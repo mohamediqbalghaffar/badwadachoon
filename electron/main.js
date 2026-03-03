@@ -1,17 +1,33 @@
-const { app, BrowserWindow, screen, ipcMain, protocol, net } = require('electron');
+const { app, BrowserWindow, screen, ipcMain, protocol } = require('electron');
 const path = require('path');
+const fs = require('fs');
 const isDev = process.env.NODE_ENV === 'development';
 
 let mainWindow;
 let bubbleWindow;
 
-// ─── Collapsed / Expanded sizes ────────────────────────────────────────────
 const BUBBLE_SIZE = { w: 80, h: 80 };
 const EXPANDED_SIZE = { w: 240, h: 300 };
 
-// ─── Register custom app:// protocol BEFORE app is ready ──────────────────
-// This fixes the Next.js static export issue where all assets use absolute
-// paths like /_next/static/... which break under file:// protocol.
+// ─── MIME type map ─────────────────────────────────────────────────────────
+const MIME = {
+    '.html': 'text/html; charset=utf-8',
+    '.js': 'application/javascript',
+    '.css': 'text/css',
+    '.json': 'application/json',
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.svg': 'image/svg+xml',
+    '.ico': 'image/x-icon',
+    '.woff': 'font/woff',
+    '.woff2': 'font/woff2',
+    '.ttf': 'font/ttf',
+    '.webp': 'image/webp',
+    '.txt': 'text/plain',
+};
+
+// ─── Must register BEFORE app is ready ────────────────────────────────────
 if (!isDev) {
     protocol.registerSchemesAsPrivileged([
         {
@@ -26,6 +42,7 @@ if (!isDev) {
     ]);
 }
 
+// ─── Main window ───────────────────────────────────────────────────────────
 function createMainWindow() {
     mainWindow = new BrowserWindow({
         width: 1200,
@@ -39,22 +56,16 @@ function createMainWindow() {
         },
     });
 
-    const startUrl = isDev
-        ? 'http://localhost:3000'
-        : 'app://localhost/';
+    mainWindow.loadURL(isDev ? 'http://localhost:3000' : 'app://localhost/');
 
-    mainWindow.loadURL(startUrl);
-
-    mainWindow.once('ready-to-show', () => {
-        mainWindow.show();
-    });
-
+    mainWindow.once('ready-to-show', () => mainWindow.show());
     mainWindow.on('closed', () => {
         mainWindow = null;
         if (bubbleWindow) bubbleWindow.close();
     });
 }
 
+// ─── Bubble window ──────────────────────────────────────────────────────────
 function createBubbleWindow() {
     const { width: sw, height: sh } = screen.getPrimaryDisplay().workAreaSize;
 
@@ -84,34 +95,27 @@ function createBubbleWindow() {
         : 'app://localhost/floating-bubble';
 
     bubbleWindow.loadURL(bubbleUrl);
-
-    bubbleWindow.on('closed', () => {
-        bubbleWindow = null;
-    });
+    bubbleWindow.on('closed', () => { bubbleWindow = null; });
 }
 
-// ─── IPC: Drag ─────────────────────────────────────────────────────────────
+// ─── IPC handlers ──────────────────────────────────────────────────────────
 ipcMain.on('move-bubble', (_, { x, y }) => {
     if (bubbleWindow) bubbleWindow.setPosition(x, y);
 });
 
-// ─── IPC: Resize ───────────────────────────────────────────────────────────
 ipcMain.on('resize-bubble', (_, { width, height }) => {
     if (!bubbleWindow) return;
     const [cx, cy] = bubbleWindow.getPosition();
     const { width: sw, height: sh } = screen.getPrimaryDisplay().workAreaSize;
-    const nx = Math.min(cx, sw - width - 10);
-    const ny = Math.min(cy, sh - height - 10);
     bubbleWindow.setSize(width, height);
-    bubbleWindow.setPosition(nx, ny);
+    bubbleWindow.setPosition(
+        Math.min(cx, sw - width - 10),
+        Math.min(cy, sh - height - 10)
+    );
 });
 
-// ─── IPC: Open main window ─────────────────────────────────────────────────
 ipcMain.on('open-main-window', (_, { tab } = {}) => {
-    if (!mainWindow) {
-        createMainWindow();
-        return;
-    }
+    if (!mainWindow) { createMainWindow(); return; }
     if (mainWindow.isMinimized()) mainWindow.restore();
     mainWindow.show();
     mainWindow.focus();
@@ -122,45 +126,68 @@ ipcMain.on('open-main-window', (_, { tab } = {}) => {
     }
 });
 
-// ─── IPC: Hide bubble ──────────────────────────────────────────────────────
 ipcMain.on('hide-bubble', () => {
     if (bubbleWindow) bubbleWindow.hide();
 });
 
-// ─── IPC: Get screen bounds ────────────────────────────────────────────────
-ipcMain.handle('get-screen-bounds', () => {
-    return screen.getPrimaryDisplay().workAreaSize;
-});
+ipcMain.handle('get-screen-bounds', () => screen.getPrimaryDisplay().workAreaSize);
 
-// ─── App lifecycle ─────────────────────────────────────────────────────────
+// ─── App ready ────────────────────────────────────────────────────────────
 app.on('ready', () => {
-    // ── Register app:// protocol handler (production only) ──────────────
+
     if (!isDev) {
+        // Out directory — works with ASAR because Electron's fs module
+        // transparently reads files from inside .asar archives
         const outDir = path.join(__dirname, '../out');
 
         protocol.handle('app', (request) => {
-            const url = new URL(request.url);
-            let filePath = url.pathname;
+            return new Promise((resolve) => {
+                const url = new URL(request.url);
+                let relPath = decodeURIComponent(url.pathname).replace(/^\//, '');
 
-            // Remove leading slash and decode URI
-            filePath = decodeURIComponent(filePath.replace(/^\//, ''));
+                // Build candidate full path inside out/
+                let fullPath = path.join(outDir, relPath);
 
-            // Map to the out/ directory  
-            let fullPath = path.join(outDir, filePath);
+                // No extension → it's a route, try folder/index.html first
+                const resolveFile = (fp) => {
+                    fs.readFile(fp, (err, data) => {
+                        if (err) {
+                            // Fall back to root index.html (SPA catch-all)
+                            fs.readFile(path.join(outDir, 'index.html'), (err2, html) => {
+                                if (err2) {
+                                    resolve(new Response('Not Found', { status: 404 }));
+                                } else {
+                                    resolve(new Response(html, {
+                                        status: 200,
+                                        headers: { 'Content-Type': 'text/html; charset=utf-8' },
+                                    }));
+                                }
+                            });
+                            return;
+                        }
+                        const ext = path.extname(fp).toLowerCase();
+                        const mime = MIME[ext] || 'application/octet-stream';
+                        resolve(new Response(data, {
+                            status: 200,
+                            headers: { 'Content-Type': mime },
+                        }));
+                    });
+                };
 
-            // If path has no extension, try index.html (SPA routing)
-            if (!path.extname(fullPath)) {
-                // Try exact folder/index.html first
-                const indexPath = path.join(fullPath, 'index.html');
-                const fs = require('fs');
-                if (fs.existsSync(indexPath)) {
-                    fullPath = indexPath;
+                if (!path.extname(fullPath)) {
+                    // Try route/index.html (e.g. /floating-bubble → floating-bubble/index.html)
+                    const candidate = path.join(fullPath, 'index.html');
+                    fs.access(candidate, fs.constants.F_OK, (err) => {
+                        if (!err) {
+                            resolveFile(candidate);
+                        } else {
+                            resolveFile(path.join(outDir, 'index.html'));
+                        }
+                    });
                 } else {
-                    fullPath = path.join(outDir, 'index.html');
+                    resolveFile(fullPath);
                 }
-            }
-
-            return net.fetch('file://' + fullPath);
+            });
         });
     }
 
@@ -168,10 +195,5 @@ app.on('ready', () => {
     createBubbleWindow();
 });
 
-app.on('window-all-closed', () => {
-    app.quit();
-});
-
-app.on('activate', () => {
-    if (!mainWindow) createMainWindow();
-});
+app.on('window-all-closed', () => app.quit());
+app.on('activate', () => { if (!mainWindow) createMainWindow(); });

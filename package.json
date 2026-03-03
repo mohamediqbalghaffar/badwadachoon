@@ -9,6 +9,7 @@
     "appId": "com.hts.taskmaster",
     "productName": "Tasks (by HTS)",
     "icon": "public/logo.png",
+    "asar": false,
     "directories": {
       "output": "dist"
     },
