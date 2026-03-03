@@ -1,4 +1,4 @@
-const { app, BrowserWindow, screen, ipcMain } = require('electron');
+const { app, BrowserWindow, screen, ipcMain, protocol, net } = require('electron');
 const path = require('path');
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -8,6 +8,23 @@ let bubbleWindow;
 // ─── Collapsed / Expanded sizes ────────────────────────────────────────────
 const BUBBLE_SIZE = { w: 80, h: 80 };
 const EXPANDED_SIZE = { w: 240, h: 300 };
+
+// ─── Register custom app:// protocol BEFORE app is ready ──────────────────
+// This fixes the Next.js static export issue where all assets use absolute
+// paths like /_next/static/... which break under file:// protocol.
+if (!isDev) {
+    protocol.registerSchemesAsPrivileged([
+        {
+            scheme: 'app',
+            privileges: {
+                secure: true,
+                standard: true,
+                supportFetchAPI: true,
+                corsEnabled: true,
+            },
+        },
+    ]);
+}
 
 function createMainWindow() {
     mainWindow = new BrowserWindow({
@@ -24,7 +41,7 @@ function createMainWindow() {
 
     const startUrl = isDev
         ? 'http://localhost:3000'
-        : `file://${path.join(__dirname, '../out/index.html')}`;
+        : 'app://localhost/';
 
     mainWindow.loadURL(startUrl);
 
@@ -32,7 +49,6 @@ function createMainWindow() {
         mainWindow.show();
     });
 
-    // When main window is closed, close everything
     mainWindow.on('closed', () => {
         mainWindow = null;
         if (bubbleWindow) bubbleWindow.close();
@@ -52,7 +68,7 @@ function createBubbleWindow() {
         alwaysOnTop: true,
         resizable: false,
         hasShadow: false,
-        skipTaskbar: true,        // don't show in taskbar — stays as overlay only
+        skipTaskbar: true,
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
@@ -65,7 +81,7 @@ function createBubbleWindow() {
 
     const bubbleUrl = isDev
         ? 'http://localhost:3000/floating-bubble'
-        : `file://${path.join(__dirname, '../out/floating-bubble.html')}`;
+        : 'app://localhost/floating-bubble';
 
     bubbleWindow.loadURL(bubbleUrl);
 
@@ -74,21 +90,18 @@ function createBubbleWindow() {
     });
 }
 
-// ─── IPC: Drag — move bubble window ────────────────────────────────────────
+// ─── IPC: Drag ─────────────────────────────────────────────────────────────
 ipcMain.on('move-bubble', (_, { x, y }) => {
     if (bubbleWindow) bubbleWindow.setPosition(x, y);
 });
 
-// ─── IPC: Resize bubble (collapsed ↔ expanded) ────────────────────────────
+// ─── IPC: Resize ───────────────────────────────────────────────────────────
 ipcMain.on('resize-bubble', (_, { width, height }) => {
     if (!bubbleWindow) return;
     const [cx, cy] = bubbleWindow.getPosition();
     const { width: sw, height: sh } = screen.getPrimaryDisplay().workAreaSize;
-
-    // Keep bubble inside screen when expanding
     const nx = Math.min(cx, sw - width - 10);
     const ny = Math.min(cy, sh - height - 10);
-
     bubbleWindow.setSize(width, height);
     bubbleWindow.setPosition(nx, ny);
 });
@@ -102,7 +115,6 @@ ipcMain.on('open-main-window', (_, { tab } = {}) => {
     if (mainWindow.isMinimized()) mainWindow.restore();
     mainWindow.show();
     mainWindow.focus();
-    // If a specific tab was requested, navigate to it
     if (tab) {
         mainWindow.webContents.executeJavaScript(
             `window.location.href = '/?tab=${tab}'`
@@ -122,11 +134,40 @@ ipcMain.handle('get-screen-bounds', () => {
 
 // ─── App lifecycle ─────────────────────────────────────────────────────────
 app.on('ready', () => {
+    // ── Register app:// protocol handler (production only) ──────────────
+    if (!isDev) {
+        const outDir = path.join(__dirname, '../out');
+
+        protocol.handle('app', (request) => {
+            const url = new URL(request.url);
+            let filePath = url.pathname;
+
+            // Remove leading slash and decode URI
+            filePath = decodeURIComponent(filePath.replace(/^\//, ''));
+
+            // Map to the out/ directory  
+            let fullPath = path.join(outDir, filePath);
+
+            // If path has no extension, try index.html (SPA routing)
+            if (!path.extname(fullPath)) {
+                // Try exact folder/index.html first
+                const indexPath = path.join(fullPath, 'index.html');
+                const fs = require('fs');
+                if (fs.existsSync(indexPath)) {
+                    fullPath = indexPath;
+                } else {
+                    fullPath = path.join(outDir, 'index.html');
+                }
+            }
+
+            return net.fetch('file://' + fullPath);
+        });
+    }
+
     createMainWindow();
     createBubbleWindow();
 });
 
-// Quit only when main window is explicitly closed (not minimized)
 app.on('window-all-closed', () => {
     app.quit();
 });
