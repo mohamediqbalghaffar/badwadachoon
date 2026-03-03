@@ -302,7 +302,7 @@ export function GeneralSettings() {
                                     variant="outline"
                                     onClick={() => {
                                         const a = document.createElement('a');
-                                        a.href = 'https://github.com/mohamediqbalghaffar/Tasks-By-HTS/releases/download/v1.0.0/Tasks-by-HTS-Windows.zip';
+                                        a.href = 'https://github.com/mohamediqbalghaffar/Tasks-By-HTS/releases/download/V1.0.0/Tasks-by-HTS-Windows.zip';
                                         a.download = 'Tasks-by-HTS-Windows.zip';
                                         document.body.appendChild(a);
                                         a.click();
@@ -330,8 +330,8 @@ export function GeneralSettings() {
                                     variant="outline"
                                     onClick={() => {
                                         const a = document.createElement('a');
-                                        a.href = 'https://github.com/mohamediqbalghaffar/Tasks-By-HTS/releases/download/v1.0.0/Tasks-by-HTS-Android.apk';
-                                        a.download = 'Tasks-by-HTS-Android.apk';
+                                        a.href = 'https://github.com/mohamediqbalghaffar/Tasks-By-HTS/releases/download/V1.0.0/Tasks.byHTS.apk';
+                                        a.download = 'Tasks.byHTS.apk';
                                         document.body.appendChild(a);
                                         a.click();
                                         document.body.removeChild(a);
