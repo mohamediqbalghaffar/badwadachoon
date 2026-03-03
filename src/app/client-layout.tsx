@@ -140,6 +140,7 @@ function RootLayoutContent({ children }: { children: React.ReactNode }) {
     // Redirect unauthenticated users to auth page (but only once per session)
     useEffect(() => {
         if (!isClient || isLoading) return;
+        if (pathname === '/floating-bubble') return; // bubble overlay never redirects
 
         const shouldRedirect = !currentUser && pathname !== '/auth';
 
@@ -156,8 +157,8 @@ function RootLayoutContent({ children }: { children: React.ReactNode }) {
         return <div className="h-screen w-screen" />;
     }
 
-    // If on auth page, render without layout
-    if (pathname === '/auth') {
+    // If on auth or bubble overlay page, render without layout
+    if (pathname === '/auth' || pathname === '/floating-bubble') {
         return <>{children}</>;
     }
 

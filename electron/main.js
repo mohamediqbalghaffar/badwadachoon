@@ -2,12 +2,12 @@ const { app, BrowserWindow, screen, ipcMain } = require('electron');
 const path = require('path');
 const isDev = process.env.NODE_ENV === 'development';
 
-console.log('Electron starting...');
-console.log('NODE_ENV:', process.env.NODE_ENV);
-console.log('isDev:', isDev);
-
 let mainWindow;
 let bubbleWindow;
+
+// ─── Collapsed / Expanded sizes ────────────────────────────────────────────
+const BUBBLE_SIZE = { w: 80, h: 80 };
+const EXPANDED_SIZE = { w: 240, h: 300 };
 
 function createMainWindow() {
     mainWindow = new BrowserWindow({
@@ -18,6 +18,7 @@ function createMainWindow() {
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
+            preload: path.join(__dirname, 'preload.js'),
         },
     });
 
@@ -31,39 +32,34 @@ function createMainWindow() {
         mainWindow.show();
     });
 
+    // When main window is closed, close everything
     mainWindow.on('closed', () => {
         mainWindow = null;
-        console.log('Main window closed');
-        // if (bubbleWindow) bubbleWindow.close();
+        if (bubbleWindow) bubbleWindow.close();
     });
 }
 
 function createBubbleWindow() {
-    const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().workAreaSize;
-
-    // Default to a safe corner if screen dimensions are wonky
-    const winX = screenWidth ? screenWidth - 270 : 100;
-    const winY = screenHeight ? screenHeight - 270 : 100;
+    const { width: sw, height: sh } = screen.getPrimaryDisplay().workAreaSize;
 
     bubbleWindow = new BrowserWindow({
-        width: 250,
-        height: 250,
-        x: winX,
-        y: winY,
+        width: BUBBLE_SIZE.w,
+        height: BUBBLE_SIZE.h,
+        x: sw - BUBBLE_SIZE.w - 20,
+        y: sh - BUBBLE_SIZE.h - 20,
         frame: false,
         transparent: true,
         alwaysOnTop: true,
         resizable: false,
         hasShadow: false,
-        show: true, // Show immediately for debugging
-        skipTaskbar: false, // Keep in taskbar for now so user can see it's running
+        skipTaskbar: true,        // don't show in taskbar — stays as overlay only
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
+            preload: path.join(__dirname, 'preload.js'),
         },
     });
 
-    // Bring to front
     bubbleWindow.setAlwaysOnTop(true, 'screen-saver');
     bubbleWindow.setVisibleOnAllWorkspaces(true);
 
@@ -72,34 +68,69 @@ function createBubbleWindow() {
         : `file://${path.join(__dirname, '../out/floating-bubble.html')}`;
 
     bubbleWindow.loadURL(bubbleUrl);
-    console.log('Bubble window loading:', bubbleUrl);
-
-    bubbleWindow.once('ready-to-show', () => {
-        console.log('Bubble window ready to show');
-        bubbleWindow.show();
-    });
-
-    // Set ignore mouse events when only the bubble (circle) is visible if needed
-    // bubbleWindow.setIgnoreMouseEvents(true, { forward: true });
 
     bubbleWindow.on('closed', () => {
         bubbleWindow = null;
     });
 }
 
+// ─── IPC: Drag — move bubble window ────────────────────────────────────────
+ipcMain.on('move-bubble', (_, { x, y }) => {
+    if (bubbleWindow) bubbleWindow.setPosition(x, y);
+});
+
+// ─── IPC: Resize bubble (collapsed ↔ expanded) ────────────────────────────
+ipcMain.on('resize-bubble', (_, { width, height }) => {
+    if (!bubbleWindow) return;
+    const [cx, cy] = bubbleWindow.getPosition();
+    const { width: sw, height: sh } = screen.getPrimaryDisplay().workAreaSize;
+
+    // Keep bubble inside screen when expanding
+    const nx = Math.min(cx, sw - width - 10);
+    const ny = Math.min(cy, sh - height - 10);
+
+    bubbleWindow.setSize(width, height);
+    bubbleWindow.setPosition(nx, ny);
+});
+
+// ─── IPC: Open main window ─────────────────────────────────────────────────
+ipcMain.on('open-main-window', (_, { tab } = {}) => {
+    if (!mainWindow) {
+        createMainWindow();
+        return;
+    }
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.show();
+    mainWindow.focus();
+    // If a specific tab was requested, navigate to it
+    if (tab) {
+        mainWindow.webContents.executeJavaScript(
+            `window.location.href = '/?tab=${tab}'`
+        );
+    }
+});
+
+// ─── IPC: Hide bubble ──────────────────────────────────────────────────────
+ipcMain.on('hide-bubble', () => {
+    if (bubbleWindow) bubbleWindow.hide();
+});
+
+// ─── IPC: Get screen bounds ────────────────────────────────────────────────
+ipcMain.handle('get-screen-bounds', () => {
+    return screen.getPrimaryDisplay().workAreaSize;
+});
+
+// ─── App lifecycle ─────────────────────────────────────────────────────────
 app.on('ready', () => {
     createMainWindow();
     createBubbleWindow();
 });
 
-app.on('window-all-closed', (e) => {
-    // Prevent app from quitting for testing purposes
-    // app.quit(); 
-    console.log('All windows closed event triggered');
+// Quit only when main window is explicitly closed (not minimized)
+app.on('window-all-closed', () => {
+    app.quit();
 });
 
 app.on('activate', () => {
-    if (mainWindow === null) {
-        createMainWindow();
-    }
+    if (!mainWindow) createMainWindow();
 });
