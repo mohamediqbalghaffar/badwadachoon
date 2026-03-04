@@ -24,6 +24,8 @@ import { usePathname, useRouter } from 'next/navigation';
 import { MobileHeader } from '@/components/mobile/MobileHeader';
 import { MobileDrawer } from '@/components/mobile/MobileDrawer';
 import { MobileBottomNav } from '@/components/mobile/MobileBottomNav';
+import { Capacitor } from '@capacitor/core';
+
 
 function ProfileSection() {
     const { t } = useLanguage();
@@ -152,6 +154,21 @@ function RootLayoutContent({ children }: { children: React.ReactNode }) {
             redirectAttemptedRef.current = false;
         }
     }, [isClient, isLoading, currentUser, pathname, router]);
+
+    // ── Android: auto-start floating bubble when user is logged in ────────
+    useEffect(() => {
+        if (!isClient || !currentUser) return;
+        if (!Capacitor.isNativePlatform()) return;
+
+        // Dynamically import to avoid breaking web/desktop builds
+        import('@capacitor/core').then(({ Capacitor: Cap }) => {
+            if (!Cap.isPluginAvailable('Bubble')) return;
+            // @ts-ignore — BubblePlugin is registered natively
+            const { Bubble } = (window as any).Capacitor?.Plugins ?? {};
+            if (Bubble) Bubble.startBubble();
+        });
+    }, [isClient, currentUser]);
+
 
     if (!isClient) {
         return <div className="h-screen w-screen" />;
