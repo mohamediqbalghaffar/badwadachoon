@@ -1,49 +1,92 @@
-const { app, BrowserWindow, screen, ipcMain, protocol } = require('electron');
+const { app, BrowserWindow, screen, ipcMain } = require('electron');
 const path = require('path');
+const http = require('http');
 const fs = require('fs');
 const isDev = process.env.NODE_ENV === 'development';
 
 let mainWindow;
 let bubbleWindow;
+let localServer;        // http.Server
+let serverPort = null;  // assigned at runtime
 
-const BUBBLE_SIZE = { w: 80, h: 80 };
-const EXPANDED_SIZE = { w: 240, h: 300 };
+const BUBBLE_W = 80, BUBBLE_H = 80;
 
-// ─── MIME type map ─────────────────────────────────────────────────────────
+// ─── MIME types ────────────────────────────────────────────────────────────
 const MIME = {
     '.html': 'text/html; charset=utf-8',
     '.js': 'application/javascript',
+    '.mjs': 'application/javascript',
     '.css': 'text/css',
     '.json': 'application/json',
     '.png': 'image/png',
     '.jpg': 'image/jpeg',
     '.jpeg': 'image/jpeg',
+    '.gif': 'image/gif',
+    '.webp': 'image/webp',
     '.svg': 'image/svg+xml',
     '.ico': 'image/x-icon',
     '.woff': 'font/woff',
     '.woff2': 'font/woff2',
     '.ttf': 'font/ttf',
-    '.webp': 'image/webp',
     '.txt': 'text/plain',
+    '.webmanifest': 'application/manifest+json',
 };
 
-// ─── Must register BEFORE app is ready ────────────────────────────────────
-if (!isDev) {
-    protocol.registerSchemesAsPrivileged([
-        {
-            scheme: 'app',
-            privileges: {
-                secure: true,
-                standard: true,
-                supportFetchAPI: true,
-                corsEnabled: true,
-            },
-        },
-    ]);
+// ─── Tiny static file server ───────────────────────────────────────────────
+function startLocalServer(outDir, callback) {
+    const server = http.createServer((req, res) => {
+        // Strip query string and decode
+        let urlPath = decodeURIComponent(req.url.split('?')[0]);
+
+        // Map URL to filesystem path inside out/
+        let filePath = path.join(outDir, urlPath);
+
+        const tryFile = (fp) => {
+            fs.readFile(fp, (err, data) => {
+                if (err) {
+                    // SPA fallback: serve index.html for unknown routes
+                    fs.readFile(path.join(outDir, 'index.html'), (e2, html) => {
+                        if (e2) { res.writeHead(404); res.end('Not found'); return; }
+                        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+                        res.end(html);
+                    });
+                    return;
+                }
+                const ext = path.extname(fp).toLowerCase();
+                const mime = MIME[ext] || 'application/octet-stream';
+                res.writeHead(200, { 'Content-Type': mime });
+                res.end(data);
+            });
+        };
+
+        if (!path.extname(filePath)) {
+            // Route without extension — try: flat .html, folder/index.html, spa-fallback
+            const flatHtml = path.join(outDir, urlPath.replace(/^\//, '') + '.html');
+            const nestedHtml = path.join(filePath, 'index.html');
+
+            fs.access(flatHtml, fs.constants.F_OK, (e1) => {
+                if (!e1) { tryFile(flatHtml); return; }
+                fs.access(nestedHtml, fs.constants.F_OK, (e2) => {
+                    if (!e2) { tryFile(nestedHtml); return; }
+                    tryFile(path.join(outDir, 'index.html')); // SPA fallback
+                });
+            });
+        } else {
+            tryFile(filePath);
+        }
+    });
+
+    // Port 0 = OS assigns a free port automatically
+    server.listen(0, '127.0.0.1', () => {
+        callback(null, server.address().port);
+    });
+
+    server.on('error', (err) => callback(err, null));
+    return server;
 }
 
-// ─── Main window ───────────────────────────────────────────────────────────
-function createMainWindow() {
+// ─── Windows ───────────────────────────────────────────────────────────────
+function createMainWindow(port) {
     mainWindow = new BrowserWindow({
         width: 1200,
         height: 800,
@@ -56,7 +99,8 @@ function createMainWindow() {
         },
     });
 
-    mainWindow.loadURL(isDev ? 'http://localhost:3000' : 'app://localhost/');
+    const url = isDev ? 'http://localhost:3000' : `http://127.0.0.1:${port}/`;
+    mainWindow.loadURL(url);
 
     mainWindow.once('ready-to-show', () => mainWindow.show());
     mainWindow.on('closed', () => {
@@ -65,15 +109,14 @@ function createMainWindow() {
     });
 }
 
-// ─── Bubble window ──────────────────────────────────────────────────────────
-function createBubbleWindow() {
+function createBubbleWindow(port) {
     const { width: sw, height: sh } = screen.getPrimaryDisplay().workAreaSize;
 
     bubbleWindow = new BrowserWindow({
-        width: BUBBLE_SIZE.w,
-        height: BUBBLE_SIZE.h,
-        x: sw - BUBBLE_SIZE.w - 20,
-        y: sh - BUBBLE_SIZE.h - 20,
+        width: BUBBLE_W,
+        height: BUBBLE_H,
+        x: sw - BUBBLE_W - 20,
+        y: sh - BUBBLE_H - 20,
         frame: false,
         transparent: true,
         alwaysOnTop: true,
@@ -90,15 +133,15 @@ function createBubbleWindow() {
     bubbleWindow.setAlwaysOnTop(true, 'screen-saver');
     bubbleWindow.setVisibleOnAllWorkspaces(true);
 
-    const bubbleUrl = isDev
+    const url = isDev
         ? 'http://localhost:3000/floating-bubble'
-        : 'app://localhost/floating-bubble';
+        : `http://127.0.0.1:${port}/floating-bubble`;
+    bubbleWindow.loadURL(url);
 
-    bubbleWindow.loadURL(bubbleUrl);
     bubbleWindow.on('closed', () => { bubbleWindow = null; });
 }
 
-// ─── IPC handlers ──────────────────────────────────────────────────────────
+// ─── IPC ───────────────────────────────────────────────────────────────────
 ipcMain.on('move-bubble', (_, { x, y }) => {
     if (bubbleWindow) bubbleWindow.setPosition(x, y);
 });
@@ -115,7 +158,7 @@ ipcMain.on('resize-bubble', (_, { width, height }) => {
 });
 
 ipcMain.on('open-main-window', (_, { tab } = {}) => {
-    if (!mainWindow) { createMainWindow(); return; }
+    if (!mainWindow) { createMainWindow(serverPort); return; }
     if (mainWindow.isMinimized()) mainWindow.restore();
     mainWindow.show();
     mainWindow.focus();
@@ -134,66 +177,33 @@ ipcMain.handle('get-screen-bounds', () => screen.getPrimaryDisplay().workAreaSiz
 
 // ─── App ready ────────────────────────────────────────────────────────────
 app.on('ready', () => {
-
-    if (!isDev) {
-        // Out directory — works with ASAR because Electron's fs module
-        // transparently reads files from inside .asar archives
-        const outDir = path.join(__dirname, '../out');
-
-        protocol.handle('app', (request) => {
-            return new Promise((resolve) => {
-                const url = new URL(request.url);
-                let relPath = decodeURIComponent(url.pathname).replace(/^\//, '');
-
-                // Build candidate full path inside out/
-                let fullPath = path.join(outDir, relPath);
-
-                // No extension → it's a route, try folder/index.html first
-                const resolveFile = (fp) => {
-                    fs.readFile(fp, (err, data) => {
-                        if (err) {
-                            // Fall back to root index.html (SPA catch-all)
-                            fs.readFile(path.join(outDir, 'index.html'), (err2, html) => {
-                                if (err2) {
-                                    resolve(new Response('Not Found', { status: 404 }));
-                                } else {
-                                    resolve(new Response(html, {
-                                        status: 200,
-                                        headers: { 'Content-Type': 'text/html; charset=utf-8' },
-                                    }));
-                                }
-                            });
-                            return;
-                        }
-                        const ext = path.extname(fp).toLowerCase();
-                        const mime = MIME[ext] || 'application/octet-stream';
-                        resolve(new Response(data, {
-                            status: 200,
-                            headers: { 'Content-Type': mime },
-                        }));
-                    });
-                };
-
-                if (!path.extname(fullPath)) {
-                    // Try route/index.html (e.g. /floating-bubble → floating-bubble/index.html)
-                    const candidate = path.join(fullPath, 'index.html');
-                    fs.access(candidate, fs.constants.F_OK, (err) => {
-                        if (!err) {
-                            resolveFile(candidate);
-                        } else {
-                            resolveFile(path.join(outDir, 'index.html'));
-                        }
-                    });
-                } else {
-                    resolveFile(fullPath);
-                }
-            });
-        });
+    if (isDev) {
+        // Dev mode: Next.js already running on 3000
+        createMainWindow(null);
+        createBubbleWindow(null);
+        return;
     }
 
-    createMainWindow();
-    createBubbleWindow();
+    // Production: start local HTTP server to serve the out/ folder
+    const outDir = path.join(__dirname, '../out');
+    localServer = startLocalServer(outDir, (err, port) => {
+        if (err) {
+            console.error('Failed to start local server:', err);
+            app.quit();
+            return;
+        }
+        serverPort = port;
+        console.log(`Local server running on http://127.0.0.1:${port}`);
+        createMainWindow(port);
+        createBubbleWindow(port);
+    });
 });
 
-app.on('window-all-closed', () => app.quit());
-app.on('activate', () => { if (!mainWindow) createMainWindow(); });
+app.on('window-all-closed', () => {
+    if (localServer) localServer.close();
+    app.quit();
+});
+
+app.on('activate', () => {
+    if (!mainWindow) createMainWindow(serverPort);
+});
