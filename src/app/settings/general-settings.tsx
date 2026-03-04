@@ -8,7 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel, AlertDialogFooter } from '@/components/ui/alert-dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Languages, RotateCcw, Moon, Sun, Monitor, Smartphone, Palette, Database, Save, Upload, Trash2, Info, Download, RefreshCw, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import { Languages, RotateCcw, Moon, Sun, Monitor, Smartphone, Palette, Database, Save, Upload, Trash2, Info, Download, RefreshCw, CheckCircle2, AlertCircle, Loader2, Zap } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
@@ -38,6 +38,48 @@ export function GeneralSettings() {
     const [updateStatus, setUpdateStatus] = React.useState<'idle' | 'checking' | 'up-to-date' | 'update-found' | 'error'>('idle');
     const [currentVersionInfo, setCurrentVersionInfo] = React.useState<{ version: string; buildDate: string } | null>(null);
     const [needsReload, setNeedsReload] = React.useState(false);
+
+    // Bubble state
+    const [bubbleActive, setBubbleActive] = React.useState(false);
+    const [bubbleLoading, setBubbleLoading] = React.useState(false);
+
+    // Detect Android / Capacitor
+    const isAndroid = typeof window !== 'undefined' &&
+        !!(window as any).Capacitor &&
+        (window as any).Capacitor.getPlatform?.() === 'android';
+
+    const getBubblePlugin = () =>
+        (window as any)?.Capacitor?.Plugins?.Bubble ?? null;
+
+    const handleStartBubble = async () => {
+        const Bubble = getBubblePlugin();
+        if (!Bubble) return;
+        setBubbleLoading(true);
+        try {
+            await Bubble.startBubble();
+            setBubbleActive(true);
+            toast({ title: 'Bubble started', description: 'Floating bubble is now active.' });
+        } catch {
+            toast({ title: 'Error', description: 'Could not start the bubble.', variant: 'destructive' });
+        } finally {
+            setBubbleLoading(false);
+        }
+    };
+
+    const handleStopBubble = async () => {
+        const Bubble = getBubblePlugin();
+        if (!Bubble) return;
+        setBubbleLoading(true);
+        try {
+            await Bubble.stopBubble();
+            setBubbleActive(false);
+            toast({ title: 'Bubble stopped', description: 'Floating bubble has been removed.' });
+        } catch {
+            toast({ title: 'Error', description: 'Could not stop the bubble.', variant: 'destructive' });
+        } finally {
+            setBubbleLoading(false);
+        }
+    };
 
     // Load current version on mount
     React.useEffect(() => {
@@ -345,6 +387,57 @@ export function GeneralSettings() {
                     </CardContent>
                 </Card>
             </div>
+
+            {/* Floating Bubble Section — Android only */}
+            {isAndroid && (
+                <div className="space-y-4">
+                    <h2 className="text-lg font-semibold flex items-center gap-2 text-primary">
+                        <Zap className="h-5 w-5" />
+                        حەبوبەی شناوەر
+                    </h2>
+                    <Card className="border-none shadow-md bg-card/50 backdrop-blur-sm">
+                        <CardContent className="pt-6 space-y-4">
+                            <p className="text-sm text-muted-foreground">
+                                چالاک بکە حەبوبەی شناوەرەکە بۆ دەستگەیشتن خێرا بە بەرنامەکە لە سەرووی هەموو بەرنامەکانی تر.
+                            </p>
+                            <div className="flex items-center justify-between rounded-lg border p-4 shadow-sm bg-card">
+                                <div className="space-y-0.5">
+                                    <Label className="text-base font-medium">حەبوبەی شناوەر</Label>
+                                    <p className="text-sm text-muted-foreground">
+                                        {bubbleActive ? 'چالاکە — لەسەر شاشەکەتە' : 'ناچالاکە'}
+                                    </p>
+                                </div>
+                                <Switch
+                                    checked={bubbleActive}
+                                    disabled={bubbleLoading}
+                                    onCheckedChange={(checked) => checked ? handleStartBubble() : handleStopBubble()}
+                                    dir="ltr"
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                                <Button
+                                    variant="outline"
+                                    className="gap-2 h-14 flex flex-col border-primary/20 hover:border-primary/50 hover:bg-primary/5"
+                                    disabled={bubbleLoading || bubbleActive}
+                                    onClick={handleStartBubble}
+                                >
+                                    {bubbleLoading && !bubbleActive ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4 text-primary" />}
+                                    <span className="text-xs">دەستپێکردن</span>
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    className="gap-2 h-14 flex flex-col border-destructive/20 hover:border-destructive/50 hover:bg-destructive/5"
+                                    disabled={bubbleLoading || !bubbleActive}
+                                    onClick={handleStopBubble}
+                                >
+                                    {bubbleLoading && bubbleActive ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4 text-destructive" />}
+                                    <span className="text-xs">ڕاگرتن</span>
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+            )}
 
             {/* App Update Section */}
             <div className="space-y-4">
