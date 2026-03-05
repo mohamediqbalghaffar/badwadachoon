@@ -25,6 +25,7 @@ import { MobileHeader } from '@/components/mobile/MobileHeader';
 import { MobileDrawer } from '@/components/mobile/MobileDrawer';
 import { MobileBottomNav } from '@/components/mobile/MobileBottomNav';
 import { Capacitor } from '@capacitor/core';
+import { CapacitorUpdater } from '@capgo/capacitor-updater';
 
 
 function ProfileSection() {
@@ -168,6 +169,16 @@ function RootLayoutContent({ children }: { children: React.ReactNode }) {
             if (Bubble) Bubble.startBubble();
         });
     }, [isClient, currentUser]);
+
+    // ── Android: Check for OTA updates via Capgo ────────
+    useEffect(() => {
+        if (!isClient) return;
+        if (!Capacitor.isNativePlatform()) return;
+
+        // Notify the updater that the app is ready and working
+        // This confirms to Capgo that the applied update didn't crash the app
+        CapacitorUpdater.notifyAppReady().catch(err => console.error("Updater error:", err));
+    }, [isClient]);
 
 
     if (!isClient) {

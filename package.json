@@ -40,6 +40,7 @@
     "@capacitor/android": "^8.1.0",
     "@capacitor/cli": "^8.1.0",
     "@capacitor/core": "^8.1.0",
+    "@capgo/capacitor-updater": "^8.43.9",
     "@ducanh2912/next-pwa": "^10.2.9",
     "@emailjs/browser": "^4.4.1",
     "@genkit-ai/googleai": "^1.0.4",
