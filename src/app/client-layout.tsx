@@ -361,7 +361,7 @@ const EditDialog = () => {
 
     const allFonts = [
         // Kurdish/Arabic Fonts
-        { name: 'Speda', value: 'Speda, sans-serif' },
+        { name: 'Speda Bold', value: 'Speda, sans-serif' },
         { name: 'Noto Sans Arabic', value: '"Noto Sans Arabic", sans-serif' },
         { name: 'Cairo', value: 'Cairo, sans-serif' },
         { name: 'Tajawal', value: 'Tajawal, sans-serif' },

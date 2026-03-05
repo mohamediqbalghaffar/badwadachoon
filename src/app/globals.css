@@ -6,7 +6,7 @@
 /* This rule defines the local Speda font for the application. */
 @font-face {
   font-family: 'Speda';
-  src: url('/fonts/Speda.ttf') format('truetype');
+  src: url('/fonts/SpedaBold.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
