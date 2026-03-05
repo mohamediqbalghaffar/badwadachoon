@@ -327,34 +327,7 @@ export function GeneralSettings() {
                             {t('downloadAppDescription')}
                         </p>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {/* Windows Download */}
-                            <div className="space-y-3 p-4 rounded-xl border border-primary/10 bg-primary/5">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-primary/10 rounded-lg text-primary">
-                                        <Monitor className="h-5 w-5" />
-                                    </div>
-                                    <h3 className="font-semibold">{t('downloadWindowsExe')}</h3>
-                                </div>
-                                <p className="text-xs text-muted-foreground leading-relaxed">
-                                    {t('downloadExeInfoDesc')}
-                                </p>
-                                <Button
-                                    className="w-full gap-2"
-                                    variant="outline"
-                                    onClick={() => {
-                                        const a = document.createElement('a');
-                                        a.href = 'https://github.com/mohamediqbalghaffar/Tasks-By-HTS/releases/download/V1.0.0/Tasks-by-HTS-Windows.zip';
-                                        a.download = 'Tasks-by-HTS-Windows.zip';
-                                        document.body.appendChild(a);
-                                        a.click();
-                                        document.body.removeChild(a);
-                                    }}
-                                >
-                                    <Download className="h-4 w-4" />
-                                    {t('download')}
-                                </Button>
-                            </div>
+                        <div className="grid grid-cols-1 gap-4">
 
                             {/* Android Download */}
                             <div className="space-y-3 p-4 rounded-xl border border-primary/10 bg-primary/5">
