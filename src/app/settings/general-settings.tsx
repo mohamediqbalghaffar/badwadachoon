@@ -132,10 +132,10 @@ export function GeneralSettings() {
 
     // Simplified Font Options
     const uiFontOptions = [
-        { name: 'Speda (Default)', value: 'Speda, sans-serif' },
-        { name: 'Noto Sans Arabic', value: '"Noto Sans Arabic", sans-serif' },
-        { name: 'Rabar', value: 'Rabar_021, sans-serif' },
-        { name: 'System UI', value: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' },
+        { name: t('fontDefault'), value: 'Speda, sans-serif' },
+        { name: 'نۆتۆ سانس (عەرەبی)', value: '"Noto Sans Arabic", sans-serif' },
+        { name: 'ڕابەر', value: 'Rabar_021, sans-serif' },
+        { name: t('fontSystem'), value: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' },
     ];
 
     const isRtl = language === 'ku';

@@ -75,7 +75,7 @@ export function AccountSettings() {
                         <Card className="border-none shadow-md bg-card/50 backdrop-blur-sm">
                             <CardHeader>
                                 <CardTitle className="text-base">{t('shareCode')}</CardTitle>
-                                <CardDescription>{t('shareCodeDesc') || 'Your unique code for sharing items'}</CardDescription>
+                                <CardDescription>{t('shareCodeDesc')}</CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <ShareCodeEditor userProfile={userProfile} updateShareCode={updateShareCode} t={t} />
@@ -95,7 +95,7 @@ export function AccountSettings() {
                                     <Key className="h-4 w-4 text-primary" />
                                     {t('passwordSettings')}
                                 </CardTitle>
-                                <CardDescription>{t('managePasswordDesc') || 'Change your password via email link'}</CardDescription>
+                                <CardDescription>{t('managePasswordDesc')}</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <Button
