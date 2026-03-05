@@ -12,6 +12,11 @@ declare global {
             hideBubble: () => void;
             getScreenBounds: () => Promise<{ width: number; height: number }>;
         };
+        AndroidBubble?: {
+            openApp: (tab?: string) => void;
+            closeBubble: () => void;
+            collapseBubble: () => void;
+        };
     }
 }
 
@@ -74,6 +79,11 @@ export default function FloatingBubblePage() {
     const handleClick = () => {
         if (hasDragged.current) return; // don't toggle if it was a drag
 
+        if (window.AndroidBubble) {
+            window.AndroidBubble.collapseBubble();
+            return;
+        }
+
         const next = !isExpanded;
         setIsExpanded(next);
 
@@ -85,16 +95,26 @@ export default function FloatingBubblePage() {
     };
 
     const openApp = (tab?: string) => {
-        window.electronAPI?.openMainWindow(tab);
+        if (window.AndroidBubble) {
+            window.AndroidBubble.openApp(tab || '');
+        } else {
+            window.electronAPI?.openMainWindow(tab);
+        }
     };
 
     const closeBubble = (e: React.MouseEvent) => {
         e.stopPropagation();
-        window.electronAPI?.hideBubble();
+        if (window.AndroidBubble) {
+            window.AndroidBubble.closeBubble();
+        } else {
+            window.electronAPI?.hideBubble();
+        }
     };
 
+    const showExpanded = isExpanded || (typeof window !== 'undefined' && !!window.AndroidBubble);
+
     // ── Collapsed View ─────────────────────────────────────────────────────
-    if (!isExpanded) {
+    if (!showExpanded) {
         return (
             <div
                 style={{

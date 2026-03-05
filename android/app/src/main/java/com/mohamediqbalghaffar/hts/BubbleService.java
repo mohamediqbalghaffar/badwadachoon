@@ -29,10 +29,13 @@ public class BubbleService extends Service {
     private WindowManager windowManager;
     private View          bubbleView;
     private View          expandedView;
+    private View          floatingAppView;
+    private android.webkit.WebView appWebView;
 
     // Bubble layout params
     private WindowManager.LayoutParams bubbleParams;
     private WindowManager.LayoutParams expandedParams;
+    private WindowManager.LayoutParams appWindowParams;
 
     private boolean isExpanded = false;
 
@@ -40,6 +43,14 @@ public class BubbleService extends Service {
     private int   initialX, initialY;
     private float initialTouchX, initialTouchY;
     private boolean dragging = false;
+    
+    // Floating app drag state
+    private int   appInitialX, appInitialY;
+    private float appInitialTouchX, appInitialTouchY;
+    private boolean appDragging = false;
+    
+    // Bubble visibility state
+    private float defaultBubbleAlpha = 1.0f;
 
     @Override
     public void onCreate() {
@@ -88,6 +99,21 @@ public class BubbleService extends Service {
         expandedParams.gravity = Gravity.TOP | Gravity.START;
         expandedView.setVisibility(View.GONE);
         windowManager.addView(expandedView, expandedParams);
+        
+        // ── Create floating app overlay view ────────────────────────────
+        floatingAppView = createFloatingAppView();
+        appWindowParams = new WindowManager.LayoutParams(
+            Math.min(1000, screenWidth - 60), Math.min(1600, screenHeight - 200),
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+                ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+                : WindowManager.LayoutParams.TYPE_SYSTEM_ALERT,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+            PixelFormat.TRANSLUCENT
+        );
+        appWindowParams.gravity = Gravity.CENTER;
+        floatingAppView.setVisibility(View.GONE);
+        windowManager.addView(floatingAppView, appWindowParams);
     }
 
     // ── Build the circular bubble ─────────────────────────────────────────
@@ -136,6 +162,11 @@ public class BubbleService extends Service {
                         if (dragging) {
                             bubbleParams.x = initialX + (int) dx;
                             bubbleParams.y = initialY + (int) dy;
+                            // reset alpha during drag if hidden
+                            if (defaultBubbleAlpha < 1.0f) {
+                                defaultBubbleAlpha = 1.0f;
+                                bubbleView.setAlpha(1.0f);
+                            }
                             windowManager.updateViewLayout(bubbleView, bubbleParams);
                             // Keep expanded panel near bubble if open
                             if (isExpanded) {
@@ -194,22 +225,52 @@ public class BubbleService extends Service {
         layout.addView(makeActionButton("📄  Letters",         "letters"));
         layout.addView(makeActionButton("🗂️  Archives",       "archives"));
 
-        // Close button
-        View closeDivider = new View(this);
-        LinearLayout.LayoutParams cdParams = new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, dpToPx(1));
-        cdParams.setMargins(0, dpToPx(8), 0, dpToPx(8));
-        closeDivider.setLayoutParams(cdParams);
-        closeDivider.setBackgroundColor(0x22FFFFFF);
-        layout.addView(closeDivider);
+        // Bottom controls layout
+        LinearLayout controlsRow = new LinearLayout(this);
+        controlsRow.setOrientation(LinearLayout.HORIZONTAL);
+        controlsRow.setWeightSum(3);
+        LinearLayout.LayoutParams crParams = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        controlsRow.setLayoutParams(crParams);
+        
+        // Minimize button
+        android.widget.TextView minimize = new android.widget.TextView(this);
+        minimize.setText("➖ Min");
+        minimize.setTextColor(Color.WHITE);
+        minimize.setTextSize(11);
+        minimize.setGravity(Gravity.CENTER);
+        minimize.setPadding(0, dpToPx(8), 0, dpToPx(8));
+        minimize.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f));
+        minimize.setOnClickListener(v -> toggleExpanded()); // just toggle off
+        
+        // Hide (transparent) button
+        android.widget.TextView hideBtn = new android.widget.TextView(this);
+        hideBtn.setText("👁️ Hide");
+        hideBtn.setTextColor(Color.WHITE);
+        hideBtn.setTextSize(11);
+        hideBtn.setGravity(Gravity.CENTER);
+        hideBtn.setPadding(0, dpToPx(8), 0, dpToPx(8));
+        hideBtn.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f));
+        hideBtn.setOnClickListener(v -> {
+            toggleExpanded();
+            defaultBubbleAlpha = 0.2f; // make very transparent
+            bubbleView.setAlpha(defaultBubbleAlpha);
+        });
 
+        // Close button
         android.widget.TextView close = new android.widget.TextView(this);
-        close.setText("✕  Close bubble");
+        close.setText("✕ Close");
         close.setTextColor(0xFFEF4444);
         close.setTextSize(11);
-        close.setPadding(dpToPx(8), dpToPx(6), dpToPx(8), dpToPx(6));
+        close.setGravity(Gravity.CENTER);
+        close.setPadding(0, dpToPx(8), 0, dpToPx(8));
+        close.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f));
         close.setOnClickListener(v -> stopSelf());
-        layout.addView(close);
+
+        controlsRow.addView(minimize);
+        controlsRow.addView(hideBtn);
+        controlsRow.addView(close);
+        layout.addView(controlsRow);
 
         return layout;
     }
@@ -269,16 +330,113 @@ public class BubbleService extends Service {
         windowManager.updateViewLayout(bubbleView, bubbleParams);
     }
 
-    // ── Open the main app ─────────────────────────────────────────────────
+    // ── Open floating WebView or full app ─────────────────────────────────
+    @android.annotation.SuppressLint("SetJavaScriptEnabled")
     private void openApp(String tab) {
-        Intent intent = getPackageManager().getLaunchIntentForPackage(getPackageName());
-        if (intent != null) {
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            if (tab != null) intent.putExtra("tab", tab);
-            startActivity(intent);
+        if (tab == null) {
+            // Full app open for '🏠 Open App'
+            Intent intent = getPackageManager().getLaunchIntentForPackage(getPackageName());
+            if (intent != null) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
+            }
+        } else {
+            // Floating page overlay!
+            String url = "http://localhost/";
+            if (tab.equals("tasks")) url = "http://localhost/add?tab=task";
+            if (tab.equals("letters")) url = "http://localhost/add?tab=letter";
+            if (tab.equals("archives")) url = "http://localhost/archives";
+            
+            appWebView.loadUrl(url);
+            
+            floatingAppView.setVisibility(View.VISIBLE);
+            // Re-focus the window params to accept input
+            appWindowParams.flags &= ~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+            windowManager.updateViewLayout(floatingAppView, appWindowParams);
         }
+        
         expandedView.setVisibility(View.GONE);
         isExpanded = false;
+        
+        // ensure visible
+        defaultBubbleAlpha = 1.0f;
+        bubbleView.setAlpha(1.0f);
+    }
+    
+    // ── Build the floating App WebView ────────────────────────────────────
+    @android.annotation.SuppressLint("SetJavaScriptEnabled")
+    private View createFloatingAppView() {
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        
+        android.graphics.drawable.GradientDrawable bg = new android.graphics.drawable.GradientDrawable();
+        bg.setColor(0xFFF3F4F6); // light bg mapping, or dark if preferred
+        bg.setCornerRadius(dpToPx(16));
+        layout.setBackground(bg);
+        layout.setClipToOutline(true);
+        
+        // Header
+        LinearLayout header = new LinearLayout(this);
+        header.setOrientation(LinearLayout.HORIZONTAL);
+        header.setBackgroundColor(0xFF7C3AED); // The purple from the gradient
+        header.setPadding(dpToPx(12), dpToPx(8), dpToPx(12), dpToPx(8));
+        header.setGravity(Gravity.CENTER_VERTICAL);
+        
+        android.widget.TextView title = new android.widget.TextView(this);
+        title.setText("Floating Window");
+        title.setTextColor(Color.WHITE);
+        title.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+        title.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f));
+        header.addView(title);
+        
+        // Header touch listener for dragging
+        header.setOnTouchListener((v, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    appInitialX = appWindowParams.x;
+                    appInitialY = appWindowParams.y;
+                    appInitialTouchX = event.getRawX();
+                    appInitialTouchY = event.getRawY();
+                    return true;
+                case MotionEvent.ACTION_MOVE:
+                    float dx = event.getRawX() - appInitialTouchX;
+                    float dy = event.getRawY() - appInitialTouchY;
+                    appWindowParams.x = appInitialX + (int) dx;
+                    appWindowParams.y = appInitialY + (int) dy;
+                    windowManager.updateViewLayout(floatingAppView, appWindowParams);
+                    return true;
+            }
+            return false;
+        });
+        
+        android.widget.TextView closeBtn = new android.widget.TextView(this);
+        closeBtn.setText("✕");
+        closeBtn.setTextColor(Color.WHITE);
+        closeBtn.setTextSize(18);
+        closeBtn.setPadding(dpToPx(12), 0, 0, 0);
+        closeBtn.setOnClickListener(v -> {
+            floatingAppView.setVisibility(View.GONE);
+            // remove focus flag so bubble gets touches again seamlessly
+            appWindowParams.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+            windowManager.updateViewLayout(floatingAppView, appWindowParams);
+        });
+        header.addView(closeBtn);
+        layout.addView(header);
+        
+        // WebView
+        appWebView = new android.webkit.WebView(this);
+        appWebView.setLayoutParams(new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, 
+            LinearLayout.LayoutParams.MATCH_PARENT));
+        
+        android.webkit.WebSettings settings = appWebView.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setDomStorageEnabled(true);
+        appWebView.setWebViewClient(new android.webkit.WebViewClient());
+        
+        layout.addView(appWebView);
+        
+        return layout;
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────
@@ -321,6 +479,7 @@ public class BubbleService extends Service {
         super.onDestroy();
         if (bubbleView   != null) windowManager.removeView(bubbleView);
         if (expandedView != null) windowManager.removeView(expandedView);
+        if (floatingAppView != null) windowManager.removeView(floatingAppView);
     }
 
     @Override
