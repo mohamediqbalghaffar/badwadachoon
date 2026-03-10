@@ -1,0 +1,661 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* --- FONT DEFINITION --- */
+/* This rule defines the local Speda font for the application. */
+@font-face {
+  font-family: 'Speda';
+  src: url('/fonts/SpedaBold.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+
+/* --- DYNAMIC BACKGROUND --- */
+/* This creates a multi-layered radial gradient background for a modern look. */
+@keyframes bg-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+html {
+  --bg-color-dark: hsl(220, 15%, 5%);
+  background-color: #e8eaf6;
+  background-image:
+    radial-gradient(ellipse at 20% 20%, rgba(124, 58, 237, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(6, 182, 212, 0.10) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(167, 139, 250, 0.08) 0%, transparent 70%),
+    linear-gradient(135deg, #f0f2f8 0%, #e8eaf6 40%, #f3e8ff 70%, #e0f2fe 100%);
+  background-size: 200% 200%;
+  background-attachment: fixed;
+  animation: bg-shift 20s ease infinite;
+}
+
+html.dark {
+  background-image:
+    radial-gradient(ellipse at 20% 20%, rgba(124, 58, 237, 0.2) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(6, 182, 212, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(167, 139, 250, 0.1) 0%, transparent 70%),
+    linear-gradient(135deg, hsl(220, 25%, 5%) 0%, hsl(220, 25%, 8%) 40%, hsl(250, 25%, 6%) 70%, hsl(200, 25%, 4%) 100%);
+  background-color: hsl(220, 15%, 5%);
+  background-size: 200% 200%;
+  animation: bg-shift 20s ease infinite;
+}
+
+
+
+body {
+  font-family: "Noto Sans Arabic", "Speda", Arial, Helvetica, sans-serif;
+
+  /* Glass effect: semi-transparent background + backdrop-filter */
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+
+  color: hsl(var(--foreground));
+  min-height: 100vh;
+  text-shadow: 0 0 8px hsl(var(--background) / 0.6);
+}
+
+@layer base {
+  :root {
+    /* Enforcing a Dark Theme with white text for high contrast */
+    --background: 220 15% 98% / 0.6;
+    /* Light background - more transparent for liquid glass */
+    --foreground: 220 15% 15%;
+    /* Dark text */
+
+    --card: 250 40% 100% / 0.4;
+    /* White, more transparent for liquid glass effect */
+    --card-foreground: 220 15% 15%;
+
+    --popover: 250 40% 100% / 0.5;
+    /* Refined transparency for liquid glass */
+    --popover-foreground: 220 15% 15%;
+
+    --primary: 250 50% 55%;
+    /* A vibrant purple for active elements */
+    --primary-foreground: 0 0% 100%;
+    /* White text */
+
+    --primary-gradient-start: 178 90% 65%;
+    --primary-gradient-end: 191 100% 45%;
+
+    --secondary: 220 10% 90%;
+    /* Light gray for secondary elements */
+    --secondary-foreground: 220 15% 15%;
+
+    --muted: 220 10% 90% / 0.7;
+    /* Muted light gray */
+    --muted-foreground: 220 15% 30%;
+    /* Darker muted text - improved visibility */
+
+    --accent: 250 50% 55%;
+    /* Using new primary purple as accent */
+    --accent-foreground: 0 0% 100%;
+    /* White text on accent */
+
+    --destructive: 0 70% 65%;
+    /* Bright Red */
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 10% 85% / 0.3;
+    /* Subtle light gray border - more transparent */
+    --input: 220 20% 100% / 0.5;
+    /* Semi-transparent white input background */
+    --ring: 250 60% 65%;
+    /* Brighter Purple ring */
+
+    --radius: 1.75rem;
+
+    /* Liquid Glass Variables */
+    --glass-blur-light: 32px;
+    --glass-blur-dark: 40px;
+    --glass-opacity-light: 0.7;
+    --glass-opacity-dark: 0.4;
+    --glass-border-opacity: 0.2;
+    --glass-highlight: rgba(255, 255, 255, 0.15);
+    --glass-shadow: rgba(0, 0, 0, 0.1);
+
+    /* Chart colors */
+    --chart-1: 220 10% 70%;
+    --chart-2: 28 100% 78%;
+    --chart-3: 179 85% 60%;
+    --chart-4: 210 60% 75%;
+    --chart-5: 160 60% 65%;
+
+    /* Sidebar colors */
+    --sidebar-background: 220 10% 12%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 220 20% 90%;
+    --sidebar-primary-foreground: 220 5% 10%;
+    --sidebar-accent: 178 90% 65%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 220 10% 25%;
+    --sidebar-ring: 178 90% 65%;
+
+    /* Eisenhower Quadrant Colors */
+    --quadrant-do-color: 140 60% 50% / 0.15;
+    /* Green */
+    --quadrant-schedule-color: 45 80% 60% / 0.15;
+    /* Orange */
+    --quadrant-delegate-color: 210 80% 65% / 0.15;
+    /* Blue */
+    --quadrant-eliminate-color: 0 0% 70% / 0.15;
+    /* Gray */
+  }
+
+  .dark {
+    --background: 220 25% 4% / 0.4;
+    --foreground: 0 0% 100%;
+
+    --card: 250 30% 12% / 0.35;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 250 30% 8% / 0.6;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 250 60% 65%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 250 25% 15% / 0.8;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 250 20% 25% / 0.5;
+    --muted-foreground: 220 10% 80%;
+
+    --accent: 250 60% 65%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 85% 65%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 250 40% 60% / 0.15;
+    --input: 250 30% 10% / 0.6;
+    --ring: 250 70% 70%;
+    
+    --glass-opacity-dark: 0.55;
+    --glass-blur-dark: 48px;
+
+    /* Eisenhower Quadrant Colors for dark mode*/
+    --quadrant-do-color: 140 70% 50% / 0.25;
+    --quadrant-schedule-color: 45 90% 60% / 0.25;
+    --quadrant-delegate-color: 210 90% 65% / 0.25;
+    --quadrant-eliminate-color: 0 0% 75% / 0.25;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    background-color: transparent;
+    /* Make body transparent to see html background */
+    color: hsl(var(--foreground));
+  }
+}
+
+@layer components {
+  .btn-gradient {
+    background-image: linear-gradient(to right, hsl(var(--primary-gradient-start)), hsl(var(--primary-gradient-end)));
+    color: hsl(var(--primary-foreground));
+    border: none;
+  }
+
+  .btn-gradient:hover {
+    opacity: 0.9;
+  }
+
+  .text-gradient {
+    background-image: linear-gradient(to right, hsl(var(--primary-gradient-start)), hsl(var(--primary-gradient-end)));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Main Glass Effect for major UI surfaces - Enhanced Liquid Glass with Reflections */
+  .glass-card,
+  [data-radix-popover-content][data-state="open"],
+  [data-radix-dialog-content][data-state="open"],
+  [data-radix-alert-dialog-content][data-state="open"],
+  .bg-nav-glass,
+  [data-sidebar="sidebar"] {
+    /* Multi-layer background: Base tint + Top-left/Bottom-right light reflection + Surface sheen */
+    background:
+      linear-gradient(125deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 40%, rgba(255, 255, 255, 0) 45%, rgba(255, 255, 255, 0.05) 100%),
+      linear-gradient(to bottom, hsl(var(--card) / var(--glass-opacity-light)) 0%, hsl(var(--card) / calc(var(--glass-opacity-light) * 0.6)) 100%);
+
+    /* Boost saturation for color vibrancy refraction */
+    backdrop-filter: blur(var(--glass-blur-light)) saturate(200%) contrast(105%);
+    -webkit-backdrop-filter: blur(var(--glass-blur-light)) saturate(200%) contrast(105%);
+
+    border-width: 1px;
+    border-style: solid;
+    border-color: rgba(255, 255, 255, 0.3);
+    /* Lighter, more reflective border */
+
+    /* Complex shadow: Inner sharp highlight + Soft color glow + Ambient shadow */
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.4),
+      inset 0 0 20px 0 rgba(255, 255, 255, 0.05),
+      0 8px 32px 0 var(--glass-shadow),
+      0 2px 8px 0 rgba(31, 38, 135, 0.07);
+
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  .glass-card:hover {
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.6),
+      inset 0 0 20px 0 rgba(255, 255, 255, 0.1),
+      0 12px 40px 0 rgba(31, 38, 135, 0.15),
+      0 4px 12px 0 rgba(31, 38, 135, 0.1);
+  }
+
+  .dark .glass-card,
+  .dark [data-radix-popover-content][data-state="open"],
+  .dark [data-radix-dialog-content][data-state="open"],
+  .dark [data-radix-alert-dialog-content][data-state="open"],
+  .dark .bg-nav-glass,
+  .dark [data-sidebar="sidebar"] {
+    background:
+      linear-gradient(125deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 40%, rgba(255, 255, 255, 0) 60%, rgba(255, 255, 255, 0.02) 100%),
+      linear-gradient(to bottom, hsl(var(--card) / var(--glass-opacity-dark)) 0%, hsl(var(--card) / calc(var(--glass-opacity-dark) * 0.5)) 100%);
+
+    backdrop-filter: blur(var(--glass-blur-dark)) saturate(180%) brightness(1.1);
+    -webkit-backdrop-filter: blur(var(--glass-blur-dark)) saturate(180%) brightness(1.1);
+
+    border-color: rgba(255, 255, 255, 0.12);
+
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.15),
+      inset 0 0 20px 0 rgba(0, 0, 0, 0.2),
+      0 12px 40px 0 rgba(0, 0, 0, 0.4),
+      0 4px 12px 0 rgba(0, 0, 0, 0.2);
+  }
+
+  /* Specific glass effect for inputs and textareas - Enhanced */
+  .glass-input {
+    background:
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05)),
+      linear-gradient(to bottom, hsl(var(--input) / 0.5) 0%, hsl(var(--input) / 0.4) 100%);
+
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+
+    border-color: rgba(255, 255, 255, 0.2);
+
+    box-shadow:
+      inset 0 2px 4px 0 rgba(0, 0, 0, 0.05),
+      0 1px 2px 0 rgba(255, 255, 255, 0.1);
+
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .glass-input:focus {
+    backdrop-filter: blur(32px) saturate(200%);
+    -webkit-backdrop-filter: blur(32px) saturate(200%);
+
+    background:
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08)),
+      linear-gradient(to bottom, hsl(var(--input) / 0.6) 0%, hsl(var(--input) / 0.5) 100%);
+
+    border-color: hsl(var(--primary) / 0.5);
+
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
+      0 0 0 4px hsl(var(--primary) / 0.15),
+      0 8px 16px 0 rgba(0, 0, 0, 0.1);
+  }
+
+  /* Eisenhower Matrix Quadrant Styles */
+  .quadrant-do {
+    background-color: hsl(var(--quadrant-do-color));
+  }
+
+  .quadrant-schedule {
+    background-color: hsl(var(--quadrant-schedule-color));
+  }
+
+  .quadrant-delegate {
+    background-color: hsl(var(--quadrant-delegate-color));
+  }
+
+  .quadrant-eliminate {
+    background-color: hsl(var(--quadrant-eliminate-color));
+  }
+
+  .quadrant-label {
+    @apply font-bold text-lg opacity-60 text-foreground;
+  }
+
+  .style-glowing-border {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  }
+}
+
+
+.responsive-container {
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 1024px) {
+  .responsive-container {
+    height: auto;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    /* Changed for sidebar layout */
+  }
+}
+
+/* New Standby Page Widget Style */
+.standby-widget {
+  background-color: rgba(26, 26, 26, 0.6);
+  /* Semi-transparent dark background */
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.125);
+  border-radius: 1.5rem;
+  /* 24px */
+  color: #ffffff;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.day_selected {
+  @apply bg-primary text-primary-foreground;
+}
+
+.day_selected:hover {
+  @apply bg-primary/90 text-primary-foreground;
+}
+
+.day_today {
+  @apply bg-accent/50 text-accent-foreground;
+}
+
+/* New Urgent Item Animation */
+@keyframes urgent-pulse-glow {
+
+  0%,
+  100% {
+    border-color: hsl(var(--destructive) / 0.7);
+    box-shadow: inset 0 0 2px hsl(var(--destructive) / 0.6),
+      inset 0 0 5px hsl(var(--destructive) / 0.4),
+      inset 0 0 10px hsl(var(--destructive) / 0.2);
+  }
+
+  50% {
+    border-color: hsl(var(--destructive) / 1);
+    box-shadow: inset 0 0 5px hsl(var(--destructive) / 0.8),
+      inset 0 0 15px hsl(var(--destructive) / 0.6),
+      inset 0 0 25px hsl(var(--destructive) / 0.4);
+  }
+}
+
+.urgent-pulse-glow {
+  animation: urgent-pulse-glow 2s infinite ease-in-out;
+  border-width: 1px;
+}
+
+/* New Expired Item Animation (Yellow) */
+@keyframes expired-pulse-glow {
+
+  0%,
+  100% {
+    border-color: hsl(45 93% 47% / 0.7);
+    box-shadow: inset 0 0 2px hsl(45 93% 47% / 0.6),
+      inset 0 0 5px hsl(45 93% 47% / 0.4),
+      inset 0 0 10px hsl(45 93% 47% / 0.2);
+  }
+
+  50% {
+    border-color: hsl(45 93% 47% / 1);
+    box-shadow: inset 0 0 5px hsl(45 93% 47% / 0.8),
+      inset 0 0 15px hsl(45 93% 47% / 0.6),
+      inset 0 0 25px hsl(45 93% 47% / 0.4);
+  }
+}
+
+.expired-pulse-glow {
+  animation: expired-pulse-glow 2s infinite ease-in-out;
+  border-width: 1px;
+}
+
+/* Liquid Glass Animations - iPhone 17 iOS 26 Style */
+@keyframes liquid-float {
+
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-6px) rotate(0.5deg);
+  }
+}
+
+@keyframes liquid-glow {
+
+  0%,
+  100% {
+    box-shadow:
+      inset 0 1px 0 0 var(--glass-highlight),
+      0 8px 32px 0 var(--glass-shadow),
+      0 2px 8px 0 rgba(0, 0, 0, 0.05);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  50% {
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.5),
+      0 12px 48px 0 rgba(0, 0, 0, 0.15),
+      0 4px 16px 0 rgba(0, 0, 0, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+}
+
+@keyframes liquid-shimmer {
+  0% {
+    background-position: -200% center;
+    opacity: 0.5;
+  }
+
+  100% {
+    background-position: 200% center;
+    opacity: 0.8;
+  }
+}
+
+@keyframes refractive-border {
+  0% {
+    border-image-source: linear-gradient(0deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  }
+
+  50% {
+    border-image-source: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  }
+
+  100% {
+    border-image-source: linear-gradient(360deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  }
+}
+
+.liquid-float {
+  animation: liquid-float 6s ease-in-out infinite;
+}
+
+.liquid-glow {
+  animation: liquid-glow 4s ease-in-out infinite;
+}
+
+.liquid-shimmer {
+  background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.2) 50%,
+      transparent 100%);
+  background-size: 200% 100%;
+  animation: liquid-shimmer 3s linear infinite;
+}
+
+/* Pause animations on hover and touch */
+.liquid-float:hover,
+.liquid-float:active,
+.glass-card:hover .liquid-float,
+.glass-card:active .liquid-float,
+[data-view="mobile"] .liquid-float:active {
+  animation-play-state: paused;
+}
+
+.liquid-glow:hover,
+.liquid-glow:active,
+.glass-card:hover .liquid-glow,
+.glass-card:active .liquid-glow,
+[data-view="mobile"] .liquid-glow:active {
+  animation-play-state: paused;
+}
+
+.liquid-shimmer:hover,
+.liquid-shimmer:active,
+.glass-card:hover .liquid-shimmer,
+.glass-card:active .liquid-shimmer,
+[data-view="mobile"] .liquid-shimmer:active {
+  animation-play-state: paused;
+}
+
+
+
+/* CSS Marquee Animation */
+@keyframes marquee-ltr {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes marquee-rtl {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.animate-marquee-ltr>span {
+  animation: marquee-ltr 15s linear infinite;
+}
+
+.animate-marquee-rtl>span {
+  animation: marquee-rtl 15s linear infinite;
+}
+
+/* View Mode Styles */
+/* Desktop Mode - Wide layout, multi-column grids, standard spacing */
+[data-view="desktop"] {
+  --view-container-max-width: 100%;
+  --view-spacing: 1rem;
+  --view-gap: 1rem;
+  --view-font-size: 1rem;
+  --view-button-height: 2.5rem;
+}
+
+[data-view="desktop"] main {
+  max-width: var(--view-container-max-width);
+}
+
+/* ============================================ */
+/* MOBILE MODE - Complete Mobile-First Redesign */
+/* ============================================ */
+
+[data-view="mobile"] {
+  --view-container-max-width: 100%;
+  --view-spacing: 1rem;
+  --view-gap: 1rem;
+  --view-font-size: 16px;
+  --view-button-height: 44px;
+}
+
+/* ============================================ */
+/* SAFE AREA INSETS — Notch / Punch-hole Support */
+/* Works on iOS (notch, Dynamic Island), Android  */
+/* (punch-hole, rounded corners), and all PWAs.   */
+/* Requires viewport-fit=cover in <meta viewport>  */
+/* ============================================ */
+
+:root {
+  /* Safe area inset CSS variables */
+  --sat: env(safe-area-inset-top, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+
+  /* Computed heights that include safe area */
+  --mobile-header-height: calc(3.5rem + var(--sat));
+  /* 56px + top notch */
+  --mobile-bottom-nav-height: calc(4rem + var(--sab));
+  /* 64px + bottom home indicator */
+}
+
+/* Safe area padding utilities */
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.pl-safe {
+  padding-left: env(safe-area-inset-left, 0px);
+}
+
+.pr-safe {
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+/* Combined safe area inset for header: own height + top inset */
+.h-safe-header {
+  height: var(--mobile-header-height);
+  padding-top: var(--sat);
+}
+
+/* Combined safe area inset for bottom nav: own height + bottom inset */
+.h-safe-bottom-nav {
+  height: var(--mobile-bottom-nav-height);
+  padding-bottom: var(--sab);
+}
+
+/* Main scroll content: must clear both header and bottom nav */
+.safe-scroll-area {
+  padding-top: var(--mobile-header-height);
+  padding-bottom: var(--mobile-bottom-nav-height);
+}
+
+/* Drawer safe area: drawer spans full height, top of content must clear notch */
+.drawer-safe-top {
+  padding-top: max(1rem, var(--sat));
+}
+
+.drawer-safe-bottom {
+  padding-bottom: max(1rem, var(--sab));
+}
