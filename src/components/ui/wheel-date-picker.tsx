@@ -35,7 +35,7 @@ export function WheelDatePicker({ date, setDate }: WheelDatePickerProps) {
     
     const monthNames = React.useMemo(() => {
         return months.map(m => {
-            const monthName = locale.localize?.month(m, { width: 'wide' });
+            const monthName = locale.localize?.month(m as 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11, { width: 'wide' });
             return monthName || (m + 1).toString();
         });
     }, [locale]);

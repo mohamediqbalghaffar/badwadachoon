@@ -465,7 +465,48 @@ public class BubbleService extends Service {
         android.webkit.WebSettings settings = appWebView.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
-        appWebView.setWebViewClient(new android.webkit.WebViewClient());
+        settings.setDatabaseEnabled(true);
+        settings.setSupportMultipleWindows(true);
+        settings.setJavaScriptCanOpenWindowsAutomatically(true);
+        settings.setMixedContentMode(android.webkit.WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE);
+        
+        // Set a modern User-Agent to avoid "unsupported browser" issues with Google/Firebase
+        String userAgent = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36";
+        settings.setUserAgentString(userAgent);
+
+        appWebView.setWebViewClient(new android.webkit.WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(android.webkit.WebView view, String url) {
+                // Keep navigation inside the WebView
+                view.loadUrl(url);
+                return true;
+            }
+        });
+
+        appWebView.setWebChromeClient(new android.webkit.WebChromeClient() {
+            @Override
+            public boolean onCreateWindow(android.webkit.WebView view, boolean isDialog, boolean isUserGesture, android.os.Message resultMsg) {
+                // Basic handler for new windows (like OAuth popups): load them in the same view
+                android.webkit.WebView.HitTestResult result = view.getHitTestResult();
+                String data = result.getExtra();
+                if (data != null) {
+                    view.loadUrl(data);
+                } else {
+                     // If it's a window.open call without a link, we just send it to the same view
+                     android.webkit.WebView newWebView = new android.webkit.WebView(BubbleService.this);
+                     newWebView.setWebViewClient(new android.webkit.WebViewClient() {
+                         @Override
+                         public void onPageStarted(android.webkit.WebView view, String url, android.graphics.Bitmap favicon) {
+                             appWebView.loadUrl(url);
+                         }
+                     });
+                     android.webkit.WebView.WebViewTransport transport = (android.webkit.WebView.WebViewTransport) resultMsg.obj;
+                     transport.setWebView(newWebView);
+                     resultMsg.sendToTarget();
+                }
+                return true;
+            }
+        });
         
         layout.addView(appWebView);
         

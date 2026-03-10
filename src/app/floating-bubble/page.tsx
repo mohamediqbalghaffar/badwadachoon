@@ -2,24 +2,8 @@
 
 import * as React from 'react';
 
-// ─── Types ─────────────────────────────────────────────────────────────────
-declare global {
-    interface Window {
-        electronAPI?: {
-            moveBubble: (x: number, y: number) => void;
-            resizeBubble: (w: number, h: number) => void;
-            togglePanel: () => void;
-            openMainWindow: (tab?: string) => void;
-            hideBubble: () => void;
-            getScreenBounds: () => Promise<{ width: number; height: number }>;
-        };
-        AndroidBubble?: {
-            openApp: (tab?: string) => void;
-            closeBubble: () => void;
-            collapseBubble: () => void;
-        };
-    }
-}
+
+// Window types are declared in src/global.d.ts
 
 // ─── Sizes (must match main.js) ────────────────────────────────────────────
 const COLLAPSED_W = 80;
