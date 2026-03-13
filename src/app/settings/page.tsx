@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import * as React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -13,7 +13,7 @@ import { GeneralSettings } from './general-settings';
 import { AccountSettings } from './account-settings';
 import { AdminSettings } from './admin-settings';
 
-export default function SettingsPage() {
+function SettingsContent() {
     const { t, language } = useLanguage();
     const { currentUser, userProfile } = useAuth(); // Use useAuth instead of useData
 
@@ -81,5 +81,13 @@ export default function SettingsPage() {
                 )}
             </Tabs>
         </div >
+    );
+}
+
+export default function SettingsPage() {
+    return (
+        <React.Suspense fallback={<LoadingAnimation text="Loading..." />}>
+            <SettingsContent />
+        </React.Suspense>
     );
 }
