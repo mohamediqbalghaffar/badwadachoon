@@ -18,7 +18,7 @@ import { Locale } from '@/lib/translations';
 import { cn } from '@/lib/utils';
 import { toast } from "@/hooks/use-toast";
 
-export function GeneralSettings() {
+export default function GeneralSettings(): React.ReactNode {
     const { language, setLanguage, t } = useLanguage();
     const { uiFont, setUiFont, theme, setTheme, viewMode, setViewMode } = useUI();
     const {
@@ -154,36 +154,39 @@ export function GeneralSettings() {
                         <div className="space-y-3">
                             <Label className="text-base font-medium">{t('theme')}</Label>
                             <div className="grid grid-cols-3 gap-4">
-                                <button
+                                <Button
+                                    variant={theme === 'light' ? "default" : "outline"}
                                     onClick={() => setTheme('light')}
                                     className={cn(
-                                        "flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all hover:bg-accent/10",
-                                        theme === 'light' ? "border-primary bg-primary/5" : "border-border bg-card"
+                                        "flex flex-col items-center justify-center gap-2 h-auto p-4 rounded-xl border-2 transition-all hover:bg-accent/10 whitespace-normal text-center",
+                                        theme === 'light' ? "border-primary bg-primary/5 text-primary" : "border-border bg-card"
                                     )}
                                 >
                                     <Sun className="h-6 w-6" />
-                                    <span className="text-sm">{t('themeLight')}</span>
-                                </button>
-                                <button
+                                    <span className="text-sm font-medium">{t('themeLight')}</span>
+                                </Button>
+                                <Button
+                                    variant={theme === 'dark' ? "default" : "outline"}
                                     onClick={() => setTheme('dark')}
                                     className={cn(
-                                        "flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all hover:bg-accent/10",
-                                        theme === 'dark' ? "border-primary bg-primary/5" : "border-border bg-card"
+                                        "flex flex-col items-center justify-center gap-2 h-auto p-4 rounded-xl border-2 transition-all hover:bg-accent/10 whitespace-normal text-center",
+                                        theme === 'dark' ? "border-primary bg-primary/5 text-primary" : "border-border bg-card"
                                     )}
                                 >
                                     <Moon className="h-6 w-6" />
-                                    <span className="text-sm">{t('themeDark')}</span>
-                                </button>
-                                <button
+                                    <span className="text-sm font-medium">{t('themeDark')}</span>
+                                </Button>
+                                <Button
+                                    variant={theme === 'system' ? "default" : "outline"}
                                     onClick={() => setTheme('system')}
                                     className={cn(
-                                        "flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all hover:bg-accent/10",
-                                        theme === 'system' ? "border-primary bg-primary/5" : "border-border bg-card"
+                                        "flex flex-col items-center justify-center gap-2 h-auto p-4 rounded-xl border-2 transition-all hover:bg-accent/10 whitespace-normal text-center",
+                                        theme === 'system' ? "border-primary bg-primary/5 text-primary" : "border-border bg-card"
                                     )}
                                 >
                                     <Monitor className="h-6 w-6" />
-                                    <span className="text-sm">{t('themeSystem')}</span>
-                                </button>
+                                    <span className="text-sm font-medium">{t('themeSystem')}</span>
+                                </Button>
                             </div>
                         </div>
 
@@ -233,7 +236,7 @@ export function GeneralSettings() {
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent className="w-[180px]" align={isRtl ? "start" : "end"}>
-                                    <DropdownMenuRadioGroup value={language} onValueChange={(value) => setLanguage(value as Locale)}>
+                                    <DropdownMenuRadioGroup value={language} onValueChange={(value: string) => setLanguage(value as Locale)}>
                                         <DropdownMenuRadioItem value="ku" className="justify-between">
                                             {t('kurdish')}
                                             {language === 'ku' && <span className="text-primary">✓</span>}
@@ -345,7 +348,7 @@ export function GeneralSettings() {
                                     variant="outline"
                                     onClick={() => {
                                         const a = document.createElement('a');
-                                        a.href = 'https://github.com/mohamediqbalghaffar/Tasks-By-HTS/releases/download/V1.0.0/Tasks.byHTS.apk';
+                                        a.href = '/Tasks.byHTS.apk';
                                         a.download = 'Tasks.byHTS.apk';
                                         document.body.appendChild(a);
                                         a.click();
@@ -383,7 +386,7 @@ export function GeneralSettings() {
                                 <Switch
                                     checked={bubbleActive}
                                     disabled={bubbleLoading}
-                                    onCheckedChange={(checked) => checked ? handleStartBubble() : handleStopBubble()}
+                                    onCheckedChange={(checked: boolean) => checked ? handleStartBubble() : handleStopBubble()}
                                     dir="ltr"
                                 />
                             </div>
@@ -496,7 +499,7 @@ export function GeneralSettings() {
                             </div>
                             <div>
                                 <h3 className="text-2xl font-bold">Tasks (by HTS)</h3>
-                                <p className="text-muted-foreground mt-1">Version 1.0.0</p>
+                                <p className="text-muted-foreground mt-1">Version 1.1.0</p>
                             </div>
                         </div>
 
@@ -530,4 +533,4 @@ export function GeneralSettings() {
             </Button>
         </div>
     );
-}
+};

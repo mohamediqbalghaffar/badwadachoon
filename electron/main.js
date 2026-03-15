@@ -6,6 +6,7 @@ const isDev = process.env.NODE_ENV === 'development';
 
 let mainWindow;
 let bubbleWindow;
+let panelWindow;
 let localServer;        // http.Server
 let serverPort = null;  // assigned at runtime
 
@@ -141,6 +142,39 @@ function createBubbleWindow(port) {
     bubbleWindow.on('closed', () => { bubbleWindow = null; });
 }
 
+function createPanelWindow(port) {
+    const { width: sw, height: sh } = screen.getPrimaryDisplay().workAreaSize;
+
+    panelWindow = new BrowserWindow({
+        width: 420,
+        height: 620,
+        x: sw - 440,
+        y: sh - 660,
+        frame: true,           // real title bar with minimize / close
+        alwaysOnTop: true,
+        resizable: true,
+        skipTaskbar: false,    // shows in taskbar so user can switch to it
+        title: 'Tasks (by HTS)',
+        icon: path.join(__dirname, '../public/logo.png'),
+        webPreferences: {
+            nodeIntegration: false,
+            contextIsolation: true,
+            preload: path.join(__dirname, 'preload.js'),
+        },
+    });
+
+    panelWindow.setAlwaysOnTop(true, 'floating');
+
+    const url = isDev ? 'http://localhost:3000' : `http://127.0.0.1:${port}/`;
+    panelWindow.loadURL(url);
+
+    // Hide instead of close so bubble can reopen it
+    panelWindow.on('close', (e) => {
+        e.preventDefault();
+        panelWindow.hide();
+    });
+}
+
 // ─── IPC ───────────────────────────────────────────────────────────────────
 ipcMain.on('move-bubble', (_, { x, y }) => {
     if (bubbleWindow) bubbleWindow.setPosition(x, y);
@@ -155,6 +189,16 @@ ipcMain.on('resize-bubble', (_, { width, height }) => {
         Math.min(cx, sw - width - 10),
         Math.min(cy, sh - height - 10)
     );
+});
+
+ipcMain.on('toggle-panel', () => {
+    if (!panelWindow) { createPanelWindow(serverPort); return; }
+    if (panelWindow.isVisible()) {
+        panelWindow.hide();
+    } else {
+        panelWindow.show();
+        panelWindow.focus();
+    }
 });
 
 ipcMain.on('open-main-window', (_, { tab } = {}) => {
@@ -181,6 +225,7 @@ app.on('ready', () => {
         // Dev mode: Next.js already running on 3000
         createMainWindow(null);
         createBubbleWindow(null);
+        createPanelWindow(null);
         return;
     }
 
@@ -196,6 +241,7 @@ app.on('ready', () => {
         console.log(`Local server running on http://127.0.0.1:${port}`);
         createMainWindow(port);
         createBubbleWindow(port);
+        createPanelWindow(port);
     });
 });
 

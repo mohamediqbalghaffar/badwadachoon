@@ -7,7 +7,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
     // Bubble resize: tell main process to resize bubble window (collapsed vs expanded)
     resizeBubble: (width, height) => ipcRenderer.send('resize-bubble', { width, height }),
 
-    // Open main app window (bring to foreground)
+    // Toggle the compact floating panel (Messenger-style)
+    togglePanel: () => ipcRenderer.send('toggle-panel'),
+
+    // Open main app window (bring to foreground, used for maximize)
     openMainWindow: (tab) => ipcRenderer.send('open-main-window', { tab }),
 
     // Close / hide the bubble

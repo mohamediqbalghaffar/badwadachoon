@@ -43,6 +43,11 @@ public class BubbleService extends Service {
     private int   initialX, initialY;
     private float initialTouchX, initialTouchY;
     private boolean dragging = false;
+
+    // Long-press detection
+    private android.os.Handler longPressHandler = new android.os.Handler();
+    private Runnable longPressRunnable;
+    private static final long LONG_PRESS_MS = 500;
     
     // Floating app drag state
     private int   appInitialX, appInitialY;
@@ -142,7 +147,7 @@ public class BubbleService extends Service {
         }
         layout.addView(icon);
 
-        // ── Touch: drag + tap ─────────────────────────────────────────────
+        // ── Touch: drag + tap + long-press ───────────────────────────────
         layout.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -153,12 +158,23 @@ public class BubbleService extends Service {
                         initialTouchX  = event.getRawX();
                         initialTouchY  = event.getRawY();
                         dragging       = false;
+                        // Schedule long-press → show shortcut menu
+                        longPressRunnable = () -> {
+                            if (!dragging) toggleExpanded();
+                        };
+                        longPressHandler.postDelayed(longPressRunnable, LONG_PRESS_MS);
                         return true;
 
                     case MotionEvent.ACTION_MOVE:
                         float dx = event.getRawX() - initialTouchX;
                         float dy = event.getRawY() - initialTouchY;
-                        if (Math.abs(dx) > 8 || Math.abs(dy) > 8) dragging = true;
+                        if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
+                            dragging = true;
+                            // Cancel long-press if user started dragging
+                            if (longPressRunnable != null) {
+                                longPressHandler.removeCallbacks(longPressRunnable);
+                            }
+                        }
                         if (dragging) {
                             bubbleParams.x = initialX + (int) dx;
                             bubbleParams.y = initialY + (int) dy;
@@ -168,7 +184,7 @@ public class BubbleService extends Service {
                                 bubbleView.setAlpha(1.0f);
                             }
                             windowManager.updateViewLayout(bubbleView, bubbleParams);
-                            // Keep expanded panel near bubble if open
+                            // Keep expanded panel near bubble if open too
                             if (isExpanded) {
                                 expandedParams.x = bubbleParams.x - 440;
                                 expandedParams.y = bubbleParams.y;
@@ -178,8 +194,21 @@ public class BubbleService extends Service {
                         return true;
 
                     case MotionEvent.ACTION_UP:
-                        if (!dragging) toggleExpanded();
-                        snapToEdge(); // snap bubble to screen edge on release
+                        // Cancel long-press timer
+                        if (longPressRunnable != null) {
+                            longPressHandler.removeCallbacks(longPressRunnable);
+                        }
+                        if (!dragging) {
+                            // Short tap = open floating panel directly (Messenger-style)
+                            openApp(null);
+                        }
+                        snapToEdge(); // snap bubble to nearest screen edge
+                        return true;
+
+                    case MotionEvent.ACTION_CANCEL:
+                        if (longPressRunnable != null) {
+                            longPressHandler.removeCallbacks(longPressRunnable);
+                        }
                         return true;
                 }
                 return false;
@@ -330,35 +359,39 @@ public class BubbleService extends Service {
         windowManager.updateViewLayout(bubbleView, bubbleParams);
     }
 
-    // ── Open floating WebView or full app ─────────────────────────────────
+    // ── Open floating WebView panel (Messenger-style) ─────────────────────
     @android.annotation.SuppressLint("SetJavaScriptEnabled")
     private void openApp(String tab) {
-        if (tab == null) {
-            // Full app open for '🏠 Open App'
-            Intent intent = getPackageManager().getLaunchIntentForPackage(getPackageName());
-            if (intent != null) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                startActivity(intent);
-            }
-        } else {
-            // Floating page overlay!
-            String url = "http://localhost/";
-            if (tab.equals("tasks")) url = "http://localhost/add?tab=task";
-            if (tab.equals("letters")) url = "http://localhost/add?tab=letter";
-            if (tab.equals("archives")) url = "http://localhost/archives";
-            
-            appWebView.loadUrl(url);
-            
-            floatingAppView.setVisibility(View.VISIBLE);
-            // Re-focus the window params to accept input
-            appWindowParams.flags &= ~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+        // If panel is already visible, just bring it forward / toggle off
+        if (floatingAppView.getVisibility() == View.VISIBLE) {
+            floatingAppView.setVisibility(View.GONE);
+            appWindowParams.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
             windowManager.updateViewLayout(floatingAppView, appWindowParams);
+            expandedView.setVisibility(View.GONE);
+            isExpanded = false;
+            return;
         }
-        
+
+        // Resolve URL — null/home maps to the main page
+        String url = "http://localhost/";
+        if (tab != null) {
+            if (tab.equals("tasks"))   url = "http://localhost/?tab=tasks";
+            if (tab.equals("letters")) url = "http://localhost/?tab=letters";
+            if (tab.equals("archives")) url = "http://localhost/archives";
+        }
+
+        appWebView.loadUrl(url);
+
+        // Show floating panel and make it focusable so the WebView accepts input
+        floatingAppView.setVisibility(View.VISIBLE);
+        appWindowParams.flags &= ~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+        windowManager.updateViewLayout(floatingAppView, appWindowParams);
+
+        // Collapse the shortcut menu if it was open
         expandedView.setVisibility(View.GONE);
         isExpanded = false;
-        
-        // ensure visible
+
+        // Ensure bubble is fully visible
         defaultBubbleAlpha = 1.0f;
         bubbleView.setAlpha(1.0f);
     }
@@ -432,7 +465,48 @@ public class BubbleService extends Service {
         android.webkit.WebSettings settings = appWebView.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
-        appWebView.setWebViewClient(new android.webkit.WebViewClient());
+        settings.setDatabaseEnabled(true);
+        settings.setSupportMultipleWindows(true);
+        settings.setJavaScriptCanOpenWindowsAutomatically(true);
+        settings.setMixedContentMode(android.webkit.WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE);
+        
+        // Set a modern User-Agent to avoid "unsupported browser" issues with Google/Firebase
+        String userAgent = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36";
+        settings.setUserAgentString(userAgent);
+
+        appWebView.setWebViewClient(new android.webkit.WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(android.webkit.WebView view, String url) {
+                // Keep navigation inside the WebView
+                view.loadUrl(url);
+                return true;
+            }
+        });
+
+        appWebView.setWebChromeClient(new android.webkit.WebChromeClient() {
+            @Override
+            public boolean onCreateWindow(android.webkit.WebView view, boolean isDialog, boolean isUserGesture, android.os.Message resultMsg) {
+                // Basic handler for new windows (like OAuth popups): load them in the same view
+                android.webkit.WebView.HitTestResult result = view.getHitTestResult();
+                String data = result.getExtra();
+                if (data != null) {
+                    view.loadUrl(data);
+                } else {
+                     // If it's a window.open call without a link, we just send it to the same view
+                     android.webkit.WebView newWebView = new android.webkit.WebView(BubbleService.this);
+                     newWebView.setWebViewClient(new android.webkit.WebViewClient() {
+                         @Override
+                         public void onPageStarted(android.webkit.WebView view, String url, android.graphics.Bitmap favicon) {
+                             appWebView.loadUrl(url);
+                         }
+                     });
+                     android.webkit.WebView.WebViewTransport transport = (android.webkit.WebView.WebViewTransport) resultMsg.obj;
+                     transport.setWebView(newWebView);
+                     resultMsg.sendToTarget();
+                }
+                return true;
+            }
+        });
         
         layout.addView(appWebView);
         
