@@ -1,4 +1,4 @@
-﻿
+
 export type Locale = 'ku';
 
 export const translations: Record<Locale, Record<string, string>> = {
@@ -719,6 +719,23 @@ export const translations: Record<Locale, Record<string, string>> = {
     "sharedType": "جۆری هاوبەش",
     "receivedBy": "نێردراون لەلایەن",
     "shareCodePlaceholder": "بۆ نموونە ١٢٣٤٥",
+
+    // General Settings
+    "generalSettingsDesc": "ڕێکخستنە گشتییەکانی ئەپەکە لێرەوە بگۆڕە",
+
+    // Notifications
+    "notifications": "ئاگاداریەکان",
+    "notificationSettings": "ڕێکخستنەکانی ئاگاداری",
+    "enableReminders": "چالاککردنی یادخستنەوە",
+    "enableRemindersDesc": "ئاگاداری بکرێیتەوە کاتێک ئەرکێک نزیک دەبێتەوە لە بەسەرچوون",
+    "soundEnabled": "دەنگی ئاگاداری",
+    "soundEnabledDesc": "دەنگ لێبدات کاتێک ئاگادارییەک دێت",
+    "testNotification": "تاقیکردنەوەی ئاگاداری",
+    "testNotificationSent": "ئاگاداریی تاقیکردنەوە نێردرا",
+
+    // Downloads
+    "downloadWindowsExe": "داگرتنی بۆ ویندۆز",
+    "downloadWindowsDesc": "فایلی .exe بۆ دامەزراندن لەسەر ویندۆز. لە بەشی ڕیلیزەکاندا بەردەستە.",
 
     // App Update
     "updateApp": "نوێکردنەوەی ئەپ",
