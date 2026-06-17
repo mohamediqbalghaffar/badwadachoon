@@ -15,6 +15,7 @@ import {
   Cell,
   AreaChart,
   Area,
+  LabelList,
 } from "recharts";
 import { format, parseISO, isValid, startOfMonth, parse, endOfMonth } from "date-fns";
 
@@ -30,7 +31,12 @@ export const DashboardCharts = () => {
       counts[d.department] = (counts[d.department] || 0) + 1;
     });
     return Object.entries(counts)
-      .map(([name, count]) => ({ name, count }))
+      .map(([name, count]) => {
+         const cleanName = name.replace('بەشی ', '').replace('سێکتەری ', '');
+         const words = cleanName.split(' ').filter(w => w.length > 1 && w !== 'و');
+         const abbr = words.slice(0, 2).map(w => w.charAt(0)).join('.');
+         return { name, count, abbr: abbr || name.charAt(0) };
+      })
       .sort((a, b) => b.count - a.count)
       .slice(0, 10); // Top 10
   }, [filteredData]);
@@ -64,21 +70,25 @@ export const DashboardCharts = () => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
       {/* Department Bar Chart */}
-      <div className="glass glass-card p-6 flex flex-col h-96">
+      <div className="glass glass-card p-6 flex flex-col min-h-96 h-auto">
         <h3 className="text-lg font-semibold mb-6">قەبارەی نامەکان بەپێی لایەن</h3>
-        <div className="flex-1 min-h-0" dir="ltr">
+        <div className="flex-1 min-h-[300px]" dir="ltr">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={deptData} margin={{ top: 10, right: 10, left: -20, bottom: 20 }}>
+            <BarChart data={deptData} margin={{ top: 25, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#cbd5e1" opacity={0.3} />
-              <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
+              <XAxis dataKey="abbr" tick={{ fontSize: 12, fill: '#64748b', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
               <Tooltip
                 cursor={{ fill: 'rgba(241, 245, 249, 0.2)' }}
                 contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(10px)' }}
+                formatter={(value: any, name: any, props: any) => [value, props.payload.name]}
+                labelFormatter={(abbr) => {
+                  const dept = deptData.find(d => d.abbr === abbr);
+                  return dept ? dept.name : abbr;
+                }}
               />
               <Bar 
                 dataKey="count" 
-                fill="url(#colorDept)" 
                 radius={[6, 6, 0, 0]} 
                 maxBarSize={50} 
                 onClick={(data: any) => {
@@ -88,15 +98,25 @@ export const DashboardCharts = () => {
                   }
                 }} 
                 cursor="pointer" 
-              />
-              <defs>
-                <linearGradient id="colorDept" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8} />
-                  <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.8} />
-                </linearGradient>
-              </defs>
+              >
+                <LabelList dataKey="abbr" position="top" fill="#64748b" fontSize={12} fontWeight="bold" />
+                {deptData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
+        </div>
+        
+        {/* Custom Legend for Abbreviations */}
+        <div className="mt-6 flex flex-wrap gap-x-4 gap-y-2 justify-center border-t border-slate-200 dark:border-slate-800 pt-4" dir="rtl">
+          {deptData.map((entry, index) => (
+            <div key={index} className="flex items-center gap-2 text-xs">
+              <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: COLORS[index % COLORS.length] }}></span>
+              <span className="font-bold text-slate-700 dark:text-slate-300 shrink-0">{entry.abbr}</span>
+              <span className="text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs line-clamp-1" title={entry.name}>= {entry.name}</span>
+            </div>
+          ))}
         </div>
       </div>
 
