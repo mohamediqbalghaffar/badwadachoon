@@ -10,7 +10,7 @@ export const DataTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState<{ key: keyof DashboardData; direction: "asc" | "desc" } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 25;
 
   // Search logic
   const searchedData = useMemo(() => {
@@ -151,20 +151,20 @@ export const DataTable = () => {
           <span className="text-sm text-slate-500 dark:text-slate-400">
             پەڕەی {currentPage} لە {totalPages}
           </span>
-          <div className="flex gap-2" dir="ltr">
+          <div className="flex gap-2" dir="rtl">
             <button
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1}
               className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50 transition-colors"
             >
-              <ChevronLeft size={20} />
+              <ChevronRight size={20} />
             </button>
             <button
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
               className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50 transition-colors"
             >
-              <ChevronRight size={20} />
+              <ChevronLeft size={20} />
             </button>
           </div>
         </div>
