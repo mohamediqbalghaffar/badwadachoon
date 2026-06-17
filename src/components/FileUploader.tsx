@@ -2,8 +2,8 @@
 
 import React, { useCallback, useState } from "react";
 import { UploadCloud, FileType, CheckCircle, AlertCircle } from "lucide-react";
-import { parseFile } from "../../utils/parser";
-import { useData } from "../../context/DataContext";
+import { parseFile } from "../utils/parser";
+import { useData } from "../context/DataContext";
 
 export const FileUploader = () => {
   const [isDragging, setIsDragging] = useState(false);

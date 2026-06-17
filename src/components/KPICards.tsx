@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useData } from "../../context/DataContext";
+import { useData } from "../context/DataContext";
 import { Layers, Clock, AlertTriangle } from "lucide-react";
 
 export const KPICards = () => {

@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { useData } from "../../context/DataContext";
-import { DashboardData } from "../../utils/parser";
+import { useData } from "../context/DataContext";
+import { DashboardData } from "../utils/parser";
 import { Search, ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
 
 export const DataTable = () => {

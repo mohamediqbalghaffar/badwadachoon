@@ -69,7 +69,7 @@ export const parseFile = async (file: File): Promise<DashboardData[]> => {
               // Handle processing time
               if (mappedKey === 'processingTime' && finalValue !== null) {
                 finalValue = parseInt(finalValue as string, 10);
-                if (isNaN(finalValue)) finalValue = null;
+                if (isNaN(finalValue as number)) finalValue = null;
               }
 
               item[mappedKey] = finalValue as any;
