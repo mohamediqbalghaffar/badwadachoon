@@ -10,7 +10,7 @@ export const DataTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState<{ key: keyof DashboardData; direction: "asc" | "desc" } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 25;
+  const itemsPerPage = 18;
 
   // Search logic
   const searchedData = useMemo(() => {

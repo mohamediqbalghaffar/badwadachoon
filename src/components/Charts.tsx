@@ -47,7 +47,12 @@ export const DashboardCharts = () => {
     filteredData.forEach((d) => {
       counts[d.letterType] = (counts[d.letterType] || 0) + 1;
     });
-    return Object.entries(counts).map(([name, value]) => ({ name, value }));
+    return Object.entries(counts).map(([name, value]) => {
+         const cleanName = name.replace('بەشی ', '').replace('سێکتەری ', '');
+         const words = cleanName.split(' ').filter(w => w.length > 1 && w !== 'و');
+         const abbr = words.slice(0, 2).map(w => w.charAt(0)).join('.');
+         return { name, value, abbr: abbr || name.charAt(0) };
+    });
   }, [filteredData]);
 
   // Prepare Timeline Data (By Month)
@@ -121,9 +126,9 @@ export const DashboardCharts = () => {
       </div>
 
       {/* Letter Type Doughnut Chart */}
-      <div className="glass glass-card p-6 flex flex-col h-96">
+      <div className="glass glass-card p-6 flex flex-col min-h-96 h-auto">
         <h3 className="text-lg font-semibold mb-6">پۆلێنکردنی جۆری نامەکان</h3>
-        <div className="flex-1 min-h-0" dir="ltr">
+        <div className="flex-1 min-h-[300px]" dir="ltr">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -143,15 +148,29 @@ export const DashboardCharts = () => {
                 }}
                 cursor="pointer"
               >
+                <LabelList dataKey="abbr" position="inside" fill="#ffffff" fontSize={14} fontWeight="bold" />
                 {typeData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
               <Tooltip
+                cursor={{ fill: 'rgba(241, 245, 249, 0.2)' }}
                 contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(10px)' }}
+                formatter={(value: any, name: any, props: any) => [value, props.payload.name]}
               />
             </PieChart>
           </ResponsiveContainer>
+        </div>
+        
+        {/* Custom Legend for Abbreviations */}
+        <div className="mt-6 flex flex-wrap gap-x-4 gap-y-2 justify-center border-t border-slate-200 dark:border-slate-800 pt-4" dir="rtl">
+          {typeData.map((entry, index) => (
+            <div key={index} className="flex items-center gap-2 text-xs">
+              <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: COLORS[index % COLORS.length] }}></span>
+              <span className="font-bold text-slate-700 dark:text-slate-300 shrink-0">{entry.abbr}</span>
+              <span className="text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs line-clamp-1" title={entry.name}>= {entry.name}</span>
+            </div>
+          ))}
         </div>
       </div>
 
