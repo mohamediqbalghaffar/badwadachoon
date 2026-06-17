@@ -48,8 +48,8 @@ export const ParticlesCanvas = () => {
 
     // Brand colors matching the HTS logo theme and general dashboard feel
     const colors = isDarkMode 
-      ? ["rgba(227, 30, 36, 0.4)", "rgba(59, 130, 246, 0.4)", "rgba(255, 255, 255, 0.2)"]
-      : ["rgba(227, 30, 36, 0.2)", "rgba(59, 130, 246, 0.2)", "rgba(0, 0, 0, 0.1)"];
+      ? ["rgba(227, 30, 36, 0.8)", "rgba(59, 130, 246, 0.8)", "rgba(255, 255, 255, 0.6)"]
+      : ["rgba(227, 30, 36, 0.7)", "rgba(59, 130, 246, 0.7)", "rgba(0, 0, 0, 0.4)"];
 
     const initParticles = () => {
       particles = [];
@@ -60,7 +60,7 @@ export const ParticlesCanvas = () => {
           y: Math.random() * height,
           vx: (Math.random() - 0.5) * 0.5,
           vy: (Math.random() - 0.5) * 0.5,
-          radius: Math.random() * 2 + 1,
+          radius: Math.random() * 3 + 3.5,
           color: colors[Math.floor(Math.random() * colors.length)],
         });
       }
