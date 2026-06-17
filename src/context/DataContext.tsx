@@ -15,6 +15,7 @@ interface DataContextType {
   data: DashboardData[];
   setData: (data: DashboardData[]) => void;
   filteredData: DashboardData[];
+  baseFilteredData: DashboardData[];
   filters: FilterState;
   setFilters: React.Dispatch<React.SetStateAction<FilterState>>;
   clearFilters: () => void;
@@ -32,7 +33,9 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     completionStatus: 'all',
   });
 
-  const filteredData = useMemo(() => {
+  // Base filtered data: all filters EXCEPT completionStatus
+  // Used by KPI cards so their values stay stable when a KPI card is clicked
+  const baseFilteredData = useMemo(() => {
     return data.filter((item) => {
       // Date filter
       if (filters.dateRange.start && item.sentDate) {
@@ -57,17 +60,20 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
         return false;
       }
 
-      // Completion Status filter
-      if (filters.completionStatus === 'pending' && item.responseDate !== null) {
-        return false;
-      }
-      if (filters.completionStatus === 'completed' && item.responseDate === null) {
-        return false;
-      }
-
       return true;
     });
-  }, [data, filters]);
+  }, [data, filters.dateRange, filters.departments, filters.letterType, filters.slaStatus]);
+
+  // Full filtered data: includes completionStatus filter on top of baseFilteredData
+  // Used by charts, data table, and detail views
+  const filteredData = useMemo(() => {
+    if (filters.completionStatus === 'all') return baseFilteredData;
+    return baseFilteredData.filter((item) => {
+      if (filters.completionStatus === 'pending' && item.responseDate !== null) return false;
+      if (filters.completionStatus === 'completed' && item.responseDate === null) return false;
+      return true;
+    });
+  }, [baseFilteredData, filters.completionStatus]);
 
   const clearFilters = () => {
     setFilters({
@@ -81,7 +87,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <DataContext.Provider
-      value={{ data, setData, filteredData, filters, setFilters, clearFilters }}
+      value={{ data, setData, filteredData, baseFilteredData, filters, setFilters, clearFilters }}
     >
       {children}
     </DataContext.Provider>

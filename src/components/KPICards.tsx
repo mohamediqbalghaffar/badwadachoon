@@ -5,12 +5,12 @@ import { useData } from "../context/DataContext";
 import { Layers, Clock, AlertTriangle } from "lucide-react";
 
 export const KPICards = () => {
-  const { filteredData, setFilters, clearFilters } = useData();
+  const { baseFilteredData, setFilters, clearFilters } = useData();
 
-  const totalLetters = filteredData.length;
-  const pendingLetters = filteredData.filter((item) => !item.responseDate).length;
+  const totalLetters = baseFilteredData.length;
+  const pendingLetters = baseFilteredData.filter((item) => !item.responseDate).length;
   
-  const completedLetters = filteredData.filter((item) => item.processingTime !== null);
+  const completedLetters = baseFilteredData.filter((item) => item.processingTime !== null);
   const avgProcessingTime =
     completedLetters.length > 0
       ? completedLetters.reduce((acc, curr) => acc + (curr.processingTime ?? 0), 0) / completedLetters.length
