@@ -75,7 +75,8 @@ export const DashboardCharts = () => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
       {/* Department Bar Chart */}
-      <div className="glass glass-card p-6 flex flex-col min-h-96 h-auto">
+      <div className="glass glass-card glass-interactive p-6 flex flex-col min-h-96 h-auto relative overflow-hidden group">
+        <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-blue-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
         <h3 className="text-lg font-semibold mb-6">قەبارەی نامەکان بەپێی لایەن</h3>
         <div className="flex-1 min-h-[300px]" dir="ltr">
           <ResponsiveContainer width="100%" height="100%">
@@ -126,7 +127,8 @@ export const DashboardCharts = () => {
       </div>
 
       {/* Letter Type Doughnut Chart */}
-      <div className="glass glass-card p-6 flex flex-col min-h-96 h-auto">
+      <div className="glass glass-card glass-interactive p-6 flex flex-col min-h-96 h-auto relative overflow-hidden group">
+        <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-emerald-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
         <h3 className="text-lg font-semibold mb-6">پۆلێنکردنی جۆری نامەکان</h3>
         <div className="flex-1 min-h-[300px]" dir="ltr">
           <ResponsiveContainer width="100%" height="100%">
@@ -175,7 +177,8 @@ export const DashboardCharts = () => {
       </div>
 
       {/* Timeline Area Chart - Full Width */}
-      <div className="glass glass-card p-6 flex flex-col h-96 lg:col-span-2">
+      <div className="glass glass-card glass-interactive p-6 flex flex-col h-96 lg:col-span-2 relative overflow-hidden group">
+        <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-purple-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
         <h3 className="text-lg font-semibold mb-6">هەڵکشان و داکشانی نامەکان بەپێی کات</h3>
         <div className="flex-1 min-h-0" dir="ltr">
           <ResponsiveContainer width="100%" height="100%">
@@ -206,7 +209,18 @@ export const DashboardCharts = () => {
               <Tooltip
                 contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(10px)' }}
               />
-              <Area type="monotone" dataKey="count" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorTimeline)" />
+              <Area 
+                type="monotone" 
+                dataKey="count" 
+                stroke="#10b981" 
+                strokeWidth={3} 
+                fillOpacity={1} 
+                fill="url(#colorTimeline)" 
+                dot={{ r: 4, stroke: '#10b981', strokeWidth: 2, fill: '#fff' }}
+                activeDot={{ r: 6, stroke: '#10b981', strokeWidth: 2, fill: '#fff' }}
+              >
+                <LabelList dataKey="count" position="top" offset={10} fill="#10b981" fontSize={12} fontWeight="bold" />
+              </Area>
             </AreaChart>
           </ResponsiveContainer>
         </div>

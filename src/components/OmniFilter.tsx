@@ -20,7 +20,7 @@ export const OmniFilter = () => {
     (filters.slaStatus ? 1 : 0);
 
   return (
-    <div className="sticky top-4 z-40 mb-8 glass glass-card p-4 transition-all">
+    <div className="sticky top-4 z-40 mb-8 glass glass-card glass-interactive p-4 transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:hover:shadow-[0_8px_30px_rgba(255,255,255,0.05)]">
       <div className="flex flex-col md:flex-row gap-4 items-center">
         
         {/* Header / Clear */}

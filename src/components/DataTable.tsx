@@ -10,7 +10,7 @@ export const DataTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState<{ key: keyof DashboardData; direction: "asc" | "desc" } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 18;
+  const itemsPerPage = 15;
 
   // Search logic
   const searchedData = useMemo(() => {
@@ -65,7 +65,8 @@ export const DataTable = () => {
   };
 
   return (
-    <div id="data-table-section" className="glass glass-card flex flex-col overflow-hidden mb-8">
+    <div id="data-table-section" className="glass glass-card glass-interactive flex flex-col overflow-hidden mb-8 relative group">
+      <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-indigo-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10"></div>
       {/* Table Header Controls */}
       <div className="p-4 border-b border-slate-200/50 dark:border-slate-800/50 flex flex-col sm:flex-row justify-between items-center gap-4">
         <h3 className="text-lg font-semibold">داتای وردی نامەکان</h3>

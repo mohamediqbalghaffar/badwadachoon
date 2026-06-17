@@ -59,8 +59,8 @@ export const FileUploader = () => {
   return (
     <div className="flex items-center justify-center min-h-[60vh] p-4">
       <div
-        className={`relative w-full max-w-xl p-12 transition-all duration-300 transform glass glass-card text-center
-          ${isDragging ? "scale-[1.02] border-blue-500/50 shadow-blue-500/20" : "scale-100 hover:scale-[1.01]"}
+        className={`relative w-full max-w-xl p-12 transition-all duration-300 transform glass glass-card glass-interactive text-center
+          ${isDragging ? "scale-[1.02] border-blue-500/50 shadow-[0_0_40px_-10px_rgba(59,130,246,0.3)] animate-pulse-ring" : "scale-100"}
         `}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
@@ -70,8 +70,8 @@ export const FileUploader = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-3xl pointer-events-none" />
         
         <div className="relative z-10 flex flex-col items-center justify-center space-y-6">
-          <div className={`p-5 rounded-full transition-colors duration-300 ${isDragging ? 'bg-blue-100/50 text-blue-600 dark:bg-blue-900/50 dark:text-blue-300' : 'bg-slate-100/50 text-slate-500 dark:bg-slate-800/50 dark:text-slate-400'}`}>
-            <UploadCloud size={48} strokeWidth={1.5} />
+          <div className={`p-5 rounded-full transition-all duration-500 ${isDragging ? 'bg-blue-100/50 text-blue-600 dark:bg-blue-900/50 dark:text-blue-300 scale-110' : 'bg-slate-100/50 text-slate-500 dark:bg-slate-800/50 dark:text-slate-400 group-hover:scale-105 group-hover:bg-blue-50/50 dark:group-hover:bg-blue-900/20'}`}>
+            <UploadCloud size={48} strokeWidth={1.5} className={isDragging ? 'animate-bounce' : ''} />
           </div>
           
           <div className="space-y-2">
