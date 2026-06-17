@@ -7,8 +7,9 @@ interface Particle {
   y: number;
   vx: number;
   vy: number;
-  radius: number;
-  color: string;
+  radiusCurrent: number;
+  radiusPrevious: number;
+  colorIndex: number;
 }
 
 export const ParticlesCanvas = () => {
@@ -47,21 +48,36 @@ export const ParticlesCanvas = () => {
       window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
 
     // Brand colors matching the HTS logo theme and general dashboard feel
-    const colors = isDarkMode 
+    const currentColors = isDarkMode 
       ? ["rgba(227, 30, 36, 0.8)", "rgba(59, 130, 246, 0.8)", "rgba(255, 255, 255, 0.6)"]
       : ["rgba(227, 30, 36, 0.7)", "rgba(59, 130, 246, 0.7)", "rgba(0, 0, 0, 0.4)"];
+
+    const previousColors = isDarkMode
+      ? ["rgba(227, 30, 36, 0.4)", "rgba(59, 130, 246, 0.4)", "rgba(255, 255, 255, 0.2)"]
+      : ["rgba(227, 30, 36, 0.2)", "rgba(59, 130, 246, 0.2)", "rgba(0, 0, 0, 0.1)"];
+
+    let cardRects: DOMRect[] = [];
+    let frameCount = 0;
+
+    const updateCardRects = () => {
+      const cardElements = document.querySelectorAll('.glass');
+      cardRects = Array.from(cardElements).map(el => el.getBoundingClientRect());
+    };
 
     const initParticles = () => {
       particles = [];
       const particleCount = Math.min(Math.floor((width * height) / 15000), 100);
       for (let i = 0; i < particleCount; i++) {
+        const radiusCurrent = Math.random() * 3 + 3.5;
+        const radiusPrevious = (radiusCurrent - 3.5) / 3 * 2 + 1; // Map 3.5 - 6.5 to 1 - 3
         particles.push({
           x: Math.random() * width,
           y: Math.random() * height,
           vx: (Math.random() - 0.5) * 0.5,
           vy: (Math.random() - 0.5) * 0.5,
-          radius: Math.random() * 3 + 3.5,
-          color: colors[Math.floor(Math.random() * colors.length)],
+          radiusCurrent,
+          radiusPrevious,
+          colorIndex: Math.floor(Math.random() * currentColors.length),
         });
       }
     };
@@ -69,6 +85,11 @@ export const ParticlesCanvas = () => {
 
     const draw = () => {
       ctx.clearRect(0, 0, width, height);
+
+      frameCount++;
+      if (frameCount % 15 === 0 || cardRects.length === 0) {
+        updateCardRects();
+      }
 
       const connectionDistance = 120;
       const mouseRepelDistance = 100;
@@ -96,10 +117,23 @@ export const ParticlesCanvas = () => {
           p.y -= Math.sin(angle) * force * 2;
         }
 
+        // Check if particle is behind any card
+        let isInsideCard = false;
+        for (let r = 0; r < cardRects.length; r++) {
+          const rect = cardRects[r];
+          if (p.x >= rect.left && p.x <= rect.right && p.y >= rect.top && p.y <= rect.bottom) {
+            isInsideCard = true;
+            break;
+          }
+        }
+
+        const radius = isInsideCard ? p.radiusPrevious : p.radiusCurrent;
+        const color = isInsideCard ? previousColors[p.colorIndex] : currentColors[p.colorIndex];
+
         // Draw particle
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fillStyle = p.color;
+        ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+        ctx.fillStyle = color;
         ctx.fill();
 
         // Connect particles
