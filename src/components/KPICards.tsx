@@ -13,7 +13,7 @@ export const KPICards = () => {
   const completedLetters = filteredData.filter((item) => item.processingTime !== null);
   const avgProcessingTime =
     completedLetters.length > 0
-      ? completedLetters.reduce((acc, curr) => acc + (curr.processingTime || 0), 0) / completedLetters.length
+      ? completedLetters.reduce((acc, curr) => acc + (curr.processingTime ?? 0), 0) / completedLetters.length
       : 0;
 
   return (

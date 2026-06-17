@@ -40,23 +40,23 @@ export const OmniFilter = () => {
           )}
         </div>
 
-        <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 w-full">
+        <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 w-full">
           {/* Date Range */}
-          <div className="flex flex-col space-y-1">
+          <div className="flex flex-col space-y-1 col-span-1 sm:col-span-2 md:col-span-2">
             <label className="text-xs text-slate-500 dark:text-slate-400">مەودای بەروار</label>
-            <div className="flex gap-2 items-center bg-white/50 dark:bg-black/20 rounded-xl p-1 border border-slate-200/50 dark:border-slate-700/50">
+            <div className="flex gap-1 items-center bg-white/50 dark:bg-black/20 rounded-xl px-2 py-[7px] border border-slate-200/50 dark:border-slate-700/50">
               <input
                 type="date"
                 value={filters.dateRange.start || ""}
                 onChange={(e) => setFilters(prev => ({ ...prev, dateRange: { ...prev.dateRange, start: e.target.value } }))}
-                className="bg-transparent border-none text-sm w-full outline-none px-1 text-slate-700 dark:text-slate-300"
+                className="bg-transparent border-none text-xs w-full min-w-0 outline-none px-1 text-slate-700 dark:text-slate-300 cursor-pointer focus:ring-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
               />
               <span className="text-slate-400">-</span>
               <input
                 type="date"
                 value={filters.dateRange.end || ""}
                 onChange={(e) => setFilters(prev => ({ ...prev, dateRange: { ...prev.dateRange, end: e.target.value } }))}
-                className="bg-transparent border-none text-sm w-full outline-none px-1 text-slate-700 dark:text-slate-300"
+                className="bg-transparent border-none text-xs w-full min-w-0 outline-none px-1 text-slate-700 dark:text-slate-300 cursor-pointer focus:ring-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
               />
             </div>
           </div>

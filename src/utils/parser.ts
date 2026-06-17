@@ -13,6 +13,13 @@ export interface DashboardData {
   slaTime: string;
 }
 
+const normalizeHeader = (str: string): string => {
+  return str
+    .replace(/\s+/g, "") // remove all whitespace
+    .replace(/[\u064A\u0649\u06CE\u06CC]/g, "ی") // normalize all Ye variants
+    .replace(/[\u0647\u0629\u06D5]/g, "ە"); // normalize Heh/Teh Marbuta/Kurdish Ae
+};
+
 // Map Kurdish headers to English keys
 const HeaderMap: Record<string, keyof DashboardData> = {
   "#": "id",
@@ -23,6 +30,7 @@ const HeaderMap: Record<string, keyof DashboardData> = {
   "ڕۆژی ناردن": "sentDate",
   "ڕۆژی وەڵام": "responseDate",
   "تێبینی": "processingTime",
+  "تیپیبنی": "processingTime", // Handle typo in Column H
   "کاتی تێچوو بەپێی ڕێنمایی": "slaTime",
 };
 
@@ -45,9 +53,26 @@ export const parseFile = async (file: File): Promise<DashboardData[]> => {
           const item: Partial<DashboardData> = {};
           
           for (const [key, value] of Object.entries(row)) {
-            // Check if key matches exactly or is a substring in our map
-            // Note: In excel, headers might have spaces
-            const matchedKey = Object.keys(HeaderMap).find(k => key.trim().includes(k));
+            const cleanKey = key.trim();
+            const normKey = normalizeHeader(cleanKey);
+            
+            // 1. Try exact match first
+            let matchedKey = Object.keys(HeaderMap).find(k => normalizeHeader(k) === normKey);
+            
+            // 2. Try substring match (sorted by length descending to match longer headers first)
+            if (!matchedKey) {
+              const sortedKeys = Object.keys(HeaderMap).sort((a, b) => b.length - a.length);
+              matchedKey = sortedKeys.find(k => {
+                const normMapKey = normalizeHeader(k);
+                
+                // Explicitly avoid matching "تیپیبنی 2" or "تێبینی 2" for processingTime
+                if ((k === "تێبینی" || k === "تیپیبنی") && normKey.includes("2")) {
+                  return false;
+                }
+                
+                return normKey.includes(normMapKey);
+              });
+            }
             
             if (matchedKey) {
               const mappedKey = HeaderMap[matchedKey];
