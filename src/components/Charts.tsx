@@ -16,12 +16,12 @@ import {
   AreaChart,
   Area,
 } from "recharts";
-import { format, parseISO, isValid, startOfMonth } from "date-fns";
+import { format, parseISO, isValid, startOfMonth, parse, endOfMonth } from "date-fns";
 
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4"];
 
 export const DashboardCharts = () => {
-  const { filteredData } = useData();
+  const { filteredData, setFilters } = useData();
 
   // Prepare Department Data
   const deptData = useMemo(() => {
@@ -76,7 +76,19 @@ export const DashboardCharts = () => {
                 cursor={{ fill: 'rgba(241, 245, 249, 0.2)' }}
                 contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(10px)' }}
               />
-              <Bar dataKey="count" fill="url(#colorDept)" radius={[6, 6, 0, 0]} maxBarSize={50} />
+              <Bar 
+                dataKey="count" 
+                fill="url(#colorDept)" 
+                radius={[6, 6, 0, 0]} 
+                maxBarSize={50} 
+                onClick={(data: any) => {
+                  if (data && data.name) {
+                    setFilters(prev => ({ ...prev, departments: [data.name as string] }));
+                    document.getElementById('data-table-section')?.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }} 
+                cursor="pointer" 
+              />
               <defs>
                 <linearGradient id="colorDept" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8} />
@@ -103,6 +115,13 @@ export const DashboardCharts = () => {
                 paddingAngle={5}
                 dataKey="value"
                 stroke="none"
+                onClick={(data: any) => {
+                  if (data && data.name) {
+                    setFilters(prev => ({ ...prev, letterType: data.name as string }));
+                    document.getElementById('data-table-section')?.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+                cursor="pointer"
               >
                 {typeData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -121,7 +140,21 @@ export const DashboardCharts = () => {
         <h3 className="text-lg font-semibold mb-6">هەڵکشان و داکشانی نامەکان بەپێی کات</h3>
         <div className="flex-1 min-h-0" dir="ltr">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={timelineData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <AreaChart 
+              data={timelineData} 
+              margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+              onClick={(e: any) => {
+                if (e && e.activePayload && e.activePayload.length > 0) {
+                  const monthStr = e.activePayload[0].payload.date;
+                  const date = parse(monthStr, 'yyyy-MM', new Date());
+                  const start = format(date, 'yyyy-MM-dd');
+                  const end = format(endOfMonth(date), 'yyyy-MM-dd');
+                  setFilters(prev => ({ ...prev, dateRange: { start, end } }));
+                  document.getElementById('data-table-section')?.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+              style={{ cursor: 'pointer' }}
+            >
               <defs>
                 <linearGradient id="colorTimeline" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#10b981" stopOpacity={0.5} />

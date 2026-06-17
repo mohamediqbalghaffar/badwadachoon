@@ -65,7 +65,7 @@ export const DataTable = () => {
   };
 
   return (
-    <div className="glass glass-card flex flex-col overflow-hidden mb-8">
+    <div id="data-table-section" className="glass glass-card flex flex-col overflow-hidden mb-8">
       {/* Table Header Controls */}
       <div className="p-4 border-b border-slate-200/50 dark:border-slate-800/50 flex flex-col sm:flex-row justify-between items-center gap-4">
         <h3 className="text-lg font-semibold">داتای وردی نامەکان</h3>

@@ -8,6 +8,7 @@ interface FilterState {
   departments: string[];
   letterType: string | null;
   slaStatus: string | null;
+  completionStatus: 'all' | 'pending' | 'completed';
 }
 
 interface DataContextType {
@@ -28,6 +29,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     departments: [],
     letterType: null,
     slaStatus: null,
+    completionStatus: 'all',
   });
 
   const filteredData = useMemo(() => {
@@ -55,6 +57,14 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
         return false;
       }
 
+      // Completion Status filter
+      if (filters.completionStatus === 'pending' && item.responseDate !== null) {
+        return false;
+      }
+      if (filters.completionStatus === 'completed' && item.responseDate === null) {
+        return false;
+      }
+
       return true;
     });
   }, [data, filters]);
@@ -65,6 +75,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
       departments: [],
       letterType: null,
       slaStatus: null,
+      completionStatus: 'all',
     });
   };
 

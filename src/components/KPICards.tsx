@@ -5,7 +5,7 @@ import { useData } from "../context/DataContext";
 import { Layers, Clock, AlertTriangle } from "lucide-react";
 
 export const KPICards = () => {
-  const { filteredData } = useData();
+  const { filteredData, setFilters, clearFilters } = useData();
 
   const totalLetters = filteredData.length;
   const pendingLetters = filteredData.filter((item) => !item.responseDate).length;
@@ -16,10 +16,22 @@ export const KPICards = () => {
       ? completedLetters.reduce((acc, curr) => acc + (curr.processingTime ?? 0), 0) / completedLetters.length
       : 0;
 
+  const handleCardClick = (status: 'all' | 'pending' | 'completed') => {
+    if (status === 'all') {
+      clearFilters();
+    } else {
+      setFilters(prev => ({ ...prev, completionStatus: status }));
+    }
+    document.getElementById('data-table-section')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
       {/* Total Letters */}
-      <div className="glass glass-card p-6 flex items-center justify-between group hover:scale-[1.02] transition-transform duration-300">
+      <div 
+        onClick={() => handleCardClick('all')}
+        className="glass glass-card p-6 flex items-center justify-between group hover:scale-[1.02] transition-transform duration-300 cursor-pointer"
+      >
         <div>
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">کۆی گشتی نامەکان</p>
           <h3 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-500">
@@ -32,7 +44,10 @@ export const KPICards = () => {
       </div>
 
       {/* Pending Letters */}
-      <div className="glass glass-card p-6 flex items-center justify-between group hover:scale-[1.02] transition-transform duration-300">
+      <div 
+        onClick={() => handleCardClick('pending')}
+        className="glass glass-card p-6 flex items-center justify-between group hover:scale-[1.02] transition-transform duration-300 cursor-pointer"
+      >
         <div>
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">نامە هەڵپەسێردراوەکان (بێ وەڵام)</p>
           <h3 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-amber-500 to-orange-500">
@@ -45,7 +60,10 @@ export const KPICards = () => {
       </div>
 
       {/* Avg Processing Time */}
-      <div className="glass glass-card p-6 flex items-center justify-between group hover:scale-[1.02] transition-transform duration-300">
+      <div 
+        onClick={() => handleCardClick('completed')}
+        className="glass glass-card p-6 flex items-center justify-between group hover:scale-[1.02] transition-transform duration-300 cursor-pointer"
+      >
         <div>
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">تێکڕای کاتی وەڵامدانەوە</p>
           <h3 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-500 to-teal-500 flex items-baseline gap-1">
