@@ -47,16 +47,16 @@ export const Dashboard = () => {
 
           {/* Main Content */}
           <div className="flex flex-col gap-4">
-            <div className="animate-fade-up delay-200">
+            <div className="animate-fade-up delay-200 relative z-30">
               <OmniFilter />
             </div>
-            <div className="animate-fade-up delay-300">
+            <div className="animate-fade-up delay-300 relative z-20">
               <KPICards />
             </div>
-            <div className="animate-fade-up delay-400">
+            <div className="animate-fade-up delay-400 relative z-10">
               <DashboardCharts />
             </div>
-            <div className="animate-fade-up delay-500">
+            <div className="animate-fade-up delay-500 relative z-0">
               <DataTable />
             </div>
           </div>
