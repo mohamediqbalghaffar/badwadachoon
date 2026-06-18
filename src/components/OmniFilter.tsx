@@ -99,7 +99,7 @@ const MultiSelect = ({ label, options, selected, onChange, placeholder }: MultiS
 };
 
 export const OmniFilter = () => {
-  const { data, filters, setFilters, clearFilters } = useData();
+  const { data, sentData, filters, setFilters, clearFilters, activeView } = useData();
 
   const formatDateDisplay = (dateStr: string | null) => {
     if (!dateStr) return "dd/mm/yyyy";
@@ -114,17 +114,23 @@ export const OmniFilter = () => {
     }
   };
 
-  // Extract unique options from raw data
-  const departments = useMemo(() => Array.from(new Set(data.map((d) => d.department))), [data]);
-  const letterTypes = useMemo(() => Array.from(new Set(data.map((d) => d.letterType))), [data]);
-  const slaStatuses = useMemo(() => Array.from(new Set(data.map((d) => d.slaTime).filter(Boolean))), [data]);
+  // Extract unique options from the appropriate dataset based on activeView
+  const activeData = activeView === 'sent' ? sentData : data;
+  const departments = useMemo(() => Array.from(new Set(activeData.map((d) => d.department))), [activeData]);
+  const letterTypes = useMemo(() => Array.from(new Set(activeData.map((d) => d.letterType))), [activeData]);
+  const slaStatuses = useMemo(() => {
+    if (activeView === 'sent') return [];
+    return Array.from(new Set((data as any[]).map((d: any) => d.slaTime).filter(Boolean)));
+  }, [data, activeView]);
+
+  const showSlaFilter = activeView === 'received';
 
   const activeFilterCount =
     (filters.dateRange.start ? 1 : 0) +
     (filters.dateRange.end ? 1 : 0) +
     (filters.departments.length > 0 ? 1 : 0) +
     (filters.letterType.length > 0 ? 1 : 0) +
-    (filters.slaStatus.length > 0 ? 1 : 0);
+    (showSlaFilter && filters.slaStatus.length > 0 ? 1 : 0);
 
   return (
     <div className="sticky top-4 z-40 mb-8 glass glass-card glass-interactive p-4 transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:hover:shadow-[0_8px_30px_rgba(255,255,255,0.05)]">
@@ -147,7 +153,7 @@ export const OmniFilter = () => {
           )}
         </div>
 
-        <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 w-full">
+        <div className={`flex-1 grid grid-cols-1 sm:grid-cols-2 ${showSlaFilter ? 'md:grid-cols-5' : 'md:grid-cols-4'} gap-4 w-full`}>
           {/* Date Range */}
           <div className="flex flex-col space-y-1 col-span-1 sm:col-span-2 md:col-span-2">
             <label className="text-xs text-slate-500 dark:text-slate-400">مەودای بەروار</label>
@@ -204,14 +210,16 @@ export const OmniFilter = () => {
             placeholder="هەموو جۆرەکان"
           />
 
-          {/* SLA Status */}
-          <MultiSelect
-            label="کاتی تێچوو (SLA)"
-            options={slaStatuses}
-            selected={filters.slaStatus}
-            onChange={(vals) => setFilters(prev => ({ ...prev, slaStatus: vals }))}
-            placeholder="هەموو حاڵەتەکان"
-          />
+          {/* SLA Status — only for received view */}
+          {showSlaFilter && (
+            <MultiSelect
+              label="کاتی تێچوو (SLA)"
+              options={slaStatuses}
+              selected={filters.slaStatus}
+              onChange={(vals) => setFilters(prev => ({ ...prev, slaStatus: vals }))}
+              placeholder="هەموو حاڵەتەکان"
+            />
+          )}
         </div>
       </div>
     </div>

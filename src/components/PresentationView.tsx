@@ -15,7 +15,9 @@ import {
   AlertOctagon, 
   Award,
   Zap,
-  BarChart2
+  BarChart2,
+  GitCompareArrows,
+  Send
 } from "lucide-react";
 import {
   BarChart,
@@ -37,7 +39,7 @@ import { format, parseISO, isValid, startOfMonth, parse } from "date-fns";
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4"];
 
 export const PresentationView = () => {
-  const { baseFilteredData, filteredData, data, filters } = useData();
+  const { baseFilteredData, filteredData, data, filters, sentData, baseFilteredSentData } = useData();
   const [activeSlide, setActiveSlide] = useState(0);
 
   // --- Calculations ---
@@ -227,7 +229,38 @@ export const PresentationView = () => {
       .slice(0, 5);
   }, [baseFilteredData]);
 
-  const slideCount = 7;
+  // --- Sent Data Calculations ---
+  const hasSentData = sentData.length > 0;
+  const slideCount = hasSentData ? 9 : 7;
+  
+  const totalSent = baseFilteredSentData.length;
+
+  const deptComparisonData = useMemo(() => {
+    if (!hasSentData) return [];
+    const depts = new Set<string>();
+    const receivedCounts: Record<string, number> = {};
+    const sentCounts: Record<string, number> = {};
+
+    baseFilteredData.forEach(d => {
+      depts.add(d.department);
+      receivedCounts[d.department] = (receivedCounts[d.department] || 0) + 1;
+    });
+
+    baseFilteredSentData.forEach(d => {
+      depts.add(d.department);
+      sentCounts[d.department] = (sentCounts[d.department] || 0) + 1;
+    });
+
+    return Array.from(depts).map(name => {
+      const received = receivedCounts[name] || 0;
+      const sent = sentCounts[name] || 0;
+      const total = received + sent;
+      const cleanName = name.replace('بەشی ', '').replace('سێکتەری ', '');
+      const words = cleanName.split(' ').filter(w => w.length > 1 && w !== 'و');
+      const abbr = words.slice(0, 2).map(w => w.charAt(0)).join('.');
+      return { name, received, sent, total, abbr: abbr || name.charAt(0) };
+    }).sort((a, b) => b.total - a.total).slice(0, 8);
+  }, [baseFilteredData, baseFilteredSentData, hasSentData]);
 
 
   const handleNext = useCallback(() => {
@@ -650,6 +683,82 @@ export const PresentationView = () => {
                   )}
                 </tbody>
               </table>
+            </div>
+          </div>
+        )}
+
+        {/* SLIDE 8: Sent Summary */}
+        {hasSentData && activeSlide === 7 && (
+          <div className="w-full max-w-5xl flex flex-col animate-fade-in">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-teal-500/10 -z-10" />
+            <div className="flex justify-between items-start mb-6">
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+                  <Send className="text-teal-500" size={32} />
+                  سەرجەم نووسراوە ڕەوانەکراوەکان
+                </h2>
+                <span className="text-sm text-slate-400 mt-2 block">ئاماری گشتی نامە نێردراوەکان</span>
+              </div>
+              <div className="flex flex-col items-end bg-white/5 dark:bg-slate-900/40 p-4 rounded-xl border border-white/10">
+                <span className="text-4xl font-black text-teal-600 dark:text-teal-400">
+                  {totalSent}
+                </span>
+                <span className="text-sm text-slate-500 font-medium">کۆی نامەکان</span>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-6 mt-4">
+              <div className="glass p-8 rounded-2xl flex flex-col items-center justify-center text-center border border-white/10 relative overflow-hidden group">
+                <div className="absolute inset-0 bg-blue-500/5 group-hover:bg-blue-500/10 transition-colors" />
+                <Layers className="text-blue-500 mb-4 relative z-10" size={48} />
+                <span className="text-5xl font-black text-slate-800 dark:text-white mb-2 relative z-10">{totalLetters}</span>
+                <span className="text-lg text-slate-500 font-bold relative z-10">نووسراوی هاتوو</span>
+              </div>
+              <div className="glass p-8 rounded-2xl flex flex-col items-center justify-center text-center border border-white/10 relative overflow-hidden group">
+                <div className="absolute inset-0 bg-teal-500/5 group-hover:bg-teal-500/10 transition-colors" />
+                <Send className="text-teal-500 mb-4 relative z-10" size={48} />
+                <span className="text-5xl font-black text-slate-800 dark:text-white mb-2 relative z-10">{totalSent}</span>
+                <span className="text-lg text-slate-500 font-bold relative z-10">نووسراوی دەرچوو</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* SLIDE 9: Comparison Chart */}
+        {hasSentData && activeSlide === 8 && (
+          <div className="w-full max-w-5xl flex flex-col animate-fade-in">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-indigo-500/10 -z-10" />
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 mb-8 flex items-center gap-3">
+              <GitCompareArrows className="text-indigo-500" size={32} />
+              بەراوردی قەبارەی کارەکان بەپێی بەشەکان
+            </h2>
+            
+            <div className="w-full h-[350px] bg-white/5 dark:bg-slate-900/40 rounded-2xl p-6 border border-white/10" dir="ltr">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={deptComparisonData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#475569" opacity={0.2} />
+                  <XAxis dataKey="abbr" tick={{ fontSize: 13, fill: '#94a3b8', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 13, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <Tooltip
+                    cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
+                    contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff' }}
+                    labelFormatter={(label, payload) => payload?.[0]?.payload?.name || label}
+                  />
+                  <Bar dataKey="received" name="هاتوو" fill="#3b82f6" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                  <Bar dataKey="sent" name="دەرچوو" fill="#06b6d4" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            
+            <div className="mt-6 flex flex-wrap gap-x-8 gap-y-2 justify-center" dir="rtl">
+              <div className="flex items-center gap-2 text-sm">
+                <span className="w-4 h-4 rounded-sm bg-[#3b82f6]"></span>
+                <span className="font-bold text-slate-700 dark:text-slate-300">نووسراوی هاتوو</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <span className="w-4 h-4 rounded-sm bg-[#06b6d4]"></span>
+                <span className="font-bold text-slate-700 dark:text-slate-300">نووسراوی دەرچوو</span>
+              </div>
             </div>
           </div>
         )}
