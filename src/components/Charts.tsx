@@ -22,7 +22,7 @@ import { format, parseISO, isValid, startOfMonth, parse, endOfMonth } from "date
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4"];
 
 export const DashboardCharts = () => {
-  const { filteredData, setFilters } = useData();
+  const { filteredData, setFilters, filters } = useData();
 
   // Prepare Department Data
   const deptData = useMemo(() => {
@@ -72,15 +72,49 @@ export const DashboardCharts = () => {
       .sort((a, b) => a.date.localeCompare(b.date));
   }, [filteredData]);
 
+  // Prepare Month Data when exactly one department is selected
+  const monthDataForDept = useMemo(() => {
+    if (filters.departments.length !== 1) return [];
+    
+    const counts: Record<string, number> = {};
+    filteredData.forEach((d) => {
+      if (d.sentDate) {
+        const date = parseISO(d.sentDate);
+        if (isValid(date)) {
+          const monthStr = format(startOfMonth(date), 'yyyy-MM');
+          counts[monthStr] = (counts[monthStr] || 0) + 1;
+        }
+      }
+    });
+
+    return Object.entries(counts)
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([date, count]) => {
+        const dateObj = parse(date, 'yyyy-MM', new Date());
+        const monthIndex = dateObj.getMonth();
+        const kurdishMonths = [
+          "کانوونی دووەم", "شوبات", "ئازار", "نیسان", "ئایار", "حوزەیران",
+          "تەممووز", "ئاب", "ئەیلوول", "تشرینی یەکەم", "تشرینی دووەم", "کانوونی یەکەم"
+        ];
+        const monthName = `${kurdishMonths[monthIndex]} ${dateObj.getFullYear()}`;
+        const abbr = format(dateObj, 'yyyy-MM');
+        return { name: monthName, count, abbr };
+      });
+  }, [filteredData, filters.departments]);
+
+  const isSingleDeptSelected = filters.departments.length === 1;
+  const chartData = isSingleDeptSelected ? monthDataForDept : deptData;
+  const chartTitle = isSingleDeptSelected ? "قەبارەی نامەکان بەپێی مانگ" : "قەبارەی نامەکان بەپێی لایەن";
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
       {/* Department Bar Chart */}
       <div className="glass glass-card glass-interactive p-6 flex flex-col min-h-96 h-auto relative overflow-hidden group">
         <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-blue-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-        <h3 className="text-lg font-semibold mb-6">قەبارەی نامەکان بەپێی لایەن</h3>
+        <h3 className="text-lg font-semibold mb-6">{chartTitle}</h3>
         <div className="flex-1 min-h-[300px]" dir="ltr">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={deptData} margin={{ top: 25, right: 10, left: -20, bottom: 0 }}>
+            <BarChart data={chartData} margin={{ top: 25, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#cbd5e1" opacity={0.3} />
               <XAxis dataKey="abbr" tick={{ fontSize: 12, fill: '#64748b', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
@@ -89,8 +123,8 @@ export const DashboardCharts = () => {
                 contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(10px)' }}
                 formatter={(value: any, name: any, props: any) => [value, props.payload.name]}
                 labelFormatter={(abbr) => {
-                  const dept = deptData.find(d => d.abbr === abbr);
-                  return dept ? dept.name : abbr;
+                  const entry = chartData.find(d => d.abbr === abbr);
+                  return entry ? entry.name : abbr;
                 }}
               />
               <Bar 
@@ -98,15 +132,16 @@ export const DashboardCharts = () => {
                 radius={[6, 6, 0, 0]} 
                 maxBarSize={50} 
                 onClick={(data: any) => {
+                  if (isSingleDeptSelected) return;
                   if (data && data.name) {
                     setFilters(prev => ({ ...prev, departments: [data.name as string] }));
                     document.getElementById('data-table-section')?.scrollIntoView({ behavior: 'smooth' });
                   }
                 }} 
-                cursor="pointer" 
+                cursor={isSingleDeptSelected ? "default" : "pointer"} 
               >
-                <LabelList dataKey="abbr" position="top" fill="#64748b" fontSize={12} fontWeight="bold" />
-                {deptData.map((entry, index) => (
+                <LabelList dataKey="count" position="top" fill="#64748b" fontSize={12} fontWeight="bold" />
+                {chartData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Bar>
@@ -116,7 +151,7 @@ export const DashboardCharts = () => {
         
         {/* Custom Legend for Abbreviations */}
         <div className="mt-6 flex flex-wrap gap-x-4 gap-y-2 justify-center border-t border-slate-200 dark:border-slate-800 pt-4" dir="rtl">
-          {deptData.map((entry, index) => (
+          {chartData.map((entry, index) => (
             <div key={index} className="flex items-center gap-2 text-xs">
               <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: COLORS[index % COLORS.length] }}></span>
               <span className="font-bold text-slate-700 dark:text-slate-300 shrink-0">{entry.abbr}</span>
