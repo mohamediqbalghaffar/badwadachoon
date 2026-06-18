@@ -13,8 +13,8 @@ import { MonitorPlay, X, Inbox, Send, GitCompareArrows } from "lucide-react";
 import { ActiveView } from "../context/DataContext";
 
 const VIEW_SEGMENTS: { key: ActiveView; label: string; icon: React.ReactNode }[] = [
-  { key: 'received', label: 'نووسراوە نێردراوەکان', icon: <Inbox size={16} /> },
-  { key: 'sent', label: 'نووسراوە ڕەوانەکراوەکان', icon: <Send size={16} /> },
+  { key: 'received', label: 'پێویست بە وەڵام', icon: <Inbox size={16} /> },
+  { key: 'sent', label: 'سەرجەم ڕەوانەکراوەکان', icon: <Send size={16} /> },
   { key: 'comparison', label: 'بەراوردکردن', icon: <GitCompareArrows size={16} /> },
 ];
 
@@ -27,9 +27,9 @@ export const Dashboard = () => {
   };
 
   const subtitles: Record<ActiveView, string> = {
-    received: 'داشبۆردی شیکاری داتای نامەکان و بەدواداچوونی مامەڵەکان',
-    sent: 'داشبۆردی شیکاری داتای نووسراوە ڕەوانەکراوەکان',
-    comparison: 'بەراوردکردنی داتای نووسراوە نێردراوەکان و ڕەوانەکراوەکان',
+    received: 'داشبۆردی بەدواداچوونی ئەو نامانەی پێویستیان بە وەڵامە',
+    sent: 'داشبۆردی شیکاری سەرجەم نووسراوە ڕەوانەکراوەکان',
+    comparison: 'بەراوردکردنی سەرجەم نامەکان لەگەڵ ئەوانەی پێویستیان بە وەڵامە',
   };
 
   return (

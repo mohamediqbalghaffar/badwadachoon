@@ -169,7 +169,7 @@ export const ComparisonView = () => {
           <div className="flex items-center justify-between relative z-10">
             <div>
               <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
-                سەرجەم نووسراوە نێردراوەکان
+                نامەی پێویست بە وەڵام
               </p>
               <h3 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-blue-400">
                 {receivedCount.toLocaleString()}
@@ -207,7 +207,7 @@ export const ComparisonView = () => {
           <div className="flex items-center justify-between text-sm font-medium mb-2">
             <span className="text-blue-600 dark:text-blue-400 flex items-center gap-1">
               <Inbox size={14} />
-              نێردراو {receivedPercent}%
+              پێویست بە وەڵام {receivedPercent}%
             </span>
             <span className="text-cyan-600 dark:text-cyan-400 flex items-center gap-1">
               ڕەوانەکراو {sentPercent}%
@@ -255,7 +255,7 @@ export const ComparisonView = () => {
                     cursor={{ fill: 'rgba(241, 245, 249, 0.2)' }}
                     contentStyle={tooltipStyle}
                     formatter={(value: any, name: any) => {
-                      const label = name === 'received' ? 'نێردراو' : 'ڕەوانەکراو';
+                      const label = name === 'received' ? 'پێویست بە وەڵام' : 'ڕەوانەکراو';
                       return [value, label];
                     }}
                     labelFormatter={(abbr) => {
@@ -288,7 +288,7 @@ export const ComparisonView = () => {
             <div className="mt-3 flex gap-x-6 justify-center" dir="rtl">
               <div className="flex items-center gap-2 text-xs">
                 <span className="w-3 h-3 rounded-sm shrink-0" style={{ backgroundColor: RECEIVED_COLOR }} />
-                <span className="font-medium text-slate-600 dark:text-slate-300">نێردراو</span>
+                <span className="font-medium text-slate-600 dark:text-slate-300">پێویست بە وەڵام</span>
               </div>
               <div className="flex items-center gap-2 text-xs">
                 <span className="w-3 h-3 rounded-sm shrink-0" style={{ backgroundColor: SENT_COLOR }} />
@@ -310,7 +310,7 @@ export const ComparisonView = () => {
           <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-blue-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           <div className="flex items-center gap-2 mb-6">
             <PieChartIcon size={18} className="text-blue-500" />
-            <h3 className="text-lg font-semibold">جۆری نامە نێردراوەکان</h3>
+            <h3 className="text-lg font-semibold">جۆری نامەکانی پێویست بە وەڵام</h3>
           </div>
           {receivedTypeData.length > 0 ? (
             <>
@@ -434,7 +434,7 @@ export const ComparisonView = () => {
                 <Tooltip
                   contentStyle={tooltipStyle}
                   formatter={(value: any, name: any) => {
-                    const label = name === 'received' ? 'نێردراو' : 'ڕەوانەکراو';
+                    const label = name === 'received' ? 'پێویست بە وەڵام' : 'ڕەوانەکراو';
                     return [value, label];
                   }}
                   labelFormatter={(label) => `مانگ: ${label}`}
@@ -479,11 +479,11 @@ export const ComparisonView = () => {
           <div className="mt-4 flex gap-x-6 justify-center border-t border-slate-200 dark:border-slate-800 pt-3" dir="rtl">
             <div className="flex items-center gap-2 text-xs">
               <span className="w-4 h-1 rounded-full shrink-0" style={{ backgroundColor: RECEIVED_COLOR }} />
-              <span className="font-medium text-slate-600 dark:text-slate-300">نێردراو (وەرگیراو)</span>
+              <span className="font-medium text-slate-600 dark:text-slate-300">پێویست بە وەڵام</span>
             </div>
             <div className="flex items-center gap-2 text-xs">
               <span className="w-4 h-1 rounded-full shrink-0" style={{ backgroundColor: SENT_COLOR }} />
-              <span className="font-medium text-slate-600 dark:text-slate-300">ڕەوانەکراو (نێردراو)</span>
+              <span className="font-medium text-slate-600 dark:text-slate-300">سەرجەم ڕەوانەکراوەکان</span>
             </div>
           </div>
         )}

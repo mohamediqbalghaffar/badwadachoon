@@ -697,7 +697,7 @@ export const PresentationView = () => {
                   <Send className="text-teal-500" size={32} />
                   سەرجەم نووسراوە ڕەوانەکراوەکان
                 </h2>
-                <span className="text-sm text-slate-400 mt-2 block">ئاماری گشتی نامە نێردراوەکان</span>
+                <span className="text-sm text-slate-400 mt-2 block">ئاماری گشتی نامە ڕەوانەکراوەکان</span>
               </div>
               <div className="flex flex-col items-end bg-white/5 dark:bg-slate-900/40 p-4 rounded-xl border border-white/10">
                 <span className="text-4xl font-black text-teal-600 dark:text-teal-400">
@@ -712,13 +712,13 @@ export const PresentationView = () => {
                 <div className="absolute inset-0 bg-blue-500/5 group-hover:bg-blue-500/10 transition-colors" />
                 <Layers className="text-blue-500 mb-4 relative z-10" size={48} />
                 <span className="text-5xl font-black text-slate-800 dark:text-white mb-2 relative z-10">{totalLetters}</span>
-                <span className="text-lg text-slate-500 font-bold relative z-10">نووسراوی هاتوو</span>
+                <span className="text-lg text-slate-500 font-bold relative z-10">پێویست بە وەڵام</span>
               </div>
               <div className="glass p-8 rounded-2xl flex flex-col items-center justify-center text-center border border-white/10 relative overflow-hidden group">
                 <div className="absolute inset-0 bg-teal-500/5 group-hover:bg-teal-500/10 transition-colors" />
                 <Send className="text-teal-500 mb-4 relative z-10" size={48} />
                 <span className="text-5xl font-black text-slate-800 dark:text-white mb-2 relative z-10">{totalSent}</span>
-                <span className="text-lg text-slate-500 font-bold relative z-10">نووسراوی دەرچوو</span>
+                <span className="text-lg text-slate-500 font-bold relative z-10">سەرجەم ڕەوانەکراوەکان</span>
               </div>
             </div>
           </div>
@@ -744,8 +744,8 @@ export const PresentationView = () => {
                     contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff' }}
                     labelFormatter={(label, payload) => payload?.[0]?.payload?.name || label}
                   />
-                  <Bar dataKey="received" name="هاتوو" fill="#3b82f6" radius={[4, 4, 0, 0]} maxBarSize={40} />
-                  <Bar dataKey="sent" name="دەرچوو" fill="#06b6d4" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                  <Bar dataKey="received" name="پێویست بە وەڵام" fill="#3b82f6" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                  <Bar dataKey="sent" name="سەرجەم ڕەوانەکراوەکان" fill="#06b6d4" radius={[4, 4, 0, 0]} maxBarSize={40} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -753,11 +753,11 @@ export const PresentationView = () => {
             <div className="mt-6 flex flex-wrap gap-x-8 gap-y-2 justify-center" dir="rtl">
               <div className="flex items-center gap-2 text-sm">
                 <span className="w-4 h-4 rounded-sm bg-[#3b82f6]"></span>
-                <span className="font-bold text-slate-700 dark:text-slate-300">نووسراوی هاتوو</span>
+                <span className="font-bold text-slate-700 dark:text-slate-300">پێویست بە وەڵام</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <span className="w-4 h-4 rounded-sm bg-[#06b6d4]"></span>
-                <span className="font-bold text-slate-700 dark:text-slate-300">نووسراوی دەرچوو</span>
+                <span className="font-bold text-slate-700 dark:text-slate-300">سەرجەم ڕەوانەکراوەکان</span>
               </div>
             </div>
           </div>
