@@ -130,39 +130,12 @@ export const PresentationView = () => {
   const isSingleDeptSelected = filters.departments.length === 1;
   const chartData = isSingleDeptSelected ? monthDataForDept : deptData;
   const chartTitle = isSingleDeptSelected ? "قەبارەی نامەکان بەپێی مانگ" : "نامەکان بەپێی بەش و لایەنەکان";
-
-  // Filter data for insights based on all active filters EXCEPT the department filter
-  // This avoids collapsing the fastest/slowest lists when a single department is selected on the dashboard
-  const insightsData = useMemo(() => {
-    return data.filter((item) => {
-      // Date filter
-      if (filters.dateRange.start && item.sentDate) {
-        if (new Date(item.sentDate) < new Date(filters.dateRange.start)) return false;
-      }
-      if (filters.dateRange.end && item.sentDate) {
-        if (new Date(item.sentDate) > new Date(filters.dateRange.end)) return false;
-      }
-
-      // Letter Type filter
-      if (filters.letterType && item.letterType !== filters.letterType) {
-        return false;
-      }
-
-      // SLA Status filter
-      if (filters.slaStatus && item.slaTime !== filters.slaStatus) {
-        return false;
-      }
-
-      return true;
-    });
-  }, [data, filters.dateRange, filters.letterType, filters.slaStatus]);
-
-  // Department insights (calculated from data unfiltered by department)
+  // Department insights (calculated from baseFilteredData to respect active dashboard filters)
   const deptInsights = useMemo(() => {
     const deptTimes: Record<string, { total: number; count: number }> = {};
     const deptPending: Record<string, number> = {};
 
-    insightsData.forEach((item) => {
+    baseFilteredData.forEach((item) => {
       if (item.processingTime !== null) {
         if (!deptTimes[item.department]) {
           deptTimes[item.department] = { total: 0, count: 0 };
@@ -191,11 +164,11 @@ export const PresentationView = () => {
       .slice(0, 3);
 
     return { fastest, slowest, mostPending };
-  }, [insightsData]);
+  }, [baseFilteredData]);
 
-  // Oldest pending letters (calculated from data unfiltered by department)
+  // Oldest pending letters (calculated from baseFilteredData to respect active dashboard filters)
   const oldestPending = useMemo(() => {
-    return insightsData
+    return baseFilteredData
       .filter((item) => !item.responseDate && item.sentDate)
       .map(item => {
         const sent = parseISO(item.sentDate!);
@@ -208,7 +181,7 @@ export const PresentationView = () => {
       })
       .sort((a, b) => b.daysPending - a.daysPending)
       .slice(0, 5);
-  }, [insightsData]);
+  }, [baseFilteredData]);
 
   const slideCount = 6;
 
