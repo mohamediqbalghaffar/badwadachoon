@@ -31,12 +31,12 @@ import {
   Area,
   LabelList,
 } from "recharts";
-import { format, parseISO, isValid, startOfMonth } from "date-fns";
+import { format, parseISO, isValid, startOfMonth, parse } from "date-fns";
 
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4"];
 
 export const PresentationView = () => {
-  const { baseFilteredData } = useData();
+  const { baseFilteredData, filteredData, data, filters } = useData();
   const [activeSlide, setActiveSlide] = useState(0);
 
   // --- Calculations ---
@@ -97,12 +97,72 @@ export const PresentationView = () => {
       .sort((a, b) => a.date.localeCompare(b.date));
   }, [baseFilteredData]);
 
-  // Department insights
+  // Prepare Month Data when exactly one department is selected (web app last update)
+  const monthDataForDept = useMemo(() => {
+    if (filters.departments.length !== 1) return [];
+    
+    const counts: Record<string, number> = {};
+    filteredData.forEach((d) => {
+      if (d.sentDate) {
+        const date = parseISO(d.sentDate);
+        if (isValid(date)) {
+          const monthStr = format(startOfMonth(date), 'yyyy-MM');
+          counts[monthStr] = (counts[monthStr] || 0) + 1;
+        }
+      }
+    });
+
+    return Object.entries(counts)
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([date, count]) => {
+        const dateObj = parse(date, 'yyyy-MM', new Date());
+        const monthIndex = dateObj.getMonth();
+        const kurdishMonths = [
+          "کانوونی دووەم", "شوبات", "ئازار", "نیسان", "ئایار", "حوزەیران",
+          "تەممووز", "ئاب", "ئەیلوول", "تشرینی یەکەم", "تشرینی دووەم", "کانوونی یەکەم"
+        ];
+        const monthName = `${kurdishMonths[monthIndex]} ${dateObj.getFullYear()}`;
+        const abbr = format(dateObj, 'yyyy-MM');
+        return { name: monthName, count, abbr };
+      });
+  }, [filteredData, filters.departments]);
+
+  const isSingleDeptSelected = filters.departments.length === 1;
+  const chartData = isSingleDeptSelected ? monthDataForDept : deptData;
+  const chartTitle = isSingleDeptSelected ? "قەبارەی نامەکان بەپێی مانگ" : "نامەکان بەپێی بەش و لایەنەکان";
+
+  // Filter data for insights based on all active filters EXCEPT the department filter
+  // This avoids collapsing the fastest/slowest lists when a single department is selected on the dashboard
+  const insightsData = useMemo(() => {
+    return data.filter((item) => {
+      // Date filter
+      if (filters.dateRange.start && item.sentDate) {
+        if (new Date(item.sentDate) < new Date(filters.dateRange.start)) return false;
+      }
+      if (filters.dateRange.end && item.sentDate) {
+        if (new Date(item.sentDate) > new Date(filters.dateRange.end)) return false;
+      }
+
+      // Letter Type filter
+      if (filters.letterType && item.letterType !== filters.letterType) {
+        return false;
+      }
+
+      // SLA Status filter
+      if (filters.slaStatus && item.slaTime !== filters.slaStatus) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [data, filters.dateRange, filters.letterType, filters.slaStatus]);
+
+  // Department insights (calculated from data unfiltered by department)
   const deptInsights = useMemo(() => {
     const deptTimes: Record<string, { total: number; count: number }> = {};
     const deptPending: Record<string, number> = {};
 
-    baseFilteredData.forEach((item) => {
+    insightsData.forEach((item) => {
       if (item.processingTime !== null) {
         if (!deptTimes[item.department]) {
           deptTimes[item.department] = { total: 0, count: 0 };
@@ -131,11 +191,11 @@ export const PresentationView = () => {
       .slice(0, 3);
 
     return { fastest, slowest, mostPending };
-  }, [baseFilteredData]);
+  }, [insightsData]);
 
-  // Oldest pending letters
+  // Oldest pending letters (calculated from data unfiltered by department)
   const oldestPending = useMemo(() => {
-    return baseFilteredData
+    return insightsData
       .filter((item) => !item.responseDate && item.sentDate)
       .map(item => {
         const sent = parseISO(item.sentDate!);
@@ -148,9 +208,10 @@ export const PresentationView = () => {
       })
       .sort((a, b) => b.daysPending - a.daysPending)
       .slice(0, 5);
-  }, [baseFilteredData]);
+  }, [insightsData]);
 
   const slideCount = 6;
+
 
   const handleNext = useCallback(() => {
     setActiveSlide((prev) => (prev === slideCount - 1 ? 0 : prev + 1));
@@ -300,23 +361,29 @@ export const PresentationView = () => {
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
                 <Building2 className="text-blue-500" size={32} />
-                نامەکان بەپێی بەش و لایەنەکان
+                {chartTitle}
               </h2>
-              <span className="text-sm text-slate-400">لایەنە سەرەکییەکان بەپێی قەبارەی کار</span>
+              <span className="text-sm text-slate-400">
+                {isSingleDeptSelected ? "ڕەوتی قەبارەی کار بەپێی مانگەکان" : "لایەنە سەرەکییەکان بەپێی قەبارەی کار"}
+              </span>
             </div>
             <div className="w-full h-[380px] bg-white/5 dark:bg-slate-900/40 rounded-2xl p-6 border border-white/10" dir="ltr">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={deptData} margin={{ top: 25, right: 10, left: -20, bottom: 0 }}>
+                <BarChart data={chartData} margin={{ top: 25, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#475569" opacity={0.2} />
                   <XAxis dataKey="abbr" tick={{ fontSize: 13, fill: '#94a3b8', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 13, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
                   <Tooltip
                     contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff' }}
                     formatter={(value: any, name: any, props: any) => [value, props.payload.name]}
+                    labelFormatter={(abbr) => {
+                      const entry = chartData.find(d => d.abbr === abbr);
+                      return entry ? entry.name : abbr;
+                    }}
                   />
                   <Bar dataKey="count" radius={[8, 8, 0, 0]} maxBarSize={45}>
                     <LabelList dataKey="count" position="top" offset={8} fill="#94a3b8" fontSize={12} fontWeight="bold" />
-                    {deptData.map((entry, index) => (
+                    {chartData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Bar>
@@ -324,7 +391,7 @@ export const PresentationView = () => {
               </ResponsiveContainer>
             </div>
             <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 justify-center" dir="rtl">
-              {deptData.map((entry, index) => (
+              {chartData.map((entry, index) => (
                 <div key={index} className="flex items-center gap-1.5 text-xs">
                   <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }}></span>
                   <span className="font-bold text-slate-700 dark:text-slate-300">{entry.abbr}</span>
