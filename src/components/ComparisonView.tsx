@@ -39,7 +39,7 @@ export const ComparisonView = () => {
 
   const receivedCount = baseFilteredData.length;
   const sentCount = baseFilteredSentData.length;
-  const total = receivedCount + sentCount;
+  const total = Math.max(sentCount, receivedCount);
   const receivedPercent = total > 0 ? Math.round((receivedCount / total) * 100) : 0;
   const sentPercent = total > 0 ? 100 - receivedPercent : 0;
 
@@ -65,7 +65,7 @@ export const ComparisonView = () => {
         const cleanName = dept.replace('بەشی ', '').replace('سێکتەری ', '');
         const words = cleanName.split(' ').filter(w => w.length > 1 && w !== 'و');
         const abbr = words.slice(0, 2).map(w => w.charAt(0)).join('.');
-        return { name: dept, abbr: abbr || dept.charAt(0), received, sent, total: received + sent };
+        return { name: dept, abbr: abbr || dept.charAt(0), received, sent, total: Math.max(received, sent) };
       })
       .sort((a, b) => b.total - a.total)
       .slice(0, 10);

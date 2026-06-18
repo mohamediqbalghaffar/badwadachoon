@@ -254,7 +254,7 @@ export const PresentationView = () => {
     return Array.from(depts).map(name => {
       const received = receivedCounts[name] || 0;
       const sent = sentCounts[name] || 0;
-      const total = received + sent;
+      const total = Math.max(received, sent);
       const cleanName = name.replace('بەشی ', '').replace('سێکتەری ', '');
       const words = cleanName.split(' ').filter(w => w.length > 1 && w !== 'و');
       const abbr = words.slice(0, 2).map(w => w.charAt(0)).join('.');
