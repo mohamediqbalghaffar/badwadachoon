@@ -55,6 +55,24 @@ export const DashboardCharts = () => {
     });
   }, [filteredData]);
 
+  // Prepare SLA Data
+  const slaData = useMemo(() => {
+    const counts: Record<string, number> = {};
+    filteredData.forEach((d) => {
+      if (d.slaTime) {
+        counts[d.slaTime] = (counts[d.slaTime] || 0) + 1;
+      }
+    });
+    return Object.entries(counts).map(([name, value]) => {
+         // Create short abbreviations for SLA labels to fit in the chart
+         let abbr = name.charAt(0);
+         if (name.includes('کەمتر')) abbr = 'ک';
+         else if (name.includes('زیاتر')) abbr = 'ز';
+         else if (name.includes('لە کاتی')) abbr = 'ل.ک';
+         return { name, value, abbr };
+    });
+  }, [filteredData]);
+
   // Prepare Timeline Data (By Month)
   const timelineData = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -107,7 +125,7 @@ export const DashboardCharts = () => {
   const chartTitle = isSingleDeptSelected ? "قەبارەی نامەکان بەپێی مانگ" : "قەبارەی نامەکان بەپێی لایەن";
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
       {/* Department Bar Chart */}
       <div className="glass glass-card glass-interactive p-6 flex flex-col min-h-96 h-auto relative overflow-hidden group">
         <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-blue-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -211,8 +229,69 @@ export const DashboardCharts = () => {
         </div>
       </div>
 
+      {/* SLA Doughnut Chart */}
+      <div className="glass glass-card glass-interactive p-6 flex flex-col min-h-96 h-auto relative overflow-hidden group">
+        <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-amber-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+        <h3 className="text-lg font-semibold mb-6">کاتی تێچوو (SLA)</h3>
+        <div className="flex-1 min-h-[300px]" dir="ltr">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={slaData}
+                cx="50%"
+                cy="50%"
+                innerRadius={80}
+                outerRadius={110}
+                paddingAngle={5}
+                dataKey="value"
+                stroke="none"
+                onClick={(data: any) => {
+                  if (data && data.name) {
+                    setFilters(prev => ({ ...prev, slaStatus: [data.name as string] }));
+                    document.getElementById('data-table-section')?.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+                cursor="pointer"
+              >
+                <LabelList dataKey="abbr" position="inside" fill="#ffffff" fontSize={14} fontWeight="bold" />
+                {slaData.map((entry, index) => {
+                  // Custom colors for SLA: Green for 'کەمتر' (less than), Red for 'زیاتر' (more than), etc.
+                  let color = COLORS[(index + 3) % COLORS.length]; 
+                  if (entry.name.includes('کەمتر')) color = '#10b981'; // Emerald
+                  else if (entry.name.includes('زیاتر')) color = '#ef4444'; // Red
+                  else if (entry.name.includes('لە کاتی')) color = '#3b82f6'; // Blue
+                  return <Cell key={`cell-${index}`} fill={color} />;
+                })}
+              </Pie>
+              <Tooltip
+                cursor={{ fill: 'rgba(241, 245, 249, 0.2)' }}
+                contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(10px)' }}
+                formatter={(value: any, name: any, props: any) => [value, props.payload.name]}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+        
+        {/* Custom Legend for Abbreviations */}
+        <div className="mt-6 flex flex-wrap gap-x-4 gap-y-2 justify-center border-t border-slate-200 dark:border-slate-800 pt-4" dir="rtl">
+          {slaData.map((entry, index) => {
+             let color = COLORS[(index + 3) % COLORS.length]; 
+             if (entry.name.includes('کەمتر')) color = '#10b981';
+             else if (entry.name.includes('زیاتر')) color = '#ef4444';
+             else if (entry.name.includes('لە کاتی')) color = '#3b82f6';
+             return (
+              <div key={index} className="flex items-center gap-2 text-xs">
+                <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: color }}></span>
+                <span className="font-bold text-slate-700 dark:text-slate-300 shrink-0">{entry.abbr}</span>
+                <span className="text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs line-clamp-1" title={entry.name}>= {entry.name}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Timeline Area Chart - Full Width */}
-      <div className="glass glass-card glass-interactive p-6 flex flex-col h-96 lg:col-span-2 relative overflow-hidden group">
+      <div className="glass glass-card glass-interactive p-6 flex flex-col h-96 lg:col-span-3 relative overflow-hidden group">
         <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-purple-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
         <h3 className="text-lg font-semibold mb-6">هەڵکشان و داکشانی نامەکان بەپێی کات</h3>
         <div className="flex-1 min-h-0" dir="ltr">
