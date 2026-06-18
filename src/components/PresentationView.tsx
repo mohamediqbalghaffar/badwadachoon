@@ -132,40 +132,62 @@ export const PresentationView = () => {
   const chartTitle = isSingleDeptSelected ? "قەبارەی نامەکان بەپێی مانگ" : "نامەکان بەپێی بەش و لایەنەکان";
   // Department insights (calculated from baseFilteredData to respect active dashboard filters)
   const deptInsights = useMemo(() => {
+    const deptTimes: Record<string, { total: number; count: number }> = {};
     const deptPending: Record<string, number> = {};
 
     baseFilteredData.forEach((item) => {
+      if (item.processingTime !== null) {
+        if (!deptTimes[item.department]) {
+          deptTimes[item.department] = { total: 0, count: 0 };
+        }
+        deptTimes[item.department].total += item.processingTime;
+        deptTimes[item.department].count += 1;
+      }
       if (!item.responseDate) {
         deptPending[item.department] = (deptPending[item.department] || 0) + 1;
       }
     });
 
-    const completed = baseFilteredData
-      .filter((item) => item.processingTime !== null)
-      .sort((a, b) => (a.processingTime ?? 0) - (b.processingTime ?? 0));
+    const isSingleDept = filters.departments.length === 1;
 
-    const fastest = completed.slice(0, 3).map(item => ({
-      name: item.subject,
-      subText: item.department,
-      time: item.processingTime
-    }));
+    if (isSingleDept) {
+      // Find the actual completed letters within the selected department and map them
+      const completedLettersInDept = baseFilteredData
+        .filter((item) => item.processingTime !== null)
+        .map((item) => ({
+          name: item.subject || `نامەی کۆدی (${item.refCode})`,
+          avgTime: item.processingTime as number,
+          count: 1
+        }));
 
-    const slowest = [...completed]
-      .sort((a, b) => (b.processingTime ?? 0) - (a.processingTime ?? 0))
-      .slice(0, 3)
-      .map(item => ({
-        name: item.subject,
-        subText: item.department,
-        time: item.processingTime
-      }));
+      const fastest = [...completedLettersInDept].sort((a, b) => a.avgTime - b.avgTime).slice(0, 3);
+      const slowest = [...completedLettersInDept].sort((a, b) => b.avgTime - a.avgTime).slice(0, 3);
+      
+      const mostPending = Object.entries(deptPending)
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 3);
 
-    const mostPending = Object.entries(deptPending)
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 3);
+      return { fastest, slowest, mostPending, isSingleDept: true };
+    } else {
+      const averages = Object.entries(deptTimes)
+        .map(([name, data]) => ({
+          name,
+          avgTime: data.total / data.count,
+          count: data.count
+        }))
+        .filter(d => d.count >= 1);
 
-    return { fastest, slowest, mostPending };
-  }, [baseFilteredData]);
+      const fastest = [...averages].sort((a, b) => a.avgTime - b.avgTime).slice(0, 3);
+      const slowest = [...averages].sort((a, b) => b.avgTime - a.avgTime).slice(0, 3);
+      const mostPending = Object.entries(deptPending)
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 3);
+
+      return { fastest, slowest, mostPending, isSingleDept: false };
+    }
+  }, [baseFilteredData, filters.departments]);
 
   // Oldest pending letters (calculated from baseFilteredData to respect active dashboard filters)
   const oldestPending = useMemo(() => {
@@ -432,7 +454,7 @@ export const PresentationView = () => {
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-orange-500/10 -z-10" />
             <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 mb-8 flex items-center gap-3">
               <Activity className="text-orange-500" size={32} />
-              شیکاری کارایی لایەن و بەشەکان
+              {deptInsights.isSingleDept ? "شیکاری کارایی نامەکانی لایەنی دیاریکراو" : "شیکاری کارایی لایەن و بەشەکان"}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               
@@ -440,17 +462,16 @@ export const PresentationView = () => {
               <div className="glass p-6 rounded-2xl border border-white/10 flex flex-col gap-4">
                 <div className="flex items-center gap-2.5 pb-3 border-b border-white/10 text-emerald-500">
                   <Award size={24} />
-                  <h3 className="font-bold text-lg">خێراترین وەڵامدانەوەکان</h3>
+                  <h3 className="font-bold text-lg">
+                    {deptInsights.isSingleDept ? "خێراترین وەڵامی نامەکان" : "خێراترین وەڵامدانەوەکان"}
+                  </h3>
                 </div>
                 <div className="flex flex-col gap-3 flex-1">
                   {deptInsights.fastest.length > 0 ? (
                     deptInsights.fastest.map((d, i) => (
-                      <div key={i} className="flex flex-col gap-0.5 text-right">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm font-bold text-slate-800 dark:text-slate-205 truncate w-[180px]" title={d.name}>{d.name}</span>
-                          <span className="text-xs font-bold text-emerald-500 shrink-0">{d.time} ڕۆژ</span>
-                        </div>
-                        <span className="text-[10px] text-slate-400 truncate max-w-[240px]">{d.subText}</span>
+                      <div key={i} className="flex justify-between items-center">
+                        <span className="text-sm text-slate-700 dark:text-slate-350 line-clamp-1 w-2/3" title={d.name}>{d.name}</span>
+                        <span className="text-sm font-bold text-emerald-500 shrink-0">{d.avgTime.toFixed(1)} ڕۆژ</span>
                       </div>
                     ))
                   ) : (
@@ -463,17 +484,16 @@ export const PresentationView = () => {
               <div className="glass p-6 rounded-2xl border border-white/10 flex flex-col gap-4">
                 <div className="flex items-center gap-2.5 pb-3 border-b border-white/10 text-red-500">
                   <AlertOctagon size={24} />
-                  <h3 className="font-bold text-lg">خاوترین وەڵامدانەوەکان</h3>
+                  <h3 className="font-bold text-lg">
+                    {deptInsights.isSingleDept ? "خاوترین وەڵامی نامەکان" : "خاوترین وەڵامدانەوەکان"}
+                  </h3>
                 </div>
                 <div className="flex flex-col gap-3 flex-1">
                   {deptInsights.slowest.length > 0 ? (
                     deptInsights.slowest.map((d, i) => (
-                      <div key={i} className="flex flex-col gap-0.5 text-right">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm font-bold text-slate-800 dark:text-slate-205 truncate w-[180px]" title={d.name}>{d.name}</span>
-                          <span className="text-xs font-bold text-red-500 shrink-0">{d.time} ڕۆژ</span>
-                        </div>
-                        <span className="text-[10px] text-slate-400 truncate max-w-[240px]">{d.subText}</span>
+                      <div key={i} className="flex justify-between items-center">
+                        <span className="text-sm text-slate-700 dark:text-slate-350 line-clamp-1 w-2/3" title={d.name}>{d.name}</span>
+                        <span className="text-sm font-bold text-red-500 shrink-0">{d.avgTime.toFixed(1)} ڕۆژ</span>
                       </div>
                     ))
                   ) : (
@@ -492,7 +512,7 @@ export const PresentationView = () => {
                   {deptInsights.mostPending.length > 0 ? (
                     deptInsights.mostPending.map((d, i) => (
                       <div key={i} className="flex justify-between items-center">
-                        <span className="text-sm text-slate-700 dark:text-slate-350 line-clamp-1 w-2/3">{d.name}</span>
+                        <span className="text-sm text-slate-700 dark:text-slate-350 line-clamp-1 w-2/3" title={d.name}>{d.name}</span>
                         <span className="text-sm font-bold text-amber-500 shrink-0">{d.count} نامە</span>
                       </div>
                     ))
