@@ -14,7 +14,8 @@ import {
   Activity, 
   AlertOctagon, 
   Award,
-  Zap
+  Zap,
+  BarChart2
 } from "lucide-react";
 import {
   BarChart,
@@ -127,6 +128,55 @@ export const PresentationView = () => {
       });
   }, [filteredData, filters.departments]);
 
+  // Prepare Enhanced SLA Data
+  const slaEnhancedData = useMemo(() => {
+    const groups: Record<string, { name: string, onTime: number, late: number, order: number, exactOnTimeName: string, exactLateName: string }> = {
+      '12': { name: '12 ڕۆژ', onTime: 0, late: 0, order: 6, exactOnTimeName: '', exactLateName: '' },
+      '10': { name: '10 ڕۆژ', onTime: 0, late: 0, order: 5, exactOnTimeName: '', exactLateName: '' },
+      '8': { name: '8 ڕۆژ', onTime: 0, late: 0, order: 4, exactOnTimeName: '', exactLateName: '' },
+      '5': { name: '5 ڕۆژ', onTime: 0, late: 0, order: 3, exactOnTimeName: '', exactLateName: '' },
+      '4': { name: '4 ڕۆژ', onTime: 0, late: 0, order: 2, exactOnTimeName: '', exactLateName: '' },
+      '2': { name: '2 ڕۆژ', onTime: 0, late: 0, order: 1, exactOnTimeName: '', exactLateName: '' },
+      'ڕێنمایی': { name: 'ڕێنمایی', onTime: 0, late: 0, order: 7, exactOnTimeName: '', exactLateName: '' },
+      '-': { name: 'نەزانراو', onTime: 0, late: 0, order: 8, exactOnTimeName: '', exactLateName: '' },
+    };
+
+    let totalOnTime = 0;
+    let totalLate = 0;
+
+    baseFilteredData.forEach((d) => {
+      const sla = d.slaTime || '-';
+      
+      let matchedKey = '-';
+      if (sla.includes('12')) matchedKey = '12';
+      else if (sla.includes('10')) matchedKey = '10';
+      else if (sla.includes('8')) matchedKey = '8';
+      else if (sla.includes('5')) matchedKey = '5';
+      else if (sla.includes('4')) matchedKey = '4';
+      else if (sla.includes('2')) matchedKey = '2';
+      else if (sla.includes('ڕێنمایی')) matchedKey = 'ڕێنمایی';
+
+      const isLate = sla.includes('زیاتر');
+
+      if (isLate) {
+        groups[matchedKey].late += 1;
+        groups[matchedKey].exactLateName = sla;
+        totalLate += 1;
+      } else {
+        groups[matchedKey].onTime += 1;
+        groups[matchedKey].exactOnTimeName = sla;
+        if (matchedKey !== '-' && matchedKey !== 'ڕێنمایی') totalOnTime += 1;
+        if (matchedKey === 'ڕێنمایی') totalOnTime += 1;
+      }
+    });
+
+    const data = Object.values(groups)
+      .filter(g => g.onTime > 0 || g.late > 0)
+      .sort((a, b) => a.order - b.order);
+
+    return { data, totalOnTime, totalLate };
+  }, [baseFilteredData]);
+
   const isSingleDeptSelected = filters.departments.length === 1;
   const chartData = isSingleDeptSelected ? monthDataForDept : deptData;
   const chartTitle = isSingleDeptSelected ? "قەبارەی نامەکان بەپێی مانگ" : "نامەکان بەپێی بەش و لایەنەکان";
@@ -177,7 +227,7 @@ export const PresentationView = () => {
       .slice(0, 5);
   }, [baseFilteredData]);
 
-  const slideCount = 6;
+  const slideCount = 7;
 
 
   const handleNext = useCallback(() => {
@@ -419,8 +469,68 @@ export const PresentationView = () => {
           </div>
         )}
 
-        {/* SLIDE 5: Department Insights */}
+        {/* SLIDE 5: SLA Status */}
         {activeSlide === 4 && (
+          <div className="w-full max-w-5xl flex flex-col animate-fade-in">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-amber-500/10 -z-10" />
+            <div className="flex justify-between items-start mb-6">
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+                  <BarChart2 className="text-amber-500" size={32} />
+                  کاتی تێچوو (SLA)
+                </h2>
+                <span className="text-sm text-slate-400 mt-2 block">ڕێژەی پابەندبوون و ئامارەکانی کاتی وەڵامدانەوە</span>
+              </div>
+              {slaEnhancedData.totalOnTime + slaEnhancedData.totalLate > 0 && (
+                <div className="flex flex-col items-end bg-white/5 dark:bg-slate-900/40 p-4 rounded-xl border border-white/10">
+                  <span className="text-4xl font-black text-emerald-600 dark:text-emerald-400">
+                    {Math.round((slaEnhancedData.totalOnTime / (slaEnhancedData.totalOnTime + slaEnhancedData.totalLate)) * 100)}%
+                  </span>
+                  <span className="text-sm text-slate-500 font-medium">پابەندبوون بە کاتی دیاریکراو</span>
+                </div>
+              )}
+            </div>
+            
+            <div className="w-full h-[350px] bg-white/5 dark:bg-slate-900/40 rounded-2xl p-6 border border-white/10" dir="ltr">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={slaEnhancedData.data} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#475569" opacity={0.2} />
+                  <XAxis dataKey="name" tick={{ fontSize: 13, fill: '#94a3b8', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 13, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <Tooltip
+                    cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
+                    contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff' }}
+                    formatter={(value: any, name: any, props: any) => {
+                      if (name === 'onTime') return [value, props.payload.exactOnTimeName || 'کەمتر / لە کاتی'];
+                      if (name === 'late') return [value, props.payload.exactLateName || 'زیاتر / دواکەوتوو'];
+                      return [value, name];
+                    }}
+                    labelFormatter={(label) => `ئامانجی: ${label}`}
+                  />
+                  <Bar dataKey="onTime" stackId="a" fill="#10b981" maxBarSize={55}>
+                    <LabelList dataKey="onTime" position="center" fill="#fff" fontSize={14} fontWeight="bold" />
+                  </Bar>
+                  <Bar dataKey="late" stackId="a" fill="#ef4444" radius={[8, 8, 0, 0]} maxBarSize={55}>
+                    <LabelList dataKey="late" position="center" fill="#fff" fontSize={14} fontWeight="bold" />
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="mt-6 flex flex-wrap gap-x-8 gap-y-2 justify-center" dir="rtl">
+              <div className="flex items-center gap-2 text-sm">
+                <span className="w-4 h-4 rounded-full bg-[#10b981]"></span>
+                <span className="font-bold text-slate-700 dark:text-slate-300">لە کاتی خۆی (کەمتر)</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <span className="w-4 h-4 rounded-full bg-[#ef4444]"></span>
+                <span className="font-bold text-slate-700 dark:text-slate-300">دواکەوتوو (زیاتر)</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* SLIDE 6: Department Insights */}
+        {activeSlide === 5 && (
           <div className="w-full max-w-5xl flex flex-col animate-fade-in">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-orange-500/10 -z-10" />
             <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 mb-8 flex items-center gap-3">
@@ -499,8 +609,8 @@ export const PresentationView = () => {
           </div>
         )}
 
-        {/* SLIDE 6: Urgent Actions */}
-        {activeSlide === 5 && (
+        {/* SLIDE 7: Urgent Actions */}
+        {activeSlide === 6 && (
           <div className="w-full max-w-5xl flex flex-col animate-fade-in">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-red-500/10 -z-10" />
             <div className="flex justify-between items-center mb-6">
