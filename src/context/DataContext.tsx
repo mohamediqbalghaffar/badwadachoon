@@ -19,6 +19,8 @@ interface DataContextType {
   filters: FilterState;
   setFilters: React.Dispatch<React.SetStateAction<FilterState>>;
   clearFilters: () => void;
+  isPresentationMode: boolean;
+  setIsPresentationMode: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -32,6 +34,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     slaStatus: null,
     completionStatus: 'all',
   });
+  const [isPresentationMode, setIsPresentationMode] = useState<boolean>(false);
 
   // Base filtered data: all filters EXCEPT completionStatus
   // Used by KPI cards so their values stay stable when a KPI card is clicked
@@ -87,7 +90,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <DataContext.Provider
-      value={{ data, setData, filteredData, baseFilteredData, filters, setFilters, clearFilters }}
+      value={{ data, setData, filteredData, baseFilteredData, filters, setFilters, clearFilters, isPresentationMode, setIsPresentationMode }}
     >
       {children}
     </DataContext.Provider>
