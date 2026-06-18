@@ -130,34 +130,26 @@ export const PresentationView = () => {
   const isSingleDeptSelected = filters.departments.length === 1;
   const chartData = isSingleDeptSelected ? monthDataForDept : deptData;
   const chartTitle = isSingleDeptSelected ? "قەبارەی نامەکان بەپێی مانگ" : "نامەکان بەپێی بەش و لایەنەکان";
-  // Department insights (calculated from baseFilteredData to respect active dashboard filters)
+  
+  // Department insights (calculated from data unfiltered by department)
   const deptInsights = useMemo(() => {
-    const deptTimes: Record<string, { total: number; count: number }> = {};
     const deptPending: Record<string, number> = {};
+    const completedLetters = baseFilteredData.filter(item => item.processingTime !== null);
 
     baseFilteredData.forEach((item) => {
-      if (item.processingTime !== null) {
-        if (!deptTimes[item.department]) {
-          deptTimes[item.department] = { total: 0, count: 0 };
-        }
-        deptTimes[item.department].total += item.processingTime;
-        deptTimes[item.department].count += 1;
-      }
       if (!item.responseDate) {
         deptPending[item.department] = (deptPending[item.department] || 0) + 1;
       }
     });
 
-    const averages = Object.entries(deptTimes)
-      .map(([name, data]) => ({
-        name,
-        avgTime: data.total / data.count,
-        count: data.count
-      }))
-      .filter(d => d.count >= 1);
+    const fastest = [...completedLetters]
+      .sort((a, b) => (a.processingTime ?? 0) - (b.processingTime ?? 0))
+      .slice(0, 3);
+      
+    const slowest = [...completedLetters]
+      .sort((a, b) => (b.processingTime ?? 0) - (a.processingTime ?? 0))
+      .slice(0, 3);
 
-    const fastest = [...averages].sort((a, b) => a.avgTime - b.avgTime).slice(0, 3);
-    const slowest = [...averages].sort((a, b) => b.avgTime - a.avgTime).slice(0, 3);
     const mostPending = Object.entries(deptPending)
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count)
@@ -444,9 +436,9 @@ export const PresentationView = () => {
                 <div className="flex flex-col gap-3 flex-1">
                   {deptInsights.fastest.length > 0 ? (
                     deptInsights.fastest.map((d, i) => (
-                      <div key={i} className="flex justify-between items-center">
-                        <span className="text-sm text-slate-700 dark:text-slate-350 line-clamp-1 w-2/3">{d.name}</span>
-                        <span className="text-sm font-bold text-emerald-500 shrink-0">{d.avgTime.toFixed(1)} ڕۆژ</span>
+                      <div key={i} className="flex justify-between items-center" title={`${d.department} - ${d.subject}`}>
+                        <span className="text-sm text-slate-700 dark:text-slate-350 line-clamp-1 w-2/3">{d.refCode} | {d.department}</span>
+                        <span className="text-sm font-bold text-emerald-500 shrink-0">{d.processingTime} ڕۆژ</span>
                       </div>
                     ))
                   ) : (
@@ -464,9 +456,9 @@ export const PresentationView = () => {
                 <div className="flex flex-col gap-3 flex-1">
                   {deptInsights.slowest.length > 0 ? (
                     deptInsights.slowest.map((d, i) => (
-                      <div key={i} className="flex justify-between items-center">
-                        <span className="text-sm text-slate-700 dark:text-slate-350 line-clamp-1 w-2/3">{d.name}</span>
-                        <span className="text-sm font-bold text-red-500 shrink-0">{d.avgTime.toFixed(1)} ڕۆژ</span>
+                      <div key={i} className="flex justify-between items-center" title={`${d.department} - ${d.subject}`}>
+                        <span className="text-sm text-slate-700 dark:text-slate-350 line-clamp-1 w-2/3">{d.refCode} | {d.department}</span>
+                        <span className="text-sm font-bold text-red-500 shrink-0">{d.processingTime} ڕۆژ</span>
                       </div>
                     ))
                   ) : (
