@@ -31,6 +31,7 @@ const HeaderMap: Record<string, keyof DashboardData> = {
   "ڕۆژی وەڵام": "responseDate",
   "تێبینی": "processingTime",
   "تیپیبنی": "processingTime", // Handle typo in Column H
+  "کاتی تێچوو بۆ وەڵام": "processingTime",
   "کاتی تێچوو بەپێی ڕێنمایی": "slaTime",
 };
 
@@ -65,8 +66,8 @@ export const parseFile = async (file: File): Promise<DashboardData[]> => {
               matchedKey = sortedKeys.find(k => {
                 const normMapKey = normalizeHeader(k);
                 
-                // Explicitly avoid matching "تیپیبنی 2" or "تێبینی 2" for processingTime
-                if ((k === "تێبینی" || k === "تیپیبنی") && normKey.includes("2")) {
+                // Explicitly avoid matching "تیپیبنی 2", "تێبینی 2" or "کاتی تێچوو بۆ وەڵام 2" for processingTime
+                if ((k === "تێبینی" || k === "تیپیبنی" || k === "کاتی تێچوو بۆ وەڵام") && normKey.includes("2")) {
                   return false;
                 }
                 
