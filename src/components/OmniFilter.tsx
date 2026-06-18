@@ -3,9 +3,23 @@
 import React, { useMemo } from "react";
 import { useData } from "../context/DataContext";
 import { Filter, Calendar, XCircle } from "lucide-react";
+import { format, parseISO, isValid } from "date-fns";
 
 export const OmniFilter = () => {
   const { data, filters, setFilters, clearFilters } = useData();
+
+  const formatDateDisplay = (dateStr: string | null) => {
+    if (!dateStr) return "dd/mm/yyyy";
+    try {
+      const d = parseISO(dateStr);
+      if (isValid(d)) {
+        return format(d, 'dd/MM/yyyy');
+      }
+      return "dd/mm/yyyy";
+    } catch (e) {
+      return "dd/mm/yyyy";
+    }
+  };
 
   // Extract unique options from raw data
   const departments = useMemo(() => Array.from(new Set(data.map((d) => d.department))), [data]);
@@ -44,20 +58,38 @@ export const OmniFilter = () => {
           {/* Date Range */}
           <div className="flex flex-col space-y-1 col-span-1 sm:col-span-2 md:col-span-2">
             <label className="text-xs text-slate-500 dark:text-slate-400">مەودای بەروار</label>
-            <div className="flex gap-1 items-center bg-white/50 dark:bg-black/20 rounded-xl px-2 py-[7px] border border-slate-200/50 dark:border-slate-700/50">
-              <input
-                type="date"
-                value={filters.dateRange.start || ""}
-                onChange={(e) => setFilters(prev => ({ ...prev, dateRange: { ...prev.dateRange, start: e.target.value } }))}
-                className="bg-transparent border-none text-xs w-full min-w-0 outline-none px-1 text-slate-700 dark:text-slate-300 cursor-pointer focus:ring-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
-              />
-              <span className="text-slate-400">-</span>
-              <input
-                type="date"
-                value={filters.dateRange.end || ""}
-                onChange={(e) => setFilters(prev => ({ ...prev, dateRange: { ...prev.dateRange, end: e.target.value } }))}
-                className="bg-transparent border-none text-xs w-full min-w-0 outline-none px-1 text-slate-700 dark:text-slate-300 cursor-pointer focus:ring-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-60 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
-              />
+            <div className="flex gap-2 items-center bg-white/50 dark:bg-black/20 rounded-xl px-3 py-[10px] border border-slate-200/50 dark:border-slate-700/50 w-full relative">
+              <div className="flex-1 flex items-center gap-2 relative">
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold whitespace-nowrap">لە</span>
+                <div className="relative flex-1 min-w-[70px]">
+                  <div className="text-xs text-slate-700 dark:text-slate-300 pointer-events-none select-none font-mono">
+                    {formatDateDisplay(filters.dateRange.start)}
+                  </div>
+                  <input
+                    type="date"
+                    value={filters.dateRange.start || ""}
+                    onChange={(e) => setFilters(prev => ({ ...prev, dateRange: { ...prev.dateRange, start: e.target.value } }))}
+                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                  />
+                </div>
+              </div>
+              
+              <span className="text-slate-400 px-1 font-light">|</span>
+              
+              <div className="flex-1 flex items-center gap-2 relative">
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold whitespace-nowrap">بۆ</span>
+                <div className="relative flex-1 min-w-[70px]">
+                  <div className="text-xs text-slate-700 dark:text-slate-300 pointer-events-none select-none font-mono">
+                    {formatDateDisplay(filters.dateRange.end)}
+                  </div>
+                  <input
+                    type="date"
+                    value={filters.dateRange.end || ""}
+                    onChange={(e) => setFilters(prev => ({ ...prev, dateRange: { ...prev.dateRange, end: e.target.value } }))}
+                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
