@@ -132,20 +132,32 @@ export const PresentationView = () => {
   const chartTitle = isSingleDeptSelected ? "قەبارەی نامەکان بەپێی مانگ" : "نامەکان بەپێی بەش و لایەنەکان";
   // Department insights (calculated from baseFilteredData to respect active dashboard filters)
   const deptInsights = useMemo(() => {
-    const completed = baseFilteredData.filter(item => item.processingTime !== null);
-    
-    // Sort actual letters by processing time
-    const sorted = [...completed].sort((a, b) => a.processingTime! - b.processingTime!);
-    
-    const fastest = sorted.slice(0, 3);
-    const slowest = [...sorted].reverse().slice(0, 3);
-
     const deptPending: Record<string, number> = {};
+
     baseFilteredData.forEach((item) => {
       if (!item.responseDate) {
         deptPending[item.department] = (deptPending[item.department] || 0) + 1;
       }
     });
+
+    const completed = baseFilteredData
+      .filter((item) => item.processingTime !== null)
+      .sort((a, b) => (a.processingTime ?? 0) - (b.processingTime ?? 0));
+
+    const fastest = completed.slice(0, 3).map(item => ({
+      name: item.subject,
+      subText: item.department,
+      time: item.processingTime
+    }));
+
+    const slowest = [...completed]
+      .sort((a, b) => (b.processingTime ?? 0) - (a.processingTime ?? 0))
+      .slice(0, 3)
+      .map(item => ({
+        name: item.subject,
+        subText: item.department,
+        time: item.processingTime
+      }));
 
     const mostPending = Object.entries(deptPending)
       .map(([name, count]) => ({ name, count }))
@@ -433,9 +445,12 @@ export const PresentationView = () => {
                 <div className="flex flex-col gap-3 flex-1">
                   {deptInsights.fastest.length > 0 ? (
                     deptInsights.fastest.map((d, i) => (
-                      <div key={i} className="flex justify-between items-center" title={`${d.refCode !== "-" ? d.refCode + " - " : ""}${d.subject}`}>
-                        <span className="text-sm text-slate-700 dark:text-slate-350 line-clamp-1 w-2/3">{d.department}</span>
-                        <span className="text-sm font-bold text-emerald-500 shrink-0">{d.processingTime} ڕۆژ</span>
+                      <div key={i} className="flex flex-col gap-0.5 text-right">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-bold text-slate-800 dark:text-slate-205 truncate w-[180px]" title={d.name}>{d.name}</span>
+                          <span className="text-xs font-bold text-emerald-500 shrink-0">{d.time} ڕۆژ</span>
+                        </div>
+                        <span className="text-[10px] text-slate-400 truncate max-w-[240px]">{d.subText}</span>
                       </div>
                     ))
                   ) : (
@@ -453,9 +468,12 @@ export const PresentationView = () => {
                 <div className="flex flex-col gap-3 flex-1">
                   {deptInsights.slowest.length > 0 ? (
                     deptInsights.slowest.map((d, i) => (
-                      <div key={i} className="flex justify-between items-center" title={`${d.refCode !== "-" ? d.refCode + " - " : ""}${d.subject}`}>
-                        <span className="text-sm text-slate-700 dark:text-slate-350 line-clamp-1 w-2/3">{d.department}</span>
-                        <span className="text-sm font-bold text-red-500 shrink-0">{d.processingTime} ڕۆژ</span>
+                      <div key={i} className="flex flex-col gap-0.5 text-right">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-bold text-slate-800 dark:text-slate-205 truncate w-[180px]" title={d.name}>{d.name}</span>
+                          <span className="text-xs font-bold text-red-500 shrink-0">{d.time} ڕۆژ</span>
+                        </div>
+                        <span className="text-[10px] text-slate-400 truncate max-w-[240px]">{d.subText}</span>
                       </div>
                     ))
                   ) : (
