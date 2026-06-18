@@ -88,22 +88,53 @@ export const DashboardCharts = () => {
     });
   }, [filteredData]);
 
-  // Prepare SLA Data
-  const slaData = useMemo(() => {
-    const counts: Record<string, number> = {};
+  // Prepare Enhanced SLA Data (Stacked Bar)
+  const slaEnhancedData = useMemo(() => {
+    const groups: Record<string, { name: string, onTime: number, late: number, order: number, exactOnTimeName: string, exactLateName: string }> = {
+      '12': { name: '12 ڕۆژ', onTime: 0, late: 0, order: 6, exactOnTimeName: '', exactLateName: '' },
+      '10': { name: '10 ڕۆژ', onTime: 0, late: 0, order: 5, exactOnTimeName: '', exactLateName: '' },
+      '8': { name: '8 ڕۆژ', onTime: 0, late: 0, order: 4, exactOnTimeName: '', exactLateName: '' },
+      '5': { name: '5 ڕۆژ', onTime: 0, late: 0, order: 3, exactOnTimeName: '', exactLateName: '' },
+      '4': { name: '4 ڕۆژ', onTime: 0, late: 0, order: 2, exactOnTimeName: '', exactLateName: '' },
+      '2': { name: '2 ڕۆژ', onTime: 0, late: 0, order: 1, exactOnTimeName: '', exactLateName: '' },
+      'ڕێنمایی': { name: 'ڕێنمایی', onTime: 0, late: 0, order: 7, exactOnTimeName: '', exactLateName: '' },
+      '-': { name: 'نەزانراو', onTime: 0, late: 0, order: 8, exactOnTimeName: '', exactLateName: '' },
+    };
+
+    let totalOnTime = 0;
+    let totalLate = 0;
+
     filteredData.forEach((d) => {
-      if (d.slaTime) {
-        counts[d.slaTime] = (counts[d.slaTime] || 0) + 1;
+      const sla = d.slaTime || '-';
+      
+      let matchedKey = '-';
+      if (sla.includes('12')) matchedKey = '12';
+      else if (sla.includes('10')) matchedKey = '10';
+      else if (sla.includes('8')) matchedKey = '8';
+      else if (sla.includes('5')) matchedKey = '5';
+      else if (sla.includes('4')) matchedKey = '4';
+      else if (sla.includes('2')) matchedKey = '2';
+      else if (sla.includes('ڕێنمایی')) matchedKey = 'ڕێنمایی';
+
+      const isLate = sla.includes('زیاتر');
+
+      if (isLate) {
+        groups[matchedKey].late += 1;
+        groups[matchedKey].exactLateName = sla;
+        totalLate += 1;
+      } else {
+        groups[matchedKey].onTime += 1;
+        groups[matchedKey].exactOnTimeName = sla;
+        if (matchedKey !== '-' && matchedKey !== 'ڕێنمایی') totalOnTime += 1;
+        if (matchedKey === 'ڕێنمایی') totalOnTime += 1; // Count instructions as on-time
       }
     });
-    return Object.entries(counts).map(([name, value]) => {
-         // Create short abbreviations for SLA labels to fit in the chart
-         let abbr = name.charAt(0);
-         if (name.includes('کەمتر')) abbr = 'ک';
-         else if (name.includes('زیاتر')) abbr = 'ز';
-         else if (name.includes('لە کاتی')) abbr = 'ل.ک';
-         return { name, value, abbr };
-    });
+
+    const data = Object.values(groups)
+      .filter(g => g.onTime > 0 || g.late > 0)
+      .sort((a, b) => a.order - b.order);
+
+    return { data, totalOnTime, totalLate };
   }, [filteredData]);
 
   // Prepare Timeline Data (By Month)
@@ -264,66 +295,78 @@ export const DashboardCharts = () => {
         </div>
       </div>
 
-      {/* SLA Doughnut Chart */}
+      {/* SLA Enhanced Status Chart */}
       <div className="glass glass-card glass-interactive p-6 flex flex-col min-h-96 h-auto relative overflow-hidden group">
         <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-amber-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-        <h3 className="text-lg font-semibold mb-6">کاتی تێچوو (SLA)</h3>
+        <div className="flex justify-between items-start mb-6">
+          <h3 className="text-lg font-semibold">کاتی تێچوو (SLA)</h3>
+          {slaEnhancedData.totalOnTime + slaEnhancedData.totalLate > 0 && (
+            <div className="flex flex-col items-end">
+              <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                {Math.round((slaEnhancedData.totalOnTime / (slaEnhancedData.totalOnTime + slaEnhancedData.totalLate)) * 100)}%
+              </span>
+              <span className="text-[10px] text-slate-500 font-medium">ڕێژەی پابەندبوون</span>
+            </div>
+          )}
+        </div>
+        
         <div className="flex-1 min-h-[300px]" dir="ltr">
           <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={slaData}
-                cx="50%"
-                cy="50%"
-                innerRadius={80}
-                outerRadius={110}
-                paddingAngle={5}
-                dataKey="value"
-                stroke="none"
-                labelLine={false}
-                label={renderCustomizedLabel}
-                onClick={(data: any) => {
-                  if (data && data.name) {
-                    setFilters(prev => ({ ...prev, slaStatus: [data.name as string] }));
-                    document.getElementById('data-table-section')?.scrollIntoView({ behavior: 'smooth' });
-                  }
-                }}
-                cursor="pointer"
-              >
-                <LabelList dataKey="abbr" position="inside" fill="#ffffff" fontSize={14} fontWeight="bold" />
-                {slaData.map((entry, index) => {
-                  // Custom colors for SLA: Green for 'کەمتر' (less than), Red for 'زیاتر' (more than), etc.
-                  let color = COLORS[(index + 3) % COLORS.length]; 
-                  if (entry.name.includes('کەمتر')) color = '#10b981'; // Emerald
-                  else if (entry.name.includes('زیاتر')) color = '#ef4444'; // Red
-                  else if (entry.name.includes('لە کاتی')) color = '#3b82f6'; // Blue
-                  return <Cell key={`cell-${index}`} fill={color} />;
-                })}
-              </Pie>
+            <BarChart data={slaEnhancedData.data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#cbd5e1" opacity={0.3} />
+              <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#64748b', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
               <Tooltip
                 cursor={{ fill: 'rgba(241, 245, 249, 0.2)' }}
                 contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(10px)' }}
-                formatter={(value: any, name: any, props: any) => [value, props.payload.name]}
+                formatter={(value: any, name: any, props: any) => {
+                  if (name === 'onTime') return [value, props.payload.exactOnTimeName || 'کەمتر / لە کاتی'];
+                  if (name === 'late') return [value, props.payload.exactLateName || 'زیاتر / دواکەوتوو'];
+                  return [value, name];
+                }}
+                labelFormatter={(label) => `ئامانجی: ${label}`}
               />
-            </PieChart>
+              <Bar 
+                dataKey="onTime" 
+                stackId="a" 
+                fill="#10b981" 
+                maxBarSize={45}
+                cursor="pointer"
+                onClick={(data: any) => {
+                  if (data && data.exactOnTimeName) {
+                    setFilters(prev => ({ ...prev, slaStatus: [data.exactOnTimeName as string] }));
+                    document.getElementById('data-table-section')?.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+              />
+              <Bar 
+                dataKey="late" 
+                stackId="a" 
+                fill="#ef4444" 
+                radius={[4, 4, 0, 0]} 
+                maxBarSize={45}
+                cursor="pointer"
+                onClick={(data: any) => {
+                  if (data && data.exactLateName) {
+                    setFilters(prev => ({ ...prev, slaStatus: [data.exactLateName as string] }));
+                    document.getElementById('data-table-section')?.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+              />
+            </BarChart>
           </ResponsiveContainer>
         </div>
         
-        {/* Custom Legend for Abbreviations */}
-        <div className="mt-6 flex flex-wrap gap-x-4 gap-y-2 justify-center border-t border-slate-200 dark:border-slate-800 pt-4" dir="rtl">
-          {slaData.map((entry, index) => {
-             let color = COLORS[(index + 3) % COLORS.length]; 
-             if (entry.name.includes('کەمتر')) color = '#10b981';
-             else if (entry.name.includes('زیاتر')) color = '#ef4444';
-             else if (entry.name.includes('لە کاتی')) color = '#3b82f6';
-             return (
-              <div key={index} className="flex items-center gap-2 text-xs">
-                <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: color }}></span>
-                <span className="font-bold text-slate-700 dark:text-slate-300 shrink-0">{entry.abbr}</span>
-                <span className="text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs line-clamp-1" title={entry.name}>= {entry.name}</span>
-              </div>
-            );
-          })}
+        {/* Custom Legend */}
+        <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 justify-center border-t border-slate-200 dark:border-slate-800 pt-4" dir="rtl">
+          <div className="flex items-center gap-2 text-xs">
+            <span className="w-3 h-3 rounded-full shrink-0 bg-[#10b981]"></span>
+            <span className="font-bold text-slate-700 dark:text-slate-300">لە کاتی خۆی (کەمتر)</span>
+          </div>
+          <div className="flex items-center gap-2 text-xs">
+            <span className="w-3 h-3 rounded-full shrink-0 bg-[#ef4444]"></span>
+            <span className="font-bold text-slate-700 dark:text-slate-300">دواکەوتوو (زیاتر)</span>
+          </div>
         </div>
       </div>
 
