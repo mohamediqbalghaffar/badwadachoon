@@ -1,13 +1,45 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useData } from "../context/DataContext";
-import { Layers, Clock, AlertTriangle, ChevronRight, ChevronLeft } from "lucide-react";
+import { 
+  Layers, 
+  Clock, 
+  AlertTriangle, 
+  ChevronRight, 
+  ChevronLeft, 
+  TrendingUp, 
+  Building2, 
+  PieChart as PieIcon, 
+  Activity, 
+  AlertOctagon, 
+  Award,
+  Zap
+} from "lucide-react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  AreaChart,
+  Area,
+  LabelList,
+} from "recharts";
+import { format, parseISO, isValid, startOfMonth } from "date-fns";
+
+const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4"];
 
 export const PresentationView = () => {
   const { baseFilteredData } = useData();
   const [activeSlide, setActiveSlide] = useState(0);
 
+  // --- Calculations ---
   const totalLetters = baseFilteredData.length;
   const pendingLetters = baseFilteredData.filter((item) => !item.responseDate).length;
   
@@ -17,52 +49,126 @@ export const PresentationView = () => {
       ? completedLetters.reduce((acc, curr) => acc + (curr.processingTime ?? 0), 0) / completedLetters.length
       : 0;
 
-  const slides = [
-    {
-      id: "total",
-      title: "کۆی گشتی نامەکان",
-      value: totalLetters,
-      icon: <Layers size={120} className="text-blue-500 drop-shadow-2xl" />,
-      gradient: "from-blue-600 to-cyan-400",
-      bgBlur: "bg-blue-500/20",
-      description: "سەرجەم ئەو نامانەی لە سیستەمەکەدا تۆمارکراون"
-    },
-    {
-      id: "pending",
-      title: "نامە هەڵپەسێردراوەکان (بێ وەڵام)",
-      value: pendingLetters,
-      icon: <AlertTriangle size={120} className="text-amber-500 drop-shadow-2xl" />,
-      gradient: "from-amber-500 to-orange-400",
-      bgBlur: "bg-amber-500/20",
-      description: "ئەو نامانەی کە هێشتا وەڵامیان نەدراوەتەوە و لە چاوەڕوانیدان"
-    },
-    {
-      id: "avg-time",
-      title: "تێکڕای کاتی وەڵامدانەوە",
-      value: `${avgProcessingTime.toFixed(1)} ڕۆژ`,
-      icon: <Clock size={120} className="text-emerald-500 drop-shadow-2xl" />,
-      gradient: "from-emerald-500 to-teal-400",
-      bgBlur: "bg-emerald-500/20",
-      description: "تێکڕای ئەو کاتەی پێویستە بۆ وەڵامدانەوەی مامەڵەکان"
-    }
-  ];
+  // Prepare Department Data
+  const deptData = useMemo(() => {
+    const counts: Record<string, number> = {};
+    baseFilteredData.forEach((d) => {
+      counts[d.department] = (counts[d.department] || 0) + 1;
+    });
+    return Object.entries(counts)
+      .map(([name, count]) => {
+         const cleanName = name.replace('بەشی ', '').replace('سێکتەری ', '');
+         const words = cleanName.split(' ').filter(w => w.length > 1 && w !== 'و');
+         const abbr = words.slice(0, 2).map(w => w.charAt(0)).join('.');
+         return { name, count, abbr: abbr || name.charAt(0) };
+      })
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 8); // Top 8 for clean display
+  }, [baseFilteredData]);
+
+  // Prepare Letter Type Data
+  const typeData = useMemo(() => {
+    const counts: Record<string, number> = {};
+    baseFilteredData.forEach((d) => {
+      counts[d.letterType] = (counts[d.letterType] || 0) + 1;
+    });
+    return Object.entries(counts).map(([name, value]) => {
+         const cleanName = name.replace('بەشی ', '').replace('سێکتەری ', '');
+         const words = cleanName.split(' ').filter(w => w.length > 1 && w !== 'و');
+         const abbr = words.slice(0, 2).map(w => w.charAt(0)).join('.');
+         return { name, value, abbr: abbr || name.charAt(0) };
+    });
+  }, [baseFilteredData]);
+
+  // Prepare Timeline Data
+  const timelineData = useMemo(() => {
+    const counts: Record<string, number> = {};
+    baseFilteredData.forEach((d) => {
+      if (d.sentDate) {
+        const date = parseISO(d.sentDate);
+        if (isValid(date)) {
+          const monthStr = format(startOfMonth(date), 'yyyy-MM');
+          counts[monthStr] = (counts[monthStr] || 0) + 1;
+        }
+      }
+    });
+    return Object.entries(counts)
+      .map(([date, count]) => ({ date, count }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+  }, [baseFilteredData]);
+
+  // Department insights
+  const deptInsights = useMemo(() => {
+    const deptTimes: Record<string, { total: number; count: number }> = {};
+    const deptPending: Record<string, number> = {};
+
+    baseFilteredData.forEach((item) => {
+      if (item.processingTime !== null) {
+        if (!deptTimes[item.department]) {
+          deptTimes[item.department] = { total: 0, count: 0 };
+        }
+        deptTimes[item.department].total += item.processingTime;
+        deptTimes[item.department].count += 1;
+      }
+      if (!item.responseDate) {
+        deptPending[item.department] = (deptPending[item.department] || 0) + 1;
+      }
+    });
+
+    const averages = Object.entries(deptTimes)
+      .map(([name, data]) => ({
+        name,
+        avgTime: data.total / data.count,
+        count: data.count
+      }))
+      .filter(d => d.count >= 1);
+
+    const fastest = [...averages].sort((a, b) => a.avgTime - b.avgTime).slice(0, 3);
+    const slowest = [...averages].sort((a, b) => b.avgTime - a.avgTime).slice(0, 3);
+    const mostPending = Object.entries(deptPending)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 3);
+
+    return { fastest, slowest, mostPending };
+  }, [baseFilteredData]);
+
+  // Oldest pending letters
+  const oldestPending = useMemo(() => {
+    return baseFilteredData
+      .filter((item) => !item.responseDate && item.sentDate)
+      .map(item => {
+        const sent = parseISO(item.sentDate!);
+        const diffTime = Math.abs(new Date().getTime() - sent.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return {
+          ...item,
+          daysPending: diffDays
+        };
+      })
+      .sort((a, b) => b.daysPending - a.daysPending)
+      .slice(0, 5);
+  }, [baseFilteredData]);
+
+  const slideCount = 6;
 
   const handleNext = useCallback(() => {
-    setActiveSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
-  }, [slides.length]);
+    setActiveSlide((prev) => (prev === slideCount - 1 ? 0 : prev + 1));
+  }, [slideCount]);
 
   const handlePrev = useCallback(() => {
-    setActiveSlide((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
-  }, [slides.length]);
+    setActiveSlide((prev) => (prev === 0 ? slideCount - 1 : prev - 1));
+  }, [slideCount]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight") {
-        // Right arrow means going forward in LTR, but in RTL (Kurdish) we might want to map it to Next or Prev.
-        // Let's make Left go to next (since reading is Right to Left), and Right go to prev.
         handlePrev();
-      } else if (e.key === "ArrowLeft") {
+      } else if (e.key === "ArrowLeft" || e.key === " " || e.key === "Enter") {
+        if (e.key === " ") e.preventDefault();
         handleNext();
+      } else if (e.key === "Backspace") {
+        handlePrev();
       }
     };
 
@@ -71,73 +177,340 @@ export const PresentationView = () => {
   }, [handleNext, handlePrev]);
 
   return (
-    <div className="relative w-full min-h-[80vh] flex items-center justify-center overflow-hidden rounded-3xl bg-slate-900/5 dark:bg-slate-900/40 backdrop-blur-3xl border border-white/20 dark:border-slate-700/50 shadow-2xl p-8">
+    <div className="relative w-full min-h-[85vh] flex flex-col items-center justify-between overflow-hidden rounded-3xl bg-slate-900/5 dark:bg-slate-950/60 backdrop-blur-3xl border border-white/20 dark:border-slate-800/80 shadow-2xl p-6 sm:p-10 select-none">
       
-      {/* Navigation Buttons */}
+      {/* Top Slide Progress and Title */}
+      <div className="w-full flex justify-between items-center mb-6 z-20">
+        <span className="text-sm font-semibold text-slate-500 dark:text-slate-400 bg-slate-200/50 dark:bg-slate-800/50 px-3 py-1.5 rounded-full">
+          سڵاید {activeSlide + 1} لە {slideCount}
+        </span>
+        <div className="flex gap-1.5">
+          {Array.from({ length: slideCount }).map((_, i) => (
+            <div 
+              key={i} 
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                i === activeSlide ? "w-8 bg-blue-500" : "w-2 bg-slate-300 dark:bg-slate-700"
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Navigation Arrows */}
       <button 
         onClick={handlePrev}
-        className="absolute right-4 z-20 p-4 rounded-full bg-white/10 hover:bg-white/20 text-slate-800 dark:text-white transition-all hover:scale-110 backdrop-blur-md"
+        className="absolute right-4 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-white/30 dark:bg-slate-800/40 hover:bg-white/60 dark:hover:bg-slate-800/80 text-slate-800 dark:text-white transition-all hover:scale-110 backdrop-blur-md"
       >
-        <ChevronRight size={48} />
+        <ChevronRight size={32} />
       </button>
       
       <button 
         onClick={handleNext}
-        className="absolute left-4 z-20 p-4 rounded-full bg-white/10 hover:bg-white/20 text-slate-800 dark:text-white transition-all hover:scale-110 backdrop-blur-md"
+        className="absolute left-4 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-white/30 dark:bg-slate-800/40 hover:bg-white/60 dark:hover:bg-slate-800/80 text-slate-800 dark:text-white transition-all hover:scale-110 backdrop-blur-md"
       >
-        <ChevronLeft size={48} />
+        <ChevronLeft size={32} />
       </button>
 
-      {/* Slides Container */}
-      <div className="relative w-full max-w-5xl h-full flex items-center justify-center">
-        {slides.map((slide, index) => {
-          const isActive = index === activeSlide;
-          return (
-            <div
-              key={slide.id}
-              className={`absolute transition-all duration-700 ease-in-out flex flex-col items-center text-center ${
-                isActive 
-                  ? "opacity-100 scale-100 translate-x-0 z-10" 
-                  : "opacity-0 scale-90 -translate-x-20 -z-10 pointer-events-none"
-              }`}
-            >
-              {/* Massive Blur Background */}
-              <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-[120px] ${slide.bgBlur} -z-10`} />
-              
-              <div className="mb-12 animate-bounce-slow">
-                {slide.icon}
+      {/* Slide Contents */}
+      <div className="relative w-full flex-1 flex items-center justify-center min-h-[500px]">
+        
+        {/* SLIDE 1: KPI Dashboard Summary */}
+        {activeSlide === 0 && (
+          <div className="w-full max-w-5xl flex flex-col items-center animate-fade-in">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-blue-500/10 -z-10" />
+            <h2 className="text-3xl sm:text-4xl font-bold text-center mb-10 text-slate-800 dark:text-slate-200">
+              کورتەی ئەدای سیستەم و ئامارە بنەڕەتییەکان
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
+              {/* Card 1 */}
+              <div className="glass p-8 rounded-2xl flex flex-col items-center text-center border border-white/10 shadow-lg relative overflow-hidden group hover:scale-[1.03] transition-transform">
+                <div className="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-4">
+                  <Layers size={32} />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-500 dark:text-slate-400 mb-2">کۆی گشتی نامەکان</h3>
+                <span className="text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-500">{totalLetters}</span>
               </div>
-              
-              <h2 className="text-4xl md:text-5xl font-medium text-slate-600 dark:text-slate-300 mb-6">
-                {slide.title}
-              </h2>
-              
-              <div className={`text-8xl md:text-[160px] font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r ${slide.gradient} drop-shadow-sm mb-8 leading-none`}>
-                {slide.value}
+              {/* Card 2 */}
+              <div className="glass p-8 rounded-2xl flex flex-col items-center text-center border border-white/10 shadow-lg relative overflow-hidden group hover:scale-[1.03] transition-transform">
+                <div className="w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400 mb-4">
+                  <AlertTriangle size={32} />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-500 dark:text-slate-400 mb-2">هەڵپەسێردراو</h3>
+                <span className="text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-amber-500 to-orange-500">{pendingLetters}</span>
               </div>
-              
-              <p className="text-xl md:text-2xl text-slate-500 dark:text-slate-400 max-w-2xl">
-                {slide.description}
-              </p>
+              {/* Card 3 */}
+              <div className="glass p-8 rounded-2xl flex flex-col items-center text-center border border-white/10 shadow-lg relative overflow-hidden group hover:scale-[1.03] transition-transform">
+                <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-4">
+                  <Clock size={32} />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-500 dark:text-slate-400 mb-2">تێکڕای کاتی وەڵامدانەوە</h3>
+                <span className="text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-emerald-500 to-teal-500">{avgProcessingTime.toFixed(1)} <span className="text-lg font-medium text-slate-400">ڕۆژ</span></span>
+              </div>
             </div>
-          );
-        })}
+          </div>
+        )}
+
+        {/* SLIDE 2: Timeline Trend */}
+        {activeSlide === 1 && (
+          <div className="w-full max-w-5xl flex flex-col animate-fade-in">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-emerald-500/10 -z-10" />
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+                <TrendingUp className="text-emerald-500" size={32} />
+                هەڵکشان و داکشانی نامەکان بەپێی کات
+              </h2>
+              <span className="text-sm text-slate-400">ڕەوتی گەشەکردن بەپێی مانگەکان</span>
+            </div>
+            <div className="w-full h-[380px] bg-white/5 dark:bg-slate-900/40 rounded-2xl p-6 border border-white/10" dir="ltr">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={timelineData} margin={{ top: 20, right: 20, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorTimelinePres" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
+                      <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#475569" opacity={0.2} />
+                  <XAxis dataKey="date" tick={{ fontSize: 13, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 13, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <Tooltip
+                    contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff' }}
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="count" 
+                    stroke="#10b981" 
+                    strokeWidth={4} 
+                    fillOpacity={1} 
+                    fill="url(#colorTimelinePres)" 
+                    dot={{ r: 6, stroke: '#10b981', strokeWidth: 3, fill: '#fff' }}
+                  >
+                    <LabelList dataKey="count" position="top" offset={12} fill="#10b981" fontSize={14} fontWeight="bold" />
+                  </Area>
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
+
+        {/* SLIDE 3: Department Volumes */}
+        {activeSlide === 2 && (
+          <div className="w-full max-w-5xl flex flex-col animate-fade-in">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-blue-500/10 -z-10" />
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+                <Building2 className="text-blue-500" size={32} />
+                نامەکان بەپێی بەش و لایەنەکان
+              </h2>
+              <span className="text-sm text-slate-400">لایەنە سەرەکییەکان بەپێی قەبارەی کار</span>
+            </div>
+            <div className="w-full h-[380px] bg-white/5 dark:bg-slate-900/40 rounded-2xl p-6 border border-white/10" dir="ltr">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={deptData} margin={{ top: 25, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#475569" opacity={0.2} />
+                  <XAxis dataKey="abbr" tick={{ fontSize: 13, fill: '#94a3b8', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 13, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <Tooltip
+                    contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff' }}
+                    formatter={(value: any, name: any, props: any) => [value, props.payload.name]}
+                  />
+                  <Bar dataKey="count" radius={[8, 8, 0, 0]} maxBarSize={45}>
+                    <LabelList dataKey="count" position="top" offset={8} fill="#94a3b8" fontSize={12} fontWeight="bold" />
+                    {deptData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 justify-center" dir="rtl">
+              {deptData.map((entry, index) => (
+                <div key={index} className="flex items-center gap-1.5 text-xs">
+                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }}></span>
+                  <span className="font-bold text-slate-700 dark:text-slate-300">{entry.abbr}</span>
+                  <span className="text-slate-500 dark:text-slate-400">= {entry.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* SLIDE 4: Letter Types */}
+        {activeSlide === 3 && (
+          <div className="w-full max-w-5xl flex flex-col animate-fade-in">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-purple-500/10 -z-10" />
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+                <PieIcon className="text-purple-500" size={32} />
+                پۆلێنکردنی جۆرەکانی نامە
+              </h2>
+              <span className="text-sm text-slate-400">دابەشبوونی کارەکان بەپێی بابەت</span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center bg-white/5 dark:bg-slate-900/40 rounded-2xl p-6 border border-white/10">
+              <div className="h-[300px]" dir="ltr">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={typeData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={70}
+                      outerRadius={100}
+                      paddingAngle={5}
+                      dataKey="value"
+                      stroke="none"
+                    >
+                      {typeData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff' }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="flex flex-col gap-4" dir="rtl">
+                {typeData.map((entry, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 rounded-xl bg-slate-800/10 dark:bg-slate-850/50 border border-white/5">
+                    <div className="flex items-center gap-3">
+                      <span className="w-4 h-4 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }}></span>
+                      <span className="font-semibold text-slate-800 dark:text-slate-200">{entry.name}</span>
+                    </div>
+                    <span className="text-lg font-bold text-slate-600 dark:text-slate-400">{entry.value} نامە</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* SLIDE 5: Department Insights */}
+        {activeSlide === 4 && (
+          <div className="w-full max-w-5xl flex flex-col animate-fade-in">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-orange-500/10 -z-10" />
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 mb-8 flex items-center gap-3">
+              <Activity className="text-orange-500" size={32} />
+              شیکاری کارایی لایەن و بەشەکان
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              
+              {/* Fastest */}
+              <div className="glass p-6 rounded-2xl border border-white/10 flex flex-col gap-4">
+                <div className="flex items-center gap-2.5 pb-3 border-b border-white/10 text-emerald-500">
+                  <Award size={24} />
+                  <h3 className="font-bold text-lg">خێراترین وەڵامدانەوەکان</h3>
+                </div>
+                <div className="flex flex-col gap-3 flex-1">
+                  {deptInsights.fastest.length > 0 ? (
+                    deptInsights.fastest.map((d, i) => (
+                      <div key={i} className="flex justify-between items-center">
+                        <span className="text-sm text-slate-700 dark:text-slate-350 line-clamp-1 w-2/3">{d.name}</span>
+                        <span className="text-sm font-bold text-emerald-500 shrink-0">{d.avgTime.toFixed(1)} ڕۆژ</span>
+                      </div>
+                    ))
+                  ) : (
+                    <span className="text-slate-400 text-sm">داتا نییە</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Slowest */}
+              <div className="glass p-6 rounded-2xl border border-white/10 flex flex-col gap-4">
+                <div className="flex items-center gap-2.5 pb-3 border-b border-white/10 text-red-500">
+                  <AlertOctagon size={24} />
+                  <h3 className="font-bold text-lg">خاوترین وەڵامدانەوەکان</h3>
+                </div>
+                <div className="flex flex-col gap-3 flex-1">
+                  {deptInsights.slowest.length > 0 ? (
+                    deptInsights.slowest.map((d, i) => (
+                      <div key={i} className="flex justify-between items-center">
+                        <span className="text-sm text-slate-700 dark:text-slate-350 line-clamp-1 w-2/3">{d.name}</span>
+                        <span className="text-sm font-bold text-red-500 shrink-0">{d.avgTime.toFixed(1)} ڕۆژ</span>
+                      </div>
+                    ))
+                  ) : (
+                    <span className="text-slate-400 text-sm">داتا نییە</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Most Pending */}
+              <div className="glass p-6 rounded-2xl border border-white/10 flex flex-col gap-4">
+                <div className="flex items-center gap-2.5 pb-3 border-b border-white/10 text-amber-500">
+                  <Zap size={24} />
+                  <h3 className="font-bold text-lg">زۆرترین کار و نامەی بەجێماو</h3>
+                </div>
+                <div className="flex flex-col gap-3 flex-1">
+                  {deptInsights.mostPending.length > 0 ? (
+                    deptInsights.mostPending.map((d, i) => (
+                      <div key={i} className="flex justify-between items-center">
+                        <span className="text-sm text-slate-700 dark:text-slate-350 line-clamp-1 w-2/3">{d.name}</span>
+                        <span className="text-sm font-bold text-amber-500 shrink-0">{d.count} نامە</span>
+                      </div>
+                    ))
+                  ) : (
+                    <span className="text-slate-400 text-sm">داتا نییە</span>
+                  )}
+                </div>
+              </div>
+
+            </div>
+          </div>
+        )}
+
+        {/* SLIDE 6: Urgent Actions */}
+        {activeSlide === 5 && (
+          <div className="w-full max-w-5xl flex flex-col animate-fade-in">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-red-500/10 -z-10" />
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+                <AlertOctagon className="text-red-500" size={32} />
+                کۆنترین کار و نامە هەڵپەسێردراوەکان
+              </h2>
+              <span className="text-sm text-red-400 font-semibold bg-red-500/10 px-3 py-1 rounded-full">پێویستی بە وەڵامدانەوەی خێرایە</span>
+            </div>
+            
+            <div className="w-full overflow-hidden rounded-2xl bg-white/5 dark:bg-slate-900/40 border border-white/10">
+              <table className="w-full text-right border-collapse">
+                <thead>
+                  <tr className="bg-slate-800/30 dark:bg-slate-950/40 text-slate-400 text-sm border-b border-white/5">
+                    <th className="p-4">ژمارەی نامە</th>
+                    <th className="p-4">بابەت</th>
+                    <th className="p-4">لایەنی پەیوەندیدار</th>
+                    <th className="p-4">رێکەوتی ناردن</th>
+                    <th className="p-4 text-left">ماوەی مانەوە</th>
+                  </tr>
+                </thead>
+                <tbody className="text-sm text-slate-700 dark:text-slate-300">
+                  {oldestPending.length > 0 ? (
+                    oldestPending.map((item, index) => (
+                      <tr key={index} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                        <td className="p-4 font-mono">{item.refCode}</td>
+                        <td className="p-4 font-semibold line-clamp-1 max-w-[200px]">{item.subject}</td>
+                        <td className="p-4">{item.department}</td>
+                        <td className="p-4">{item.sentDate}</td>
+                        <td className="p-4 text-left font-bold text-red-500">{item.daysPending} ڕۆژ</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={5} className="p-8 text-center text-slate-400">هیچ نامەیەکی هەڵپەسێردراو بوونی نییە!</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
       </div>
 
-      {/* Slide Indicators */}
-      <div className="absolute bottom-8 flex gap-4 z-20">
-        {slides.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => setActiveSlide(index)}
-            className={`transition-all duration-300 rounded-full h-3 ${
-              index === activeSlide 
-                ? "w-12 bg-blue-500 dark:bg-blue-400" 
-                : "w-3 bg-slate-300 dark:bg-slate-700 hover:bg-slate-400 dark:hover:bg-slate-600"
-            }`}
-          />
-        ))}
+      {/* Slide Navigation Hints */}
+      <div className="mt-6 text-center text-xs text-slate-400">
+        بۆ گۆڕینی سڵایدەکان دەتوانیت لای چەپ/ڕاست یان دوگمەکانی <kbd className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono text-[10px]">Enter</kbd> و <kbd className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono text-[10px]">Space</kbd> بەکاربهێنیت.
       </div>
+
     </div>
   );
 };
