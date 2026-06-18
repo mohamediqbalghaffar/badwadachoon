@@ -231,9 +231,73 @@ export const PresentationView = () => {
 
   // --- Sent Data Calculations ---
   const hasSentData = sentData.length > 0;
-  const slideCount = hasSentData ? 9 : 7;
+  const { activeView } = useData();
+
+  const slideCount = useMemo(() => {
+    if (activeView === 'sent') return 4;
+    if (activeView === 'comparison') return 3;
+    return 7;
+  }, [activeView]);
   
   const totalSent = baseFilteredSentData.length;
+
+  const sentTimelineData = useMemo(() => {
+    const counts: Record<string, number> = {};
+    baseFilteredSentData.forEach((d) => {
+      if (d.sentDate) {
+        const date = parseISO(d.sentDate);
+        if (isValid(date)) {
+          const monthStr = format(startOfMonth(date), 'yyyy-MM');
+          counts[monthStr] = (counts[monthStr] || 0) + 1;
+        }
+      }
+    });
+    return Object.entries(counts).map(([date, count]) => ({ date, count })).sort((a, b) => a.date.localeCompare(b.date));
+  }, [baseFilteredSentData]);
+
+  const sentDeptData = useMemo(() => {
+    const counts: Record<string, number> = {};
+    baseFilteredSentData.forEach((d) => counts[d.department] = (counts[d.department] || 0) + 1);
+    return Object.entries(counts).map(([name, count]) => {
+         const cleanName = name.replace('بەشی ', '').replace('سێکتەری ', '');
+         const words = cleanName.split(' ').filter(w => w.length > 1 && w !== 'و');
+         const abbr = words.slice(0, 2).map(w => w.charAt(0)).join('.');
+         return { name, count, abbr: abbr || name.charAt(0) };
+    }).sort((a, b) => b.count - a.count).slice(0, 8);
+  }, [baseFilteredSentData]);
+
+  const sentTypeDataPres = useMemo(() => {
+    const counts: Record<string, number> = {};
+    baseFilteredSentData.forEach((d) => counts[d.letterType] = (counts[d.letterType] || 0) + 1);
+    return Object.entries(counts).map(([name, value]) => ({ name, value }));
+  }, [baseFilteredSentData]);
+
+  const timelineDataComparison = useMemo(() => {
+    const rByMonth: Record<string, number> = {};
+    const sByMonth: Record<string, number> = {};
+    baseFilteredData.forEach((d) => {
+      if (d.sentDate) {
+        const date = parseISO(d.sentDate);
+        if (isValid(date)) {
+          const monthStr = format(startOfMonth(date), 'yyyy-MM');
+          rByMonth[monthStr] = (rByMonth[monthStr] || 0) + 1;
+        }
+      }
+    });
+    baseFilteredSentData.forEach((d) => {
+      if (d.sentDate) {
+        const date = parseISO(d.sentDate);
+        if (isValid(date)) {
+          const monthStr = format(startOfMonth(date), 'yyyy-MM');
+          sByMonth[monthStr] = (sByMonth[monthStr] || 0) + 1;
+        }
+      }
+    });
+    const allMonths = new Set([...Object.keys(rByMonth), ...Object.keys(sByMonth)]);
+    return Array.from(allMonths).sort((a, b) => a.localeCompare(b)).map((month) => ({
+      date: month, received: rByMonth[month] || 0, sent: sByMonth[month] || 0,
+    }));
+  }, [baseFilteredData, baseFilteredSentData]);
 
   const deptComparisonData = useMemo(() => {
     if (!hasSentData) return [];
@@ -326,7 +390,7 @@ export const PresentationView = () => {
       <div className="relative w-full flex-1 flex items-center justify-center min-h-[500px]">
         
         {/* SLIDE 1: KPI Dashboard Summary */}
-        {activeSlide === 0 && (
+        {activeView === 'received' && activeSlide === 0 && (
           <div className="w-full max-w-5xl flex flex-col items-center animate-fade-in">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-blue-500/10 -z-10" />
             <h2 className="text-3xl sm:text-4xl font-bold text-center mb-10 text-slate-800 dark:text-slate-200">
@@ -362,7 +426,7 @@ export const PresentationView = () => {
         )}
 
         {/* SLIDE 2: Timeline Trend */}
-        {activeSlide === 1 && (
+        {activeView === 'received' && activeSlide === 1 && (
           <div className="w-full max-w-5xl flex flex-col animate-fade-in">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-emerald-500/10 -z-10" />
             <div className="flex justify-between items-center mb-6">
@@ -405,7 +469,7 @@ export const PresentationView = () => {
         )}
 
         {/* SLIDE 3: Department Volumes */}
-        {activeSlide === 2 && (
+        {activeView === 'received' && activeSlide === 2 && (
           <div className="w-full max-w-5xl flex flex-col animate-fade-in">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-blue-500/10 -z-10" />
             <div className="flex justify-between items-center mb-6">
@@ -453,7 +517,7 @@ export const PresentationView = () => {
         )}
 
         {/* SLIDE 4: Letter Types */}
-        {activeSlide === 3 && (
+        {activeView === 'received' && activeSlide === 3 && (
           <div className="w-full max-w-5xl flex flex-col animate-fade-in">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-purple-500/10 -z-10" />
             <div className="flex justify-between items-center mb-6">
@@ -503,7 +567,7 @@ export const PresentationView = () => {
         )}
 
         {/* SLIDE 5: SLA Status */}
-        {activeSlide === 4 && (
+        {activeView === 'received' && activeSlide === 4 && (
           <div className="w-full max-w-5xl flex flex-col animate-fade-in">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-amber-500/10 -z-10" />
             <div className="flex justify-between items-start mb-6">
@@ -563,7 +627,7 @@ export const PresentationView = () => {
         )}
 
         {/* SLIDE 6: Department Insights */}
-        {activeSlide === 5 && (
+        {activeView === 'received' && activeSlide === 5 && (
           <div className="w-full max-w-5xl flex flex-col animate-fade-in">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-orange-500/10 -z-10" />
             <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 mb-8 flex items-center gap-3">
@@ -643,7 +707,7 @@ export const PresentationView = () => {
         )}
 
         {/* SLIDE 7: Urgent Actions */}
-        {activeSlide === 6 && (
+        {activeView === 'received' && activeSlide === 6 && (
           <div className="w-full max-w-5xl flex flex-col animate-fade-in">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-red-500/10 -z-10" />
             <div className="flex justify-between items-center mb-6">
@@ -687,8 +751,10 @@ export const PresentationView = () => {
           </div>
         )}
 
-        {/* SLIDE 8: Sent Summary */}
-        {hasSentData && activeSlide === 7 && (
+        
+        {/* ===================== SENT SLIDES ===================== */}
+        {/* SENT SLIDE 0: Summary */}
+        {activeView === 'sent' && activeSlide === 0 && (
           <div className="w-full max-w-5xl flex flex-col animate-fade-in">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-teal-500/10 -z-10" />
             <div className="flex justify-between items-start mb-6">
@@ -707,13 +773,7 @@ export const PresentationView = () => {
               </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-6 mt-4">
-              <div className="glass p-8 rounded-2xl flex flex-col items-center justify-center text-center border border-white/10 relative overflow-hidden group">
-                <div className="absolute inset-0 bg-blue-500/5 group-hover:bg-blue-500/10 transition-colors" />
-                <Layers className="text-blue-500 mb-4 relative z-10" size={48} />
-                <span className="text-5xl font-black text-slate-800 dark:text-white mb-2 relative z-10">{totalLetters}</span>
-                <span className="text-lg text-slate-500 font-bold relative z-10">پێویست بە وەڵام</span>
-              </div>
+            <div className="grid grid-cols-1 gap-6 mt-4">
               <div className="glass p-8 rounded-2xl flex flex-col items-center justify-center text-center border border-white/10 relative overflow-hidden group">
                 <div className="absolute inset-0 bg-teal-500/5 group-hover:bg-teal-500/10 transition-colors" />
                 <Send className="text-teal-500 mb-4 relative z-10" size={48} />
@@ -724,8 +784,137 @@ export const PresentationView = () => {
           </div>
         )}
 
-        {/* SLIDE 9: Comparison Chart */}
-        {hasSentData && activeSlide === 8 && (
+        {/* SENT SLIDE 1: Timeline Trend */}
+        {activeView === 'sent' && activeSlide === 1 && (
+          <div className="w-full max-w-5xl flex flex-col animate-fade-in">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-teal-500/10 -z-10" />
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+                <TrendingUp className="text-teal-500" size={32} />
+                هەڵکشان و داکشانی نامە ڕەوانەکراوەکان
+              </h2>
+            </div>
+            <div className="w-full h-[380px] bg-white/5 dark:bg-slate-900/40 rounded-2xl p-6 border border-white/10" dir="ltr">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={sentTimelineData} margin={{ top: 20, right: 20, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorTimelineSent" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.4} />
+                      <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#475569" opacity={0.2} />
+                  <XAxis dataKey="date" tick={{ fontSize: 13, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 13, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <Tooltip contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff' }} />
+                  <Area type="monotone" dataKey="count" stroke="#06b6d4" strokeWidth={4} fillOpacity={1} fill="url(#colorTimelineSent)" dot={{ r: 6, stroke: '#06b6d4', strokeWidth: 3, fill: '#fff' }}>
+                    <LabelList dataKey="count" position="top" offset={12} fill="#06b6d4" fontSize={14} fontWeight="bold" />
+                  </Area>
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
+
+        {/* SENT SLIDE 2: Depts */}
+        {activeView === 'sent' && activeSlide === 2 && (
+          <div className="w-full max-w-5xl flex flex-col animate-fade-in">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-teal-500/10 -z-10" />
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+                <Building2 className="text-teal-500" size={32} />
+                لایەنە سەرەکییەکان بەپێی نامەی ڕەوانەکراو
+              </h2>
+            </div>
+            <div className="w-full h-[380px] bg-white/5 dark:bg-slate-900/40 rounded-2xl p-6 border border-white/10" dir="ltr">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={sentDeptData} margin={{ top: 25, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#475569" opacity={0.2} />
+                  <XAxis dataKey="abbr" tick={{ fontSize: 13, fill: '#94a3b8', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 13, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <Tooltip contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff' }} formatter={(value, name, props) => [value, props.payload.name]} labelFormatter={(abbr) => { const entry = sentDeptData.find(d => d.abbr === abbr); return entry ? entry.name : abbr; }} />
+                  <Bar dataKey="count" radius={[8, 8, 0, 0]} maxBarSize={45}>
+                    <LabelList dataKey="count" position="top" offset={8} fill="#94a3b8" fontSize={12} fontWeight="bold" />
+                    {sentDeptData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
+
+        {/* SENT SLIDE 3: Types */}
+        {activeView === 'sent' && activeSlide === 3 && (
+          <div className="w-full max-w-5xl flex flex-col animate-fade-in">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-purple-500/10 -z-10" />
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+                <PieIcon className="text-purple-500" size={32} />
+                جۆری نامە ڕەوانەکراوەکان
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center bg-white/5 dark:bg-slate-900/40 rounded-2xl p-6 border border-white/10">
+              <div className="h-[300px]" dir="ltr">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={sentTypeDataPres} cx="50%" cy="50%" innerRadius={70} outerRadius={100} paddingAngle={5} dataKey="value" stroke="none">
+                      {sentTypeDataPres.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
+                    </Pie>
+                    <Tooltip contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff' }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="flex flex-col gap-4" dir="rtl">
+                {sentTypeDataPres.map((entry, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 rounded-xl bg-slate-800/10 dark:bg-slate-850/50 border border-white/5">
+                    <div className="flex items-center gap-3">
+                      <span className="w-4 h-4 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }}></span>
+                      <span className="font-semibold text-slate-800 dark:text-slate-200">{entry.name}</span>
+                    </div>
+                    <span className="text-lg font-bold text-slate-600 dark:text-slate-400">{entry.value} نامە</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ===================== COMPARISON SLIDES ===================== */}
+        {/* COMP SLIDE 0: Summary */}
+        {activeView === 'comparison' && activeSlide === 0 && (
+          <div className="w-full max-w-5xl flex flex-col animate-fade-in">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-indigo-500/10 -z-10" />
+            <div className="flex justify-between items-start mb-6">
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+                  <GitCompareArrows className="text-indigo-500" size={32} />
+                  بەراوردکردنی نامەکان
+                </h2>
+                <span className="text-sm text-slate-400 mt-2 block">ڕێژەی ئەو نامانەی پێویستیان بە وەڵامە لە کۆی گشتی نامە ڕەوانەکراوەکان</span>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-6 mt-4">
+              <div className="glass p-8 rounded-2xl flex flex-col items-center justify-center text-center border border-white/10 relative overflow-hidden group">
+                <div className="absolute inset-0 bg-blue-500/5 group-hover:bg-blue-500/10 transition-colors" />
+                <Layers className="text-blue-500 mb-4 relative z-10" size={48} />
+                <span className="text-5xl font-black text-slate-800 dark:text-white mb-2 relative z-10">{totalLetters}</span>
+                <span className="text-lg text-slate-500 font-bold relative z-10">پێویست بە وەڵام</span>
+                <span className="text-sm font-bold text-blue-500 mt-2">{totalSent > 0 ? Math.round((totalLetters / Math.max(totalLetters, totalSent)) * 100) : 0}%</span>
+              </div>
+              <div className="glass p-8 rounded-2xl flex flex-col items-center justify-center text-center border border-white/10 relative overflow-hidden group">
+                <div className="absolute inset-0 bg-teal-500/5 group-hover:bg-teal-500/10 transition-colors" />
+                <Send className="text-teal-500 mb-4 relative z-10" size={48} />
+                <span className="text-5xl font-black text-slate-800 dark:text-white mb-2 relative z-10">{Math.max(totalLetters, totalSent)}</span>
+                <span className="text-lg text-slate-500 font-bold relative z-10">سەرجەم ڕەوانەکراوەکان</span>
+                <span className="text-sm font-bold text-teal-500 mt-2">100%</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* COMP SLIDE 1: Comparison Chart */}
+        {activeView === 'comparison' && activeSlide === 1 && (
           <div className="w-full max-w-5xl flex flex-col animate-fade-in">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-indigo-500/10 -z-10" />
             <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 mb-8 flex items-center gap-3">
@@ -763,6 +952,39 @@ export const PresentationView = () => {
           </div>
         )}
 
+        {/* COMP SLIDE 2: Timeline */}
+        {activeView === 'comparison' && activeSlide === 2 && (
+          <div className="w-full max-w-5xl flex flex-col animate-fade-in">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-purple-500/10 -z-10" />
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 mb-8 flex items-center gap-3">
+              <TrendingUp className="text-purple-500" size={32} />
+              بەراوردکردنی هەڵکشان و داکشان بەپێی کات
+            </h2>
+            
+            <div className="w-full h-[350px] bg-white/5 dark:bg-slate-900/40 rounded-2xl p-6 border border-white/10" dir="ltr">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={timelineDataComparison} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorRec" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4} />
+                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="colorSent" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.4} />
+                      <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#475569" opacity={0.2} />
+                  <XAxis dataKey="date" tick={{ fontSize: 13, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 13, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <Tooltip contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff' }} />
+                  <Area type="monotone" dataKey="received" name="پێویست بە وەڵام" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorRec)" />
+                  <Area type="monotone" dataKey="sent" name="سەرجەم ڕەوانەکراوەکان" stroke="#06b6d4" strokeWidth={3} fillOpacity={1} fill="url(#colorSent)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Slide Navigation Hints */}
