@@ -130,25 +130,22 @@ export const PresentationView = () => {
   const isSingleDeptSelected = filters.departments.length === 1;
   const chartData = isSingleDeptSelected ? monthDataForDept : deptData;
   const chartTitle = isSingleDeptSelected ? "قەبارەی نامەکان بەپێی مانگ" : "نامەکان بەپێی بەش و لایەنەکان";
-  
-  // Department insights (calculated from data unfiltered by department)
+  // Department insights (calculated from baseFilteredData to respect active dashboard filters)
   const deptInsights = useMemo(() => {
-    const deptPending: Record<string, number> = {};
-    const completedLetters = baseFilteredData.filter(item => item.processingTime !== null);
+    const completed = baseFilteredData.filter(item => item.processingTime !== null);
+    
+    // Sort actual letters by processing time
+    const sorted = [...completed].sort((a, b) => a.processingTime! - b.processingTime!);
+    
+    const fastest = sorted.slice(0, 3);
+    const slowest = [...sorted].reverse().slice(0, 3);
 
+    const deptPending: Record<string, number> = {};
     baseFilteredData.forEach((item) => {
       if (!item.responseDate) {
         deptPending[item.department] = (deptPending[item.department] || 0) + 1;
       }
     });
-
-    const fastest = [...completedLetters]
-      .sort((a, b) => (a.processingTime ?? 0) - (b.processingTime ?? 0))
-      .slice(0, 3);
-      
-    const slowest = [...completedLetters]
-      .sort((a, b) => (b.processingTime ?? 0) - (a.processingTime ?? 0))
-      .slice(0, 3);
 
     const mostPending = Object.entries(deptPending)
       .map(([name, count]) => ({ name, count }))
@@ -436,8 +433,8 @@ export const PresentationView = () => {
                 <div className="flex flex-col gap-3 flex-1">
                   {deptInsights.fastest.length > 0 ? (
                     deptInsights.fastest.map((d, i) => (
-                      <div key={i} className="flex justify-between items-center" title={`${d.department} - ${d.subject}`}>
-                        <span className="text-sm text-slate-700 dark:text-slate-350 line-clamp-1 w-2/3">{d.refCode} | {d.department}</span>
+                      <div key={i} className="flex justify-between items-center" title={`${d.refCode !== "-" ? d.refCode + " - " : ""}${d.subject}`}>
+                        <span className="text-sm text-slate-700 dark:text-slate-350 line-clamp-1 w-2/3">{d.department}</span>
                         <span className="text-sm font-bold text-emerald-500 shrink-0">{d.processingTime} ڕۆژ</span>
                       </div>
                     ))
@@ -456,8 +453,8 @@ export const PresentationView = () => {
                 <div className="flex flex-col gap-3 flex-1">
                   {deptInsights.slowest.length > 0 ? (
                     deptInsights.slowest.map((d, i) => (
-                      <div key={i} className="flex justify-between items-center" title={`${d.department} - ${d.subject}`}>
-                        <span className="text-sm text-slate-700 dark:text-slate-350 line-clamp-1 w-2/3">{d.refCode} | {d.department}</span>
+                      <div key={i} className="flex justify-between items-center" title={`${d.refCode !== "-" ? d.refCode + " - " : ""}${d.subject}`}>
+                        <span className="text-sm text-slate-700 dark:text-slate-350 line-clamp-1 w-2/3">{d.department}</span>
                         <span className="text-sm font-bold text-red-500 shrink-0">{d.processingTime} ڕۆژ</span>
                       </div>
                     ))
