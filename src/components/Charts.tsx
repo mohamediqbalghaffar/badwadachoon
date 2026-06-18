@@ -21,6 +21,39 @@ import { format, parseISO, isValid, startOfMonth, parse, endOfMonth } from "date
 
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4"];
 
+const RADIAN = Math.PI / 180;
+const renderCustomizedLabel = (props: any) => {
+  const { cx, cy, midAngle, innerRadius, outerRadius, value, name, fill } = props;
+  const sin = Math.sin(-RADIAN * midAngle);
+  const cos = Math.cos(-RADIAN * midAngle);
+  
+  // Starting point at the outer edge of the pie slice
+  const sx = cx + (outerRadius) * cos;
+  const sy = cy + (outerRadius) * sin;
+  
+  // Middle point for the elbow bend
+  const mx = cx + (outerRadius + 20) * cos;
+  const my = cy + (outerRadius + 20) * sin;
+  
+  // End point of the connecting line
+  const ex = mx + (cos >= 0 ? 1 : -1) * 20;
+  const ey = my;
+  const textAnchor = cos >= 0 ? 'start' : 'end';
+
+  return (
+    <g>
+      {/* Connecting Line */}
+      <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke={fill} fill="none" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+      {/* Dot at the end of the line */}
+      <circle cx={ex} cy={ey} r={4} fill={fill} stroke="none" />
+      {/* Label text */}
+      <text x={ex + (cos >= 0 ? 1 : -1) * 8} y={ey} dy={4} textAnchor={textAnchor} fill={fill} className="text-[11px] font-bold" style={{ fontFamily: 'inherit' }}>
+        {`${name} : ${value}`}
+      </text>
+    </g>
+  );
+};
+
 export const DashboardCharts = () => {
   const { filteredData, setFilters, filters } = useData();
 
@@ -195,6 +228,8 @@ export const DashboardCharts = () => {
                 paddingAngle={5}
                 dataKey="value"
                 stroke="none"
+                labelLine={false}
+                label={renderCustomizedLabel}
                 onClick={(data: any) => {
                   if (data && data.name) {
                     setFilters(prev => ({ ...prev, letterType: [data.name as string] }));
@@ -245,6 +280,8 @@ export const DashboardCharts = () => {
                 paddingAngle={5}
                 dataKey="value"
                 stroke="none"
+                labelLine={false}
+                label={renderCustomizedLabel}
                 onClick={(data: any) => {
                   if (data && data.name) {
                     setFilters(prev => ({ ...prev, slaStatus: [data.name as string] }));
