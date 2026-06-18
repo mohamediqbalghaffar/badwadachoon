@@ -6,8 +6,8 @@ import { DashboardData } from "../utils/parser";
 interface FilterState {
   dateRange: { start: string | null; end: string | null };
   departments: string[];
-  letterType: string | null;
-  slaStatus: string | null;
+  letterType: string[];
+  slaStatus: string[];
   completionStatus: 'all' | 'pending' | 'completed';
 }
 
@@ -30,8 +30,8 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
   const [filters, setFilters] = useState<FilterState>({
     dateRange: { start: null, end: null },
     departments: [],
-    letterType: null,
-    slaStatus: null,
+    letterType: [],
+    slaStatus: [],
     completionStatus: 'all',
   });
   const [isPresentationMode, setIsPresentationMode] = useState<boolean>(false);
@@ -54,12 +54,12 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       // Letter Type filter
-      if (filters.letterType && item.letterType !== filters.letterType) {
+      if (filters.letterType.length > 0 && !filters.letterType.includes(item.letterType)) {
         return false;
       }
 
       // SLA Status filter
-      if (filters.slaStatus && item.slaTime !== filters.slaStatus) {
+      if (filters.slaStatus.length > 0 && (!item.slaTime || !filters.slaStatus.includes(item.slaTime))) {
         return false;
       }
 
@@ -82,8 +82,8 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     setFilters({
       dateRange: { start: null, end: null },
       departments: [],
-      letterType: null,
-      slaStatus: null,
+      letterType: [],
+      slaStatus: [],
       completionStatus: 'all',
     });
   };

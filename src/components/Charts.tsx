@@ -179,7 +179,7 @@ export const DashboardCharts = () => {
                 stroke="none"
                 onClick={(data: any) => {
                   if (data && data.name) {
-                    setFilters(prev => ({ ...prev, letterType: data.name as string }));
+                    setFilters(prev => ({ ...prev, letterType: [data.name as string] }));
                     document.getElementById('data-table-section')?.scrollIntoView({ behavior: 'smooth' });
                   }
                 }}
