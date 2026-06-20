@@ -240,7 +240,7 @@ export const ComparisonView = () => {
 
         {deptComparisonData.length > 0 ? (
           <>
-            <div className="flex-1 min-h-[350px]" dir="ltr">
+            <div className="h-[350px] w-full" dir="ltr">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={deptComparisonData} margin={{ top: 25, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#cbd5e1" opacity={0.3} />
@@ -314,7 +314,7 @@ export const ComparisonView = () => {
           </div>
           {receivedTypeData.length > 0 ? (
             <>
-              <div className="flex-1 min-h-[280px]" dir="ltr">
+              <div className="h-[280px] w-full" dir="ltr">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
@@ -364,7 +364,7 @@ export const ComparisonView = () => {
           </div>
           {sentTypeData.length > 0 ? (
             <>
-              <div className="flex-1 min-h-[280px]" dir="ltr">
+              <div className="h-[280px] w-full" dir="ltr">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
@@ -415,7 +415,7 @@ export const ComparisonView = () => {
         </div>
 
         {timelineData.length > 0 ? (
-          <div className="flex-1 min-h-0" dir="ltr">
+          <div className="h-[280px] w-full" dir="ltr">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={timelineData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
