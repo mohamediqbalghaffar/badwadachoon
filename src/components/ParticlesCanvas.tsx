@@ -2,6 +2,8 @@
 
 import React, { useEffect, useRef } from "react";
 
+type ParticleShape = 'circle' | 'triangle' | 'lightning';
+
 interface Particle {
   x: number;
   y: number;
@@ -10,6 +12,7 @@ interface Particle {
   radiusCurrent: number;
   radiusPrevious: number;
   colorIndex: number;
+  shape: ParticleShape;
 }
 
 export const ParticlesCanvas = () => {
@@ -70,6 +73,12 @@ export const ParticlesCanvas = () => {
       for (let i = 0; i < particleCount; i++) {
         const radiusCurrent = Math.random() * 3 + 3.5;
         const radiusPrevious = (radiusCurrent - 3.5) / 3 * 2 + 1; // Map 3.5 - 6.5 to 1 - 3
+        
+        const rand = Math.random();
+        let shape: ParticleShape = 'circle';
+        if (rand > 0.8) shape = 'triangle';
+        else if (rand > 0.6) shape = 'lightning';
+
         particles.push({
           x: Math.random() * width,
           y: Math.random() * height,
@@ -78,6 +87,7 @@ export const ParticlesCanvas = () => {
           radiusCurrent,
           radiusPrevious,
           colorIndex: Math.floor(Math.random() * currentColors.length),
+          shape,
         });
       }
     };
@@ -132,7 +142,22 @@ export const ParticlesCanvas = () => {
 
         // Draw particle
         ctx.beginPath();
-        ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+        if (p.shape === 'circle') {
+          ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+        } else if (p.shape === 'triangle') {
+          ctx.moveTo(p.x, p.y - radius);
+          ctx.lineTo(p.x + radius * 0.866, p.y + radius * 0.5);
+          ctx.lineTo(p.x - radius * 0.866, p.y + radius * 0.5);
+          ctx.closePath();
+        } else if (p.shape === 'lightning') {
+          ctx.moveTo(p.x + radius * 0.3, p.y - radius);
+          ctx.lineTo(p.x - radius * 0.5, p.y + radius * 0.2);
+          ctx.lineTo(p.x, p.y + radius * 0.2);
+          ctx.lineTo(p.x - radius * 0.3, p.y + radius);
+          ctx.lineTo(p.x + radius * 0.5, p.y - radius * 0.2);
+          ctx.lineTo(p.x, p.y - radius * 0.2);
+          ctx.closePath();
+        }
         ctx.fillStyle = color;
         ctx.fill();
 
