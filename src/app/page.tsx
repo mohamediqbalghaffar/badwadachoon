@@ -8,7 +8,8 @@ import { HTSLogoBackground } from "../components/HTSLogoBackground";
 import { ParticlesCanvas } from "../components/ParticlesCanvas";
 
 const MainContent = () => {
-  const { data } = useData();
+  const { data, sentData } = useData();
+  const hasData = data.length > 0 || sentData.length > 0;
 
   return (
     <main className="min-h-screen relative overflow-hidden bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 transition-colors duration-500">
@@ -17,7 +18,7 @@ const MainContent = () => {
       <ParticlesCanvas />
       
       <div className="relative z-10 w-full h-full min-h-screen flex items-center justify-center pt-8 pb-12">
-        {data.length === 0 ? <FileUploader /> : <Dashboard />}
+        {!hasData ? <FileUploader /> : <Dashboard />}
       </div>
     </main>
   );

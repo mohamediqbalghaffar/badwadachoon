@@ -9,7 +9,7 @@ export const FileUploader = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { setData } = useData();
+  const { setData, setSentData } = useData();
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -43,11 +43,12 @@ export const FileUploader = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const parsedData = await parseFile(file);
-      if (parsedData.length === 0) {
+      const result = await parseFile(file);
+      if (result.receivedData.length === 0 && result.sentData.length === 0) {
         throw new Error("پەڕگەکە بەتاڵە یان داتای دروستی تێدا نییە.");
       }
-      setData(parsedData);
+      setData(result.receivedData);
+      setSentData(result.sentData);
     } catch (err: any) {
       setError("هەڵەیەک ڕوویدا لە کاتی خوێندنەوەی پەڕگەکە.");
       console.error(err);

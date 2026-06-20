@@ -98,7 +98,7 @@ export const DataTable = () => {
                 { key: "refCode", label: "کۆد" },
                 { key: "sentDate", label: "ڕۆژی ناردن" },
                 { key: "responseDate", label: "ڕۆژی وەڵام" },
-                { key: "processingTime", label: "تێبینی (ڕۆژ)" },
+                { key: "processingTime", label: "کاتی تێچوو بۆ وەڵام (ڕۆژ)" },
                 { key: "slaTime", label: "باری SLA" },
               ].map((col) => (
                 <th
