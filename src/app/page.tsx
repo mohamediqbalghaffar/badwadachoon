@@ -50,6 +50,13 @@ export default function Home() {
         ) : (
           <MainContent onBack={() => setActiveModule('landing')} />
         )}
+
+        {/* Copyright Footer */}
+        <div className="absolute bottom-4 left-0 w-full text-center z-10 pointer-events-none">
+          <p className="text-xs md:text-sm text-slate-500/80 dark:text-slate-400/80 font-medium tracking-wide">
+            © ٢٠٢٦ - دروستکراوە لەلایەن بەشی کارگێڕی HTS-HQ
+          </p>
+        </div>
       </main>
     </DataProvider>
   );
