@@ -52,12 +52,12 @@ export const ParticlesCanvas = () => {
 
     // Brand colors matching the HTS logo theme and general dashboard feel
     const currentColors = isDarkMode 
-      ? ["rgba(227, 30, 36, 0.8)", "rgba(59, 130, 246, 0.8)", "rgba(255, 255, 255, 0.6)"]
-      : ["rgba(227, 30, 36, 0.7)", "rgba(59, 130, 246, 0.7)", "rgba(0, 0, 0, 0.4)"];
+      ? ["rgba(227, 30, 36, 0.5)", "rgba(59, 130, 246, 0.5)", "rgba(255, 255, 255, 0.4)"]
+      : ["rgba(227, 30, 36, 0.4)", "rgba(59, 130, 246, 0.4)", "rgba(0, 0, 0, 0.2)"];
 
     const previousColors = isDarkMode
-      ? ["rgba(227, 30, 36, 0.4)", "rgba(59, 130, 246, 0.4)", "rgba(255, 255, 255, 0.2)"]
-      : ["rgba(227, 30, 36, 0.2)", "rgba(59, 130, 246, 0.2)", "rgba(0, 0, 0, 0.1)"];
+      ? ["rgba(227, 30, 36, 0.3)", "rgba(59, 130, 246, 0.3)", "rgba(255, 255, 255, 0.15)"]
+      : ["rgba(227, 30, 36, 0.15)", "rgba(59, 130, 246, 0.15)", "rgba(0, 0, 0, 0.08)"];
 
     let cardRects: DOMRect[] = [];
     let frameCount = 0;
@@ -69,7 +69,7 @@ export const ParticlesCanvas = () => {
 
     const initParticles = () => {
       particles = [];
-      const particleCount = Math.min(Math.floor((width * height) / 15000), 100);
+      const particleCount = Math.min(Math.floor((width * height) / 25000), 60);
       for (let i = 0; i < particleCount; i++) {
         const radiusCurrent = Math.random() * 3 + 3.5;
         const radiusPrevious = (radiusCurrent - 3.5) / 3 * 2 + 1; // Map 3.5 - 6.5 to 1 - 3
