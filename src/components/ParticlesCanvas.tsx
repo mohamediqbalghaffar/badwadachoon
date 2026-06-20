@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef } from "react";
 
-type ParticleShape = 'circle' | 'triangle' | 'lightning';
+type ParticleShape = 'circle' | 'tower' | 'lightning';
 
 interface Particle {
   x: number;
@@ -76,7 +76,7 @@ export const ParticlesCanvas = () => {
         
         const rand = Math.random();
         let shape: ParticleShape = 'circle';
-        if (rand > 0.8) shape = 'triangle';
+        if (rand > 0.8) shape = 'tower';
         else if (rand > 0.6) shape = 'lightning';
 
         particles.push({
@@ -144,10 +144,30 @@ export const ParticlesCanvas = () => {
         ctx.beginPath();
         if (p.shape === 'circle') {
           ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
-        } else if (p.shape === 'triangle') {
-          ctx.moveTo(p.x, p.y - radius);
-          ctx.lineTo(p.x + radius * 0.866, p.y + radius * 0.5);
-          ctx.lineTo(p.x - radius * 0.866, p.y + radius * 0.5);
+        } else if (p.shape === 'tower') {
+          // Miniature telecom tower (slightly larger)
+          const tr = radius * 1.8;
+          ctx.moveTo(p.x, p.y - tr); // Antenna tip
+          // Right side
+          ctx.lineTo(p.x + tr * 0.1, p.y - tr * 0.5);
+          ctx.lineTo(p.x + tr * 0.4, p.y - tr * 0.4);
+          ctx.lineTo(p.x + tr * 0.4, p.y - tr * 0.2);
+          ctx.lineTo(p.x + tr * 0.15, p.y - tr * 0.2);
+          ctx.lineTo(p.x + tr * 0.25, p.y + tr * 0.2);
+          ctx.lineTo(p.x + tr * 0.55, p.y + tr * 0.3);
+          ctx.lineTo(p.x + tr * 0.55, p.y + tr * 0.5);
+          ctx.lineTo(p.x + tr * 0.35, p.y + tr * 0.5);
+          ctx.lineTo(p.x + tr * 0.6, p.y + tr);
+          // Left side
+          ctx.lineTo(p.x - tr * 0.6, p.y + tr);
+          ctx.lineTo(p.x - tr * 0.35, p.y + tr * 0.5);
+          ctx.lineTo(p.x - tr * 0.55, p.y + tr * 0.5);
+          ctx.lineTo(p.x - tr * 0.55, p.y + tr * 0.3);
+          ctx.lineTo(p.x - tr * 0.25, p.y + tr * 0.2);
+          ctx.lineTo(p.x - tr * 0.15, p.y - tr * 0.2);
+          ctx.lineTo(p.x - tr * 0.4, p.y - tr * 0.2);
+          ctx.lineTo(p.x - tr * 0.4, p.y - tr * 0.4);
+          ctx.lineTo(p.x - tr * 0.1, p.y - tr * 0.5);
           ctx.closePath();
         } else if (p.shape === 'lightning') {
           ctx.moveTo(p.x + radius * 0.3, p.y - radius);
