@@ -25,7 +25,7 @@ export const HTSLogo = ({ className = "" }: { className?: string }) => {
 
   return (
     <svg
-      viewBox="0 0 800 400"
+      viewBox="-100 -100 1000 600"
       className={`${className} animate-logo-float`}
       style={{
         transform: `translate(${tx1}px, ${ty1}px)`,
