@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     }
 
     // 1. Download current excel file
-    const response = await fetch(dataBlob.url);
+    const response = await fetch(dataBlob.downloadUrl || dataBlob.url);
     const arrayBuffer = await response.arrayBuffer();
     
     // 2. Read with XLSX
@@ -54,15 +54,27 @@ export async function POST(request: Request) {
     // 5. Save back to buffer
     const outBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'buffer' });
 
-    // 6. Upload to blob
-    const blob = await put('latest_data.xlsx', outBuffer, {
-      access: 'public',
-      addRandomSuffix: false
-    });
+    // 6. Upload to blob (Try public, fallback to private)
+    let blob;
+    try {
+      blob = await put('latest_data.xlsx', outBuffer, {
+        access: 'public',
+        addRandomSuffix: false
+      });
+    } catch (putError: any) {
+      if (putError.message?.includes('private store')) {
+        blob = await put('latest_data.xlsx', outBuffer, {
+          access: 'private',
+          addRandomSuffix: false
+        });
+      } else {
+        throw putError;
+      }
+    }
 
     return NextResponse.json({ success: true, blob });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Records update error:", error);
-    return NextResponse.json({ error: 'Failed to update records' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to update records', details: error.message }, { status: 500 });
   }
 }
