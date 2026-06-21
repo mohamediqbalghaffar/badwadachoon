@@ -9,36 +9,40 @@ datasource db {
 }
 
 model ReceivedLetter {
-  id             Int       @id @default(autoincrement())
-  subject        String
-  department     String
-  departments    String[]  @default([])
-  dept1          String?
-  dept2          String?
-  dept3          String?
-  refCode        String
-  letterType     String
-  sentDate       DateTime?
-  responseDate   DateTime?
-  processingTime Int?
-  slaTime        String
+  id             Int       @id @default(autoincrement()) @map("#")
+  subject        String    @map("بابەت")
+  department     String    @map("لایەنی پەیوەندیدار گشتی")
+  departments    String[]  @default([]) @map("لایەنە پەیوەندیدارەکان")
+  dept1          String?   @map("لایەنی پەیوەندیدار 1")
+  dept2          String?   @map("لایەنی پەیوەندیدار 2")
+  dept3          String?   @map("لایەنی پەیوەندیدار 3")
+  refCode        String    @map("جۆر")
+  letterType     String    @map("جۆری نامە")
+  sentDate       DateTime? @map("ڕۆژی ناردن")
+  responseDate   DateTime? @map("ڕۆژی وەڵام")
+  processingTime Int?      @map("تێبینی")
+  slaTime        String    @map("کاتی تێچوو بەپێی ڕێنمایی")
 
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  createdAt      DateTime  @default(now()) @map("کاتی دروستکردن")
+  updatedAt      DateTime  @updatedAt @map("کاتی نوێکردنەوە")
+
+  @@map("وەڵامی نووسراوە نێردراوەکان")
 }
 
 model SentLetter {
-  id             Int       @id @default(autoincrement())
-  subject        String
-  department     String
-  departments    String[]  @default([])
-  dept1          String?
-  dept2          String?
-  dept3          String?
-  refCode        String
-  letterType     String
-  sentDate       DateTime?
+  id             Int       @id @default(autoincrement()) @map("#")
+  subject        String    @map("بابەت")
+  department     String    @map("لایەنی پەیوەندیدار گشتی")
+  departments    String[]  @default([]) @map("لایەنە پەیوەندیدارەکان")
+  dept1          String?   @map("لایەنی پەیوەندیدار 1")
+  dept2          String?   @map("لایەنی پەیوەندیدار 2")
+  dept3          String?   @map("لایەنی پەیوەندیدار 3")
+  refCode        String    @map("جۆر")
+  letterType     String    @map("جۆری نامە")
+  sentDate       DateTime? @map("ڕۆژی ناردن")
 
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  createdAt      DateTime  @default(now()) @map("کاتی دروستکردن")
+  updatedAt      DateTime  @updatedAt @map("کاتی نوێکردنەوە")
+
+  @@map("سەرجەم نووسراوە ڕەوانەکراوەکان")
 }
