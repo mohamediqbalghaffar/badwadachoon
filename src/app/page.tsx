@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { DataProvider, useData } from "../context/DataContext";
+import { DataProvider, useData, AdminMode } from "../context/DataContext";
 import { Dashboard } from "../components/Dashboard";
 import { HTSLogoBackground } from "../components/HTSLogoBackground";
 import { ParticlesCanvas } from "../components/ParticlesCanvas";
@@ -47,8 +47,10 @@ const MainContent: React.FC<MainContentProps> = ({ onBack }) => {
   );
 };
 
+export type ActiveModule = 'landing' | { type: 'admin', mode: AdminMode };
+
 const AppContent = () => {
-  const [activeModule, setActiveModule] = useState<'landing' | 'admin'>('landing');
+  const [activeModule, setActiveModule] = useState<ActiveModule>('landing');
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
@@ -68,24 +70,24 @@ const AppContent = () => {
   }
 
   return (
-    <DataProvider>
-      <main className="min-h-screen relative overflow-hidden bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 transition-colors duration-500">
-        <HTSLogoBackground />
-        <ParticlesCanvas />
-        
-        {activeModule === 'landing' ? (
-          <LandingPortals onSelectAdmin={() => setActiveModule('admin')} />
-        ) : (
+    <main className="min-h-screen relative overflow-hidden bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 transition-colors duration-500">
+      <HTSLogoBackground />
+      <ParticlesCanvas />
+      
+      {activeModule === 'landing' ? (
+        <LandingPortals onSelectAdmin={(mode: AdminMode) => setActiveModule({ type: 'admin', mode })} />
+      ) : (
+        <DataProvider mode={activeModule.mode}>
           <MainContent onBack={() => setActiveModule('landing')} />
-        )}
+        </DataProvider>
+      )}
 
-        <div className="absolute bottom-4 left-0 w-full text-center z-10 pointer-events-none">
-          <p className="text-xs md:text-sm text-slate-500/80 dark:text-slate-400/80 font-medium tracking-wide">
-            © ٢٠٢٦ - دروستکراوە لەلایەن بەشی کارگێڕی HTS-HQ
-          </p>
-        </div>
-      </main>
-    </DataProvider>
+      <div className="absolute bottom-4 left-0 w-full text-center z-10 pointer-events-none">
+        <p className="text-xs md:text-sm text-slate-500/80 dark:text-slate-400/80 font-medium tracking-wide">
+          © ٢٠٢٦ - دروستکراوە لەلایەن بەشی کارگێڕی HTS-HQ
+        </p>
+      </div>
+    </main>
   );
 };
 

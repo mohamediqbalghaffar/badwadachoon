@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useMemo } from "react";
 import { DashboardData, SentLetterData } from "../utils/parser";
 
 export type ActiveView = 'received' | 'sent' | 'comparison';
+export type AdminMode = 'live' | 'local';
 
 interface FilterState {
   dateRange: { start: string | null; end: string | null };
@@ -34,11 +35,12 @@ interface DataContextType {
   isPresentationMode: boolean;
   setIsPresentationMode: React.Dispatch<React.SetStateAction<boolean>>;
   dbLoading: boolean;
+  mode: AdminMode;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
-export const DataProvider = ({ children }: { children: React.ReactNode }) => {
+export const DataProvider = ({ children, mode }: { children: React.ReactNode, mode: AdminMode }) => {
   const [data, setData] = useState<DashboardData[]>([]);
   const [sentData, setSentData] = useState<SentLetterData[]>([]);
   const [activeView, setActiveView] = useState<ActiveView>('received');
@@ -54,6 +56,11 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Fetch initial data from DB on mount
   React.useEffect(() => {
+    if (mode === 'local') {
+      setDbLoading(false);
+      return;
+    }
+
     const fetchFromDb = async () => {
       try {
         setDbLoading(true);
@@ -78,7 +85,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     fetchFromDb();
-  }, []);
+  }, [mode]);
 
   // === RECEIVED DATA FILTERS ===
 
@@ -173,7 +180,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
         filters, setFilters, clearFilters,
         activeView, setActiveView,
         isPresentationMode, setIsPresentationMode,
-        dbLoading,
+        dbLoading, mode,
       }}
     >
       {children}

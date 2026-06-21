@@ -2,13 +2,16 @@
 
 import React, { useState } from "react";
 import { HTSLogo } from "./HTSLogoBackground";
+import { Database, Laptop, X } from "lucide-react";
+import { AdminMode } from "../context/DataContext";
 
 interface LandingPortalsProps {
-  onSelectAdmin: () => void;
+  onSelectAdmin: (mode: AdminMode) => void;
 }
 
 export const LandingPortals: React.FC<LandingPortalsProps> = ({ onSelectAdmin }) => {
   const [toast, setToast] = useState<string | null>(null);
+  const [showModeModal, setShowModeModal] = useState(false);
 
   const showToast = (message: string) => {
     setToast(message);
@@ -35,7 +38,7 @@ export const LandingPortals: React.FC<LandingPortalsProps> = ({ onSelectAdmin })
 
         {/* کارگێڕی (Active) */}
         <button
-          onClick={onSelectAdmin}
+          onClick={() => setShowModeModal(true)}
           className={`${liquidGlassClasses} ring-blue-400/30 dark:ring-blue-500/30 hover:shadow-blue-500/20 dark:hover:shadow-blue-500/20`}
         >
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-blue-600/0 dark:from-blue-500/20 dark:to-blue-600/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -56,6 +59,52 @@ export const LandingPortals: React.FC<LandingPortalsProps> = ({ onSelectAdmin })
       {toast && (
         <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 backdrop-blur-xl bg-slate-800/90 dark:bg-slate-200/90 border border-white/20 text-white dark:text-slate-900 px-6 py-3 rounded-full shadow-2xl font-medium text-sm animate-in fade-in slide-in-from-bottom-4 duration-300 z-50">
           {toast}
+        </div>
+      )}
+
+      {/* Mode Selection Modal */}
+      {showModeModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-200 dark:border-slate-800">
+            
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-900/50">
+              <h2 className="text-xl font-bold text-slate-800 dark:text-white">جۆری چوونەژوورەوە</h2>
+              <button 
+                onClick={() => setShowModeModal(false)}
+                className="p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-300 rounded-full transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <button 
+                onClick={() => { setShowModeModal(false); onSelectAdmin('live'); }}
+                className="w-full group overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-500 transition-colors bg-slate-50 dark:bg-slate-800/50 p-5 flex items-center gap-4 text-right"
+              >
+                <div className="p-3 bg-white dark:bg-slate-800 rounded-full shadow-sm text-blue-500 group-hover:scale-110 transition-transform">
+                  <Database size={24} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-1">داتابەیسی سەرهێڵ (Online Live)</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">بینین و بارکردنی داتا ڕاستەوخۆ لەسەر داتابەیسی سەرەکی.</p>
+                </div>
+              </button>
+
+              <button 
+                onClick={() => { setShowModeModal(false); onSelectAdmin('local'); }}
+                className="w-full group overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-emerald-500 dark:hover:border-emerald-500 transition-colors bg-slate-50 dark:bg-slate-800/50 p-5 flex items-center gap-4 text-right"
+              >
+                <div className="p-3 bg-white dark:bg-slate-800 rounded-full shadow-sm text-emerald-500 group-hover:scale-110 transition-transform">
+                  <Laptop size={24} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-1">داتای لۆکاڵی کاتی (Local Upload)</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">بینینی داتا بە شێوەی کاتی تەنها لەسەر ئەم ئامێرە (سەیڤ نابێت).</p>
+                </div>
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
