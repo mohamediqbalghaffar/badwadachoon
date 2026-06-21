@@ -132,31 +132,29 @@ export const Dashboard = () => {
           </div>
 
           {/* 3-Segment View Switcher */}
-          {sentData.length > 0 && (
-            <div className="flex justify-center mb-6 animate-fade-up delay-100">
-              <div className="inline-flex items-center p-1.5 rounded-2xl glass glass-card shadow-lg border border-white/20 dark:border-slate-700/50 gap-1">
-                {VIEW_SEGMENTS.map((seg) => {
-                  const isActive = activeView === seg.key;
-                  return (
-                    <button
-                      key={seg.key}
-                      onClick={() => handleViewChange(seg.key)}
-                      className={`relative flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 cursor-pointer select-none whitespace-nowrap ${
-                        isActive
-                          ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/25 scale-[1.02]'
-                          : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-slate-200'
-                      }`}
-                    >
-                      <span className={`transition-transform duration-300 ${isActive ? 'scale-110' : ''}`}>
-                        {seg.icon}
-                      </span>
-                      <span className="hidden sm:inline">{seg.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
+          <div className="flex justify-center mb-6 animate-fade-up delay-100">
+            <div className="inline-flex items-center p-1.5 rounded-2xl glass glass-card shadow-lg border border-white/20 dark:border-slate-700/50 gap-1">
+              {VIEW_SEGMENTS.map((seg) => {
+                const isActive = activeView === seg.key;
+                return (
+                  <button
+                    key={seg.key}
+                    onClick={() => handleViewChange(seg.key)}
+                    className={`relative flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 cursor-pointer select-none whitespace-nowrap ${
+                      isActive
+                        ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/25 scale-[1.02]'
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-slate-200'
+                    }`}
+                  >
+                    <span className={`transition-transform duration-300 ${isActive ? 'scale-110' : ''}`}>
+                      {seg.icon}
+                    </span>
+                    <span className="hidden sm:inline">{seg.label}</span>
+                  </button>
+                );
+              })}
             </div>
-          )}
+          </div>
 
           {/* Main Content — Conditional on activeView */}
           {activeView === 'received' && (
