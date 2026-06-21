@@ -92,7 +92,12 @@ export const FileUploader = () => {
       });
 
       if (!uploadRes.ok) {
-        throw new Error("سێرڤەر نەیتوانی پەڕگەکە پاشەکەوت بکات.");
+        let errorDetails = "";
+        try {
+          const resJson = await uploadRes.json();
+          errorDetails = resJson.details || resJson.error || uploadRes.statusText;
+        } catch(e) {}
+        throw new Error(`سێرڤەر نەیتوانی پەڕگەکە پاشەکەوت بکات. ${errorDetails ? `(${errorDetails})` : ''}`);
       }
 
       // 3. Set data in UI
