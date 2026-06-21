@@ -39,9 +39,12 @@ export interface ParseResult {
 
 const normalizeHeader = (str: string): string => {
   return str
-    .replace(/\s+/g, "") // remove all whitespace
+    .replace(/[\s\u200B-\u200D\uFEFF]/g, "") // remove all whitespace and zero-width chars
     .replace(/[\u064A\u0649\u06CE\u06CC]/g, "ی") // normalize all Ye variants
-    .replace(/[\u0647\u0629\u06D5]/g, "ە"); // normalize Heh/Teh Marbuta/Kurdish Ae
+    .replace(/[\u0647\u0629\u06D5\u06C0]/g, "ە") // normalize Heh/Teh Marbuta/Kurdish Ae/Heh with Yeh above
+    .replace(/ڕ/g, "ر") // normalize Rha to Ra for looser matching
+    .replace(/ڵ/g, "ل") // normalize Lla to La for looser matching
+    .replace(/ێ/g, "ی"); // normalize E to Ye for looser matching
 };
 
 // Map Kurdish headers to English keys for Sheet 1 (Received Letters)
@@ -74,18 +77,29 @@ const SentHeaderMap: Record<string, keyof SentLetterData> = {
 };
 
 // Known sheet names (with normalized matching)
-const RECEIVED_SHEET_NAMES = ["وەڵامی نووسراوە نێردراوەکان"];
-const SENT_SHEET_NAMES = ["سەرجەم نووسراوە ڕەوانەکراوەکان"];
+const RECEIVED_SHEET_NAMES = [
+  "وەڵامی نووسراوە نێردراوەکان",
+  "وەڵامەکان",
+  "هاتوو"
+];
+const SENT_SHEET_NAMES = [
+  "سەرجەم نووسراوە ڕەوانەکراوەکان",
+  "سەرجەم ڕەوانەکراوەکان",
+  "نووسراوە ڕەوانەکراوەکان",
+  "ڕەوانەکراوەکان",
+  "دەرچوو"
+];
 
 const findSheetByName = (workbook: XLSX.WorkBook, targetNames: string[]): XLSX.WorkSheet | null => {
   for (const sheetName of workbook.SheetNames) {
     const normSheet = normalizeHeader(sheetName);
     for (const target of targetNames) {
-      if (normSheet === normalizeHeader(target)) {
+      const normTarget = normalizeHeader(target);
+      if (normSheet === normTarget) {
         return workbook.Sheets[sheetName];
       }
       // Also try substring match
-      if (normSheet.includes(normalizeHeader(target)) || normalizeHeader(target).includes(normSheet)) {
+      if (normSheet.includes(normTarget) || normTarget.includes(normSheet)) {
         return workbook.Sheets[sheetName];
       }
     }
