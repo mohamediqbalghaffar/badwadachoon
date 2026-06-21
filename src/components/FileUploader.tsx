@@ -17,26 +17,73 @@ export const FileUploader = () => {
   useEffect(() => {
     const fetchLatestData = async () => {
       try {
+        // 1. Instantly load from cache if available
+        const cachedDataStr = localStorage.getItem("dashboard_data");
+        const cachedTimeStr = localStorage.getItem("dashboard_last_updated");
+        
+        if (cachedDataStr && cachedTimeStr) {
+          try {
+            const cachedData = JSON.parse(cachedDataStr);
+            if (cachedData.receivedData && cachedData.sentData) {
+              setData(cachedData.receivedData);
+              setSentData(cachedData.sentData);
+            }
+          } catch(e) {
+             console.error("Cache corrupted, clearing...");
+             localStorage.removeItem("dashboard_data");
+             localStorage.removeItem("dashboard_last_updated");
+          }
+        }
+
+        // 2. Check server for new version
         const res = await fetch("/api/data");
         if (res.ok) {
-          const { url } = await res.json();
+          const { url, uploadedAt } = await res.json();
           if (url) {
-            setLoadingText("دابەزاندنی پەڕگە...");
+            // Compare timestamps
+            if (cachedTimeStr && uploadedAt === cachedTimeStr) {
+              console.log("Local cache is up to date!");
+              return; // We already loaded the freshest data
+            }
+
+            // We need to download new data
+            if (!cachedDataStr) {
+               setLoadingText("دابەزاندنی پەڕگە...");
+            } else {
+               // Silently download in background if we already showed cached data
+               console.log("Newer data found on server, downloading in background...");
+            }
+
             const fileRes = await fetch(url);
             const blob = await fileRes.blob();
             const file = new File([blob], "latest_data.xlsx", { type: blob.type });
-            setLoadingText("شیکردنەوەی داتا...");
+            
+            if (!cachedDataStr) {
+              setLoadingText("شیکردنەوەی داتا...");
+            }
+            
             const result = await parseFile(file);
             setData(result.receivedData);
             setSentData(result.sentData);
+
+            // Update cache
+            try {
+              localStorage.setItem("dashboard_data", JSON.stringify(result));
+              localStorage.setItem("dashboard_last_updated", uploadedAt || new Date().toISOString());
+            } catch(e) {
+              console.warn("Could not cache to localStorage (possibly too large)", e);
+            }
             return;
           }
         }
       } catch (err) {
         console.error("Failed to fetch initial data:", err);
       }
-      // If we reach here, no data was loaded
-      setIsLoading(false);
+      
+      // If we reach here and have no cached data, stop loading
+      if (!localStorage.getItem("dashboard_data")) {
+        setIsLoading(false);
+      }
     };
 
     fetchLatestData();
@@ -100,9 +147,21 @@ export const FileUploader = () => {
         throw new Error(`سێرڤەر نەیتوانی پەڕگەکە پاشەکەوت بکات. ${errorDetails ? `(${errorDetails})` : ''}`);
       }
 
+      const uploadedBlob = await uploadRes.json();
+
       // 3. Set data in UI
       setData(result.receivedData);
       setSentData(result.sentData);
+
+      // 4. Update local cache with new data
+      try {
+        localStorage.setItem("dashboard_data", JSON.stringify(result));
+        if (uploadedBlob.uploadedAt) {
+          localStorage.setItem("dashboard_last_updated", uploadedBlob.uploadedAt);
+        }
+      } catch(e) {
+        console.warn("Could not cache to localStorage", e);
+      }
     } catch (err: any) {
       setError(err.message || "هەڵەیەک ڕوویدا لە کاتی خوێندنەوەی پەڕگەکە.");
       console.error(err);

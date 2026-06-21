@@ -222,7 +222,7 @@ export const parseFile = async (file: File): Promise<ParseResult> => {
     reader.onload = (e) => {
       try {
         const data = e.target?.result;
-        const workbook = XLSX.read(data, { type: "binary", cellDates: true });
+        const workbook = XLSX.read(data, { type: "array", cellDates: true });
 
         // --- Parse Sheet 1 (Received Letters) ---
         let receivedSheet = findSheetByName(workbook, RECEIVED_SHEET_NAMES);
@@ -250,6 +250,6 @@ export const parseFile = async (file: File): Promise<ParseResult> => {
       reject(error);
     };
 
-    reader.readAsBinaryString(file);
+    reader.readAsArrayBuffer(file);
   });
 };
