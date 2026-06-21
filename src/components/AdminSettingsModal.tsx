@@ -34,15 +34,33 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose 
       
       setSyncStatus({ type: 'idle', message: 'بەرزکردنەوە بۆ داتابەیس...' });
 
-      // 2. Sync to Database
-      const res = await fetch('/api/db/sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(parsedData)
-      });
+      // 2. Sync to Database in chunks to avoid payload limits
+      const CHUNK_SIZE = 500;
+      const totalReceived = parsedData.receivedData.length;
+      const totalSent = parsedData.sentData.length;
+      const maxLen = Math.max(totalReceived, totalSent);
+      const totalChunks = Math.max(1, Math.ceil(maxLen / CHUNK_SIZE));
 
-      if (!res.ok) {
-        throw new Error('سێرڤەر نەیتوانی داتابەیس نوێ بکاتەوە');
+      for (let i = 0; i < totalChunks; i++) {
+        setSyncStatus({ type: 'idle', message: `بەرزکردنەوەی بەشەکان... ${i + 1} لە ${totalChunks}` });
+
+        const rChunk = parsedData.receivedData.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+        const sChunk = parsedData.sentData.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+
+        const res = await fetch('/api/db/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            receivedData: rChunk,
+            sentData: sChunk,
+            isFirstChunk: i === 0,
+            isLastChunk: i === totalChunks - 1
+          })
+        });
+
+        if (!res.ok) {
+          throw new Error('سێرڤەر نەیتوانی داتابەیس نوێ بکاتەوە');
+        }
       }
 
       // 3. Update local state
@@ -108,7 +126,7 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose 
                 accept=".xlsx, .xls"
                 onChange={handleFileUpload}
                 disabled={isSyncing}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed z-10"
               />
             </div>
 
