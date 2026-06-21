@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { X, UploadCloud, Download, Database, AlertCircle, CheckCircle2 } from "lucide-react";
+import { X, UploadCloud, Download, Database, AlertCircle, CheckCircle2, Trash2 } from "lucide-react";
 import * as XLSX from "xlsx";
 import { useData } from "../context/DataContext";
 import { parseFile } from "../utils/parser";
@@ -19,6 +19,34 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose 
 
   const handleExport = () => {
     window.open('/api/db/export', '_blank');
+  };
+
+  const handleDeleteData = async () => {
+    if (!window.confirm('دڵنیایت لە سڕینەوەی سەرجەم داتاکان؟ ئەم کارە هەڵناوەشێتەوە!')) return;
+
+    setIsSyncing(true);
+    setSyncStatus({ type: 'idle', message: 'سڕینەوەی داتابەیس...' });
+
+    try {
+      const clearRes = await fetch('/api/db/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clearFirst: true, receivedData: [], sentData: [] })
+      });
+
+      if (!clearRes.ok) {
+        throw new Error('سێرڤەر نەیتوانی داتابەیس بسڕێتەوە');
+      }
+
+      setData([]);
+      setSentData([]);
+      setSyncStatus({ type: 'success', message: 'داتابەیس بە سەرکەوتوویی سڕایەوە!' });
+    } catch (error: any) {
+      console.error(error);
+      setSyncStatus({ type: 'error', message: error.message || 'هەڵەیەک ڕوویدا' });
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -138,7 +166,7 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose 
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 gap-4">
+          <div className="grid sm:grid-cols-3 gap-4">
             
             {/* Import Card */}
             <div className="relative group overflow-hidden rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-500 transition-colors bg-slate-50 dark:bg-slate-800/50 p-6 flex flex-col items-center justify-center gap-4 text-center">
@@ -146,7 +174,7 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose 
                 <UploadCloud size={32} />
               </div>
               <div>
-                <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-1">بارکردنی داتابەیس (ئێکسڵ)</h3>
+                <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-1">بارکردنی داتابەیس</h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">فایلی .xlsx لێرە هەڵبژێرە</p>
               </div>
               <input 
@@ -169,8 +197,23 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose 
                 <Download size={32} />
               </div>
               <div>
-                <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-1">دابەزاندنی داتابەیس (ئێکسڵ)</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">سەرجەم داتاکان بە فایلی ئێکسڵ</p>
+                <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-1">دابەزاندنی داتابەیس</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">سەرجەم داتاکان بە ئێکسڵ</p>
+              </div>
+            </button>
+
+            {/* Delete Card */}
+            <button 
+              onClick={handleDeleteData}
+              disabled={isSyncing}
+              className="group overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-rose-500 dark:hover:border-rose-500 transition-colors bg-slate-50 dark:bg-slate-800/50 p-6 flex flex-col items-center justify-center gap-4 text-center disabled:opacity-50"
+            >
+              <div className="p-4 bg-white dark:bg-slate-800 rounded-full shadow-sm text-rose-500 group-hover:scale-110 transition-transform">
+                <Trash2 size={32} />
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-1">سڕینەوەی داتابەیس</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">سڕینەوەی سەرجەم داتاکان</p>
               </div>
             </button>
             
