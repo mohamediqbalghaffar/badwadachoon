@@ -5,6 +5,10 @@ export interface DashboardData {
   id: string | number;
   subject: string;
   department: string;
+  departments: string[];
+  dept1?: string;
+  dept2?: string;
+  dept3?: string;
   refCode: string;
   letterType: string;
   sentDate: string | null;
@@ -17,6 +21,10 @@ export interface SentLetterData {
   id: string | number;
   subject: string;
   department: string;
+  departments: string[];
+  dept1?: string;
+  dept2?: string;
+  dept3?: string;
   refCode: string;
   letterType: string;
   sentDate: string | null;
@@ -38,7 +46,9 @@ const normalizeHeader = (str: string): string => {
 const ReceivedHeaderMap: Record<string, keyof DashboardData> = {
   "#": "id",
   "بابەت": "subject",
-  "لایەنی پەیوەندیدار 3": "department",
+  "لایەنی پەیوەندیدار 1": "dept1",
+  "لایەنی پەیوەندیدار 2": "dept2",
+  "لایەنی پەیوەندیدار 3": "dept3",
   "جۆر": "refCode",
   "جۆری نامە": "letterType",
   "ڕۆژی ناردن": "sentDate",
@@ -53,7 +63,9 @@ const ReceivedHeaderMap: Record<string, keyof DashboardData> = {
 const SentHeaderMap: Record<string, keyof SentLetterData> = {
   "#": "id",
   "بابەت": "subject",
-  "لایەنی پەیوەندیدار 3": "department",
+  "لایەنی پەیوەندیدار 1": "dept1",
+  "لایەنی پەیوەندیدار 2": "dept2",
+  "لایەنی پەیوەندیدار 3": "dept3",
   "جۆر": "refCode",
   "جۆری نامە": "letterType",
   "ڕۆژی ناردن": "sentDate",
@@ -163,10 +175,13 @@ const parseReceivedSheet = (worksheet: XLSX.WorkSheet): DashboardData[] => {
       ['processingTime']
     );
 
+    const depts = [item.dept1, item.dept2, item.dept3].filter(Boolean) as string[];
+
     return {
       id: item.id || index + 1,
       subject: item.subject || "نەزانراو",
-      department: item.department || "نەزانراو",
+      department: depts.length > 0 ? depts.join(", ") : "نەزانراو",
+      departments: depts,
       refCode: item.refCode || "-",
       letterType: item.letterType || "گشتی",
       sentDate: item.sentDate || null,
@@ -188,10 +203,13 @@ const parseSentSheet = (worksheet: XLSX.WorkSheet): SentLetterData[] => {
       []
     );
 
+    const depts = [item.dept1, item.dept2, item.dept3].filter(Boolean) as string[];
+
     return {
       id: item.id || index + 1,
       subject: item.subject || "نەزانراو",
-      department: item.department || "نەزانراو",
+      department: depts.length > 0 ? depts.join(", ") : "نەزانراو",
+      departments: depts,
       refCode: item.refCode || "-",
       letterType: item.letterType || "گشتی",
       sentDate: item.sentDate || null,

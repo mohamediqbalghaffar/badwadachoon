@@ -28,8 +28,11 @@ export const DataTable = () => {
     let sortableItems = [...searchedData];
     if (sortConfig !== null) {
       sortableItems.sort((a, b) => {
-        let aVal = a[sortConfig.key];
-        let bVal = b[sortConfig.key];
+        let aVal: any = a[sortConfig.key] ?? "";
+        let bVal: any = b[sortConfig.key] ?? "";
+
+        if (Array.isArray(aVal)) aVal = aVal.join(", ");
+        if (Array.isArray(bVal)) bVal = bVal.join(", ");
 
         if (aVal === null) return 1;
         if (bVal === null) return -1;

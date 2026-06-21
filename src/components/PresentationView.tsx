@@ -56,7 +56,9 @@ export const PresentationView = () => {
   const deptData = useMemo(() => {
     const counts: Record<string, number> = {};
     baseFilteredData.forEach((d) => {
-      counts[d.department] = (counts[d.department] || 0) + 1;
+      d.departments.forEach((dept) => {
+        counts[dept] = (counts[dept] || 0) + 1;
+      });
     });
     return Object.entries(counts)
       .map(([name, count]) => {
@@ -203,7 +205,9 @@ export const PresentationView = () => {
     const deptPending: Record<string, number> = {};
     baseFilteredData.forEach((item) => {
       if (!item.responseDate) {
-        deptPending[item.department] = (deptPending[item.department] || 0) + 1;
+        item.departments.forEach((dept) => {
+          deptPending[dept] = (deptPending[dept] || 0) + 1;
+        });
       }
     });
     return Object.entries(deptPending)
@@ -257,7 +261,9 @@ export const PresentationView = () => {
 
   const sentDeptData = useMemo(() => {
     const counts: Record<string, number> = {};
-    baseFilteredSentData.forEach((d) => counts[d.department] = (counts[d.department] || 0) + 1);
+    baseFilteredSentData.forEach((d) => {
+      d.departments.forEach((dept) => counts[dept] = (counts[dept] || 0) + 1);
+    });
     return Object.entries(counts).map(([name, count]) => {
          const cleanName = name.replace('بەشی ', '').replace('سێکتەری ', '');
          const words = cleanName.split(' ').filter(w => w.length > 1 && w !== 'و');
@@ -306,13 +312,17 @@ export const PresentationView = () => {
     const sentCounts: Record<string, number> = {};
 
     baseFilteredData.forEach(d => {
-      depts.add(d.department);
-      receivedCounts[d.department] = (receivedCounts[d.department] || 0) + 1;
+      d.departments.forEach((dept) => {
+        depts.add(dept);
+        receivedCounts[dept] = (receivedCounts[dept] || 0) + 1;
+      });
     });
 
     baseFilteredSentData.forEach(d => {
-      depts.add(d.department);
-      sentCounts[d.department] = (sentCounts[d.department] || 0) + 1;
+      d.departments.forEach((dept) => {
+        depts.add(dept);
+        sentCounts[dept] = (sentCounts[dept] || 0) + 1;
+      });
     });
 
     return Array.from(depts).map(name => {

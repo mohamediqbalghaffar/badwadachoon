@@ -58,7 +58,7 @@ const SentKPICards = () => {
   const totalLetters = baseFilteredSentData.length;
 
   const uniqueDepartments = useMemo(() => {
-    const set = new Set(baseFilteredSentData.map((d) => d.department));
+    const set = new Set(baseFilteredSentData.flatMap((d) => d.departments));
     return set.size;
   }, [baseFilteredSentData]);
 
@@ -123,7 +123,9 @@ const SentCharts = () => {
   const deptData = useMemo(() => {
     const counts: Record<string, number> = {};
     filteredSentData.forEach((d) => {
-      counts[d.department] = (counts[d.department] || 0) + 1;
+      d.departments.forEach((dept) => {
+        counts[dept] = (counts[dept] || 0) + 1;
+      });
     });
     return Object.entries(counts)
       .map(([name, count]) => {
@@ -339,8 +341,11 @@ const SentDataTable = () => {
     const sortableItems = [...searchedData];
     if (sortConfig !== null) {
       sortableItems.sort((a, b) => {
-        const aVal = a[sortConfig.key];
-        const bVal = b[sortConfig.key];
+        let aVal: any = a[sortConfig.key] ?? "";
+        let bVal: any = b[sortConfig.key] ?? "";
+
+        if (Array.isArray(aVal)) aVal = aVal.join(", ");
+        if (Array.isArray(bVal)) bVal = bVal.join(", ");
 
         if (aVal === null) return 1;
         if (bVal === null) return -1;

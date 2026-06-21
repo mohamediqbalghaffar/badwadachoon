@@ -116,7 +116,7 @@ export const OmniFilter = () => {
 
   // Extract unique options from the appropriate dataset based on activeView
   const activeData = activeView === 'sent' ? sentData : data;
-  const departments = useMemo(() => Array.from(new Set(activeData.map((d) => d.department))), [activeData]);
+  const departments = useMemo(() => Array.from(new Set(activeData.flatMap((d) => d.departments))), [activeData]);
   const letterTypes = useMemo(() => Array.from(new Set(activeData.map((d) => d.letterType))), [activeData]);
   const slaStatuses = useMemo(() => {
     if (activeView === 'sent') return [];

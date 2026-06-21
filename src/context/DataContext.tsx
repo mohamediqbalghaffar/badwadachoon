@@ -65,7 +65,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       // Department filter
-      if (filters.departments.length > 0 && !filters.departments.includes(item.department)) {
+      if (filters.departments.length > 0 && !item.departments.some(d => filters.departments.includes(d))) {
         return false;
       }
 
@@ -107,7 +107,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       // Department filter
-      if (filters.departments.length > 0 && !filters.departments.includes(item.department)) {
+      if (filters.departments.length > 0 && !item.departments.some(d => filters.departments.includes(d))) {
         return false;
       }
 

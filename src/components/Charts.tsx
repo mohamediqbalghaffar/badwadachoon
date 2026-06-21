@@ -61,7 +61,9 @@ export const DashboardCharts = () => {
   const deptData = useMemo(() => {
     const counts: Record<string, number> = {};
     filteredData.forEach((d) => {
-      counts[d.department] = (counts[d.department] || 0) + 1;
+      d.departments.forEach((dept) => {
+        counts[dept] = (counts[dept] || 0) + 1;
+      });
     });
     return Object.entries(counts)
       .map(([name, count]) => {

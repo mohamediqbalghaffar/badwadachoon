@@ -49,11 +49,15 @@ export const ComparisonView = () => {
     const sentCounts: Record<string, number> = {};
 
     baseFilteredData.forEach((d) => {
-      receivedCounts[d.department] = (receivedCounts[d.department] || 0) + 1;
+      d.departments.forEach((dept) => {
+        receivedCounts[dept] = (receivedCounts[dept] || 0) + 1;
+      });
     });
 
     baseFilteredSentData.forEach((d) => {
-      sentCounts[d.department] = (sentCounts[d.department] || 0) + 1;
+      d.departments.forEach((dept) => {
+        sentCounts[dept] = (sentCounts[dept] || 0) + 1;
+      });
     });
 
     const allDepts = new Set([...Object.keys(receivedCounts), ...Object.keys(sentCounts)]);
