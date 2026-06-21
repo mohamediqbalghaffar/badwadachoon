@@ -78,30 +78,36 @@ export const Dashboard = () => {
                     <button 
                       onClick={() => setIsAdminSettingsOpen(true)}
                       title="ڕێکخستنەکانی داتابەیس"
-                      className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:text-slate-400 dark:hover:bg-blue-500/10 rounded-xl transition-colors flex items-center gap-2"
+                      className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:text-slate-400 dark:hover:bg-blue-500/10 rounded-xl transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
                     >
-                      <Settings size={20} />
+                      <Settings size={20} className={isAdminSettingsOpen ? "animate-spin-slow text-blue-500" : ""} />
                     </button>
                     <div className="w-px h-8 bg-slate-200 dark:bg-slate-700 mx-1"></div>
                   </>
                 )}
 
-                <div className="flex flex-col items-end">
-                  <span className="text-sm font-bold text-slate-800 dark:text-slate-100 capitalize">{user.username}</span>
-                  <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
-                    {user.role === 'admin' && <ShieldCheck size={12} className="text-blue-500" />}
-                    {user.role === 'admin' ? 'بەڕێوەبەر' : user.role === 'user' ? 'بەکارهێنەر' : 'بینەر'}
-                  </span>
-                </div>
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white ${user.role === 'admin' ? 'bg-blue-500' : user.role === 'user' ? 'bg-indigo-500' : 'bg-teal-500'}`}>
-                  <User size={20} />
-                </div>
+                <button 
+                  onClick={() => user.role === 'admin' && setIsAdminSettingsOpen(true)}
+                  className={`flex items-center gap-3 p-1.5 pr-4 rounded-full transition-all duration-300 ${user.role === 'admin' ? 'cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 hover:shadow-sm' : 'cursor-default'}`}
+                  title={user.role === 'admin' ? 'کردنەوەی ڕێکخستنەکان' : ''}
+                >
+                  <div className="flex flex-col items-end">
+                    <span className="text-sm font-bold text-slate-800 dark:text-slate-100 capitalize">{user.username}</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                      {user.role === 'admin' && <ShieldCheck size={12} className="text-blue-500" />}
+                      {user.role === 'admin' ? 'بەڕێوەبەر' : user.role === 'user' ? 'بەکارهێنەر' : 'بینەر'}
+                    </span>
+                  </div>
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white shadow-inner transition-transform group-hover:scale-105 ${user.role === 'admin' ? 'bg-gradient-to-br from-blue-500 to-indigo-600' : user.role === 'user' ? 'bg-gradient-to-br from-indigo-500 to-violet-600' : 'bg-gradient-to-br from-teal-500 to-emerald-600'}`}>
+                    <User size={20} />
+                  </div>
+                </button>
                 
                 <div className="w-px h-8 bg-slate-200 dark:bg-slate-700 mx-1"></div>
                 <button 
                   onClick={logout}
                   title="چوونەدەرەوە"
-                  className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl transition-colors"
+                  className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl transition-all hover:scale-105 active:scale-95"
                 >
                   <LogOut size={20} />
                 </button>
@@ -171,6 +177,8 @@ export const Dashboard = () => {
           <PresentationView />
         </div>
       )}
+      {/* Admin Settings Modal */}
+      {isAdminSettingsOpen && <AdminSettingsModal onClose={() => setIsAdminSettingsOpen(false)} />}
     </div>
   );
 };
