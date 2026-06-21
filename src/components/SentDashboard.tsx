@@ -3,7 +3,8 @@
 import React, { useState, useMemo } from "react";
 import { useData } from "../context/DataContext";
 import { SentLetterData } from "../utils/parser";
-import { Send, Building2, FileText, Search, ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
+import { Send, Building2, FileText, Search, ChevronLeft, ChevronRight, ArrowUpDown, Edit2, Trash2, Check, X } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 import {
   BarChart,
   Bar,
@@ -319,11 +320,17 @@ const SentCharts = () => {
 // ─── Data Table ──────────────────────────────────────────────────────────────
 
 const SentDataTable = () => {
-  const { filteredSentData } = useData();
+  const { filteredSentData, setSentData, sentData } = useData();
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState<{ key: keyof SentLetterData; direction: "asc" | "desc" } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 15;
+
+  // Edit states
+  const [editingId, setEditingId] = useState<string | number | null>(null);
+  const [editForm, setEditForm] = useState<Partial<SentLetterData>>({});
+  const [isSaving, setIsSaving] = useState(false);
 
   // Search logic
   const searchedData = useMemo(() => {
@@ -371,6 +378,67 @@ const SentDataTable = () => {
       direction = "desc";
     }
     setSortConfig({ key, direction });
+  };
+
+  const handleEdit = (row: SentLetterData) => {
+    setEditingId(row.id);
+    setEditForm({ ...row });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditForm({});
+  };
+
+  const handleSave = async (id: string | number) => {
+    if (!editForm._raw) return;
+    setIsSaving(true);
+    try {
+      const updatedRaw = { ...editForm._raw };
+      updatedRaw["بابەت"] = editForm.subject;
+      updatedRaw["جۆر"] = editForm.refCode;
+      updatedRaw["جۆری نامە"] = editForm.letterType;
+      
+      const response = await fetch("/api/records", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "edit", sheet: "sent", id, data: updatedRaw }),
+      });
+      
+      if (response.ok) {
+        setSentData(sentData.map(d => d.id === id ? { ...d, ...editForm, _raw: updatedRaw } as SentLetterData : d));
+        setEditingId(null);
+      } else {
+        alert("هەڵەیەک ڕوویدا لە کاتی پاشەکەوتکردن");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("هەڵەیەک ڕوویدا لە کاتی پاشەکەوتکردن");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async (id: string | number) => {
+    if (!confirm("دڵنیایت لە سڕینەوەی ئەم تۆمارە؟")) return;
+    setIsSaving(true);
+    try {
+      const response = await fetch("/api/records", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete", sheet: "sent", id }),
+      });
+      if (response.ok) {
+        setSentData(sentData.filter(d => d.id !== id));
+      } else {
+        alert("هەڵەیەک ڕوویدا لە کاتی سڕینەوە");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("هەڵەیەک ڕوویدا لە کاتی سڕینەوە");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   // Reset page when data changes
@@ -424,6 +492,9 @@ const SentDataTable = () => {
                   </div>
                 </th>
               ))}
+              {(user?.role === 'admin' || user?.role === 'user') && (
+                <th className="px-4 py-3 whitespace-nowrap text-center">کردارەکان</th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -434,15 +505,68 @@ const SentDataTable = () => {
                   className="border-b border-slate-100 dark:border-slate-800/50 hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors"
                 >
                   <td className="px-4 py-3 font-medium text-slate-900 dark:text-slate-100">{row.id}</td>
-                  <td className="px-4 py-3 max-w-xs truncate" title={row.subject}>{row.subject}</td>
-                  <td className="px-4 py-3 whitespace-nowrap">{row.department}</td>
-                  <td className="px-4 py-3 whitespace-nowrap font-mono text-xs">{row.refCode}</td>
+                  <td className="px-4 py-3 max-w-xs truncate" title={row.subject}>
+                    {editingId === row.id ? (
+                      <input 
+                        type="text" 
+                        value={editForm.subject || ''} 
+                        onChange={e => setEditForm({...editForm, subject: e.target.value})}
+                        className="w-full bg-white dark:bg-slate-900 border border-blue-300 rounded px-2 py-1 text-right outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    ) : (row.subject)}
+                  </td>
                   <td className="px-4 py-3 whitespace-nowrap">
-                    <span className="px-2.5 py-1 text-xs font-medium border rounded-full bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400 border-teal-200 dark:border-teal-800">
-                      {row.letterType || "-"}
-                    </span>
+                    {row.departments?.join("، ") || row.dept1}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap font-mono text-xs">
+                    {editingId === row.id ? (
+                      <input 
+                        type="text" 
+                        value={editForm.refCode || ''} 
+                        onChange={e => setEditForm({...editForm, refCode: e.target.value})}
+                        className="w-24 bg-white dark:bg-slate-900 border border-blue-300 rounded px-2 py-1 text-left outline-none focus:ring-2 focus:ring-blue-500"
+                        dir="ltr"
+                      />
+                    ) : (row.refCode)}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    {editingId === row.id ? (
+                      <input 
+                        type="text" 
+                        value={editForm.letterType || ''} 
+                        onChange={e => setEditForm({...editForm, letterType: e.target.value})}
+                        className="w-24 bg-white dark:bg-slate-900 border border-blue-300 rounded px-2 py-1 text-right outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    ) : (
+                      <span className="px-2.5 py-1 text-xs font-medium border rounded-full bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400 border-teal-200 dark:border-teal-800">
+                        {row.letterType || "-"}
+                      </span>
+                    )}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">{row.sentDate || "-"}</td>
+                  {(user?.role === 'admin' || user?.role === 'user') && (
+                    <td className="px-4 py-3 whitespace-nowrap text-center">
+                      {editingId === row.id ? (
+                        <div className="flex items-center justify-center gap-2">
+                          <button onClick={() => handleSave(row.id)} disabled={isSaving} className="p-1.5 bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors" title="پاشەکەوتکردن">
+                            <Check size={16} />
+                          </button>
+                          <button onClick={handleCancelEdit} disabled={isSaving} className="p-1.5 bg-slate-100 text-slate-700 rounded hover:bg-slate-200 transition-colors" title="پاشگەزبوونەوە">
+                            <X size={16} />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center gap-2">
+                          <button onClick={() => handleEdit(row)} className="p-1.5 bg-blue-50 text-blue-600 rounded hover:bg-blue-100 transition-colors" title="دەستکاری">
+                            <Edit2 size={16} />
+                          </button>
+                          <button onClick={() => handleDelete(row.id)} className="p-1.5 bg-red-50 text-red-600 rounded hover:bg-red-100 transition-colors" title="سڕینەوە">
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  )}
                 </tr>
               ))
             ) : (

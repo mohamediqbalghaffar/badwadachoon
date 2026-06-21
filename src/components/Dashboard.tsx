@@ -5,12 +5,12 @@ import { OmniFilter } from "./OmniFilter";
 import { KPICards } from "./KPICards";
 import { DashboardCharts } from "./Charts";
 import { DataTable } from "./DataTable";
-import { useData } from "../context/DataContext";
+import { useData, ActiveView } from "../context/DataContext";
+import { useAuth } from "../context/AuthContext";
 import { PresentationView } from "./PresentationView";
 import { SentDashboard } from "./SentDashboard";
 import { ComparisonView } from "./ComparisonView";
-import { MonitorPlay, X, Inbox, Send, GitCompareArrows } from "lucide-react";
-import { ActiveView } from "../context/DataContext";
+import { MonitorPlay, X, Inbox, Send, GitCompareArrows, LogOut, User, ShieldCheck } from "lucide-react";
 
 const VIEW_SEGMENTS: { key: ActiveView; label: string; icon: React.ReactNode }[] = [
   { key: 'received', label: 'پێویست بە وەڵام', icon: <Inbox size={16} /> },
@@ -20,6 +20,7 @@ const VIEW_SEGMENTS: { key: ActiveView; label: string; icon: React.ReactNode }[]
 
 export const Dashboard = () => {
   const { isPresentationMode, setIsPresentationMode, activeView, setActiveView, sentData, clearFilters } = useData();
+  const { user, logout } = useAuth();
 
   const handleViewChange = (view: ActiveView) => {
     clearFilters();
@@ -56,13 +57,38 @@ export const Dashboard = () => {
       {!isPresentationMode ? (
         <>
           {/* Header */}
-          <div className="mb-8 animate-fade-up">
-            <h1 className="text-3xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-blue-600 to-red-600 dark:from-red-500 dark:via-blue-500 dark:to-red-500 text-gradient-animate pb-2 tracking-tight">
-              بەدواداچوون
-            </h1>
-            <p className="text-slate-500 dark:text-slate-400 mt-2 text-lg animate-fade-up delay-100">
-              {subtitles[activeView]}
-            </p>
+          <div className="mb-8 flex flex-col md:flex-row md:items-start justify-between gap-4 animate-fade-up">
+            <div>
+              <h1 className="text-3xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-blue-600 to-red-600 dark:from-red-500 dark:via-blue-500 dark:to-red-500 text-gradient-animate pb-2 tracking-tight">
+                بەدواداچوون
+              </h1>
+              <p className="text-slate-500 dark:text-slate-400 mt-2 text-lg animate-fade-up delay-100">
+                {subtitles[activeView]}
+              </p>
+            </div>
+
+            {user && (
+              <div className="flex items-center gap-3 bg-white/50 dark:bg-slate-800/50 backdrop-blur-md px-4 py-2 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                <div className="flex flex-col items-end">
+                  <span className="text-sm font-bold text-slate-800 dark:text-slate-100 capitalize">{user.username}</span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                    {user.role === 'admin' && <ShieldCheck size={12} className="text-blue-500" />}
+                    {user.role === 'admin' ? 'بەڕێوەبەر' : user.role === 'user' ? 'بەکارهێنەر' : 'بینەر'}
+                  </span>
+                </div>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white ${user.role === 'admin' ? 'bg-blue-500' : user.role === 'user' ? 'bg-indigo-500' : 'bg-teal-500'}`}>
+                  <User size={20} />
+                </div>
+                <div className="w-px h-8 bg-slate-200 dark:bg-slate-700 mx-1"></div>
+                <button 
+                  onClick={logout}
+                  title="چوونەدەرەوە"
+                  className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl transition-colors"
+                >
+                  <LogOut size={20} />
+                </button>
+              </div>
+            )}
           </div>
 
           {/* 3-Segment View Switcher */}

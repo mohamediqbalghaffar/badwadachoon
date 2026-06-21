@@ -3,14 +3,21 @@
 import React, { useState, useMemo } from "react";
 import { useData } from "../context/DataContext";
 import { DashboardData } from "../utils/parser";
-import { Search, ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, ArrowUpDown, Edit2, Trash2, Check, X } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 export const DataTable = () => {
-  const { filteredData } = useData();
+  const { filteredData, setData, data } = useData();
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState<{ key: keyof DashboardData; direction: "asc" | "desc" } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 15;
+
+  // Edit states
+  const [editingId, setEditingId] = useState<string | number | null>(null);
+  const [editForm, setEditForm] = useState<Partial<DashboardData>>({});
+  const [isSaving, setIsSaving] = useState(false);
 
   // Search logic
   const searchedData = useMemo(() => {
@@ -67,6 +74,71 @@ export const DataTable = () => {
     return "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800";
   };
 
+  const handleEdit = (row: DashboardData) => {
+    setEditingId(row.id);
+    setEditForm({ ...row });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditForm({});
+  };
+
+  const handleSave = async (id: string | number) => {
+    if (!editForm._raw) return;
+    setIsSaving(true);
+    try {
+      // Map edited English keys back to the raw Kurdish keys for saving
+      const updatedRaw = { ...editForm._raw };
+      updatedRaw["بابەت"] = editForm.subject;
+      updatedRaw["جۆر"] = editForm.refCode;
+      updatedRaw["جۆری نامە"] = editForm.letterType;
+      
+      // Assume dept1 was changed if department array was modified? 
+      // For simplicity in this demo, we only safely update single-value fields.
+      
+      const response = await fetch("/api/records", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "edit", sheet: "received", id, data: updatedRaw }),
+      });
+      
+      if (response.ok) {
+        setData(data.map(d => d.id === id ? { ...d, ...editForm, _raw: updatedRaw } as DashboardData : d));
+        setEditingId(null);
+      } else {
+        alert("هەڵەیەک ڕوویدا لە کاتی پاشەکەوتکردن");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("هەڵەیەک ڕوویدا لە کاتی پاشەکەوتکردن");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async (id: string | number) => {
+    if (!confirm("دڵنیایت لە سڕینەوەی ئەم تۆمارە؟")) return;
+    setIsSaving(true);
+    try {
+      const response = await fetch("/api/records", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete", sheet: "received", id }),
+      });
+      if (response.ok) {
+        setData(data.filter(d => d.id !== id));
+      } else {
+        alert("هەڵەیەک ڕوویدا لە کاتی سڕینەوە");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("هەڵەیەک ڕوویدا لە کاتی سڕینەوە");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <div id="data-table-section" className="glass glass-card glass-interactive flex flex-col overflow-hidden mb-8 relative group">
       <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-indigo-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10"></div>
@@ -115,6 +187,9 @@ export const DataTable = () => {
                   </div>
                 </th>
               ))}
+              {(user?.role === 'admin' || user?.role === 'user') && (
+                <th className="px-4 py-3 whitespace-nowrap text-center">کردارەکان</th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -125,9 +200,31 @@ export const DataTable = () => {
                   className="border-b border-slate-100 dark:border-slate-800/50 hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors"
                 >
                   <td className="px-4 py-3 font-medium text-slate-900 dark:text-slate-100">{row.id}</td>
-                  <td className="px-4 py-3 max-w-xs truncate" title={row.subject}>{row.subject}</td>
-                  <td className="px-4 py-3 whitespace-nowrap">{row.department}</td>
-                  <td className="px-4 py-3 whitespace-nowrap font-mono text-xs">{row.refCode}</td>
+                  <td className="px-4 py-3 max-w-xs truncate" title={row.subject}>
+                    {editingId === row.id ? (
+                      <input 
+                        type="text" 
+                        value={editForm.subject || ''} 
+                        onChange={e => setEditForm({...editForm, subject: e.target.value})}
+                        className="w-full bg-white dark:bg-slate-900 border border-blue-300 rounded px-2 py-1 text-right outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    ) : (row.subject)}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    {/* Simplified: Array editing is hard in a single cell, so we keep it read-only for now */}
+                    {row.departments?.join("، ") || row.dept1}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap font-mono text-xs">
+                    {editingId === row.id ? (
+                      <input 
+                        type="text" 
+                        value={editForm.refCode || ''} 
+                        onChange={e => setEditForm({...editForm, refCode: e.target.value})}
+                        className="w-24 bg-white dark:bg-slate-900 border border-blue-300 rounded px-2 py-1 text-left outline-none focus:ring-2 focus:ring-blue-500"
+                        dir="ltr"
+                      />
+                    ) : (row.refCode)}
+                  </td>
                   <td className="px-4 py-3 whitespace-nowrap">{row.sentDate || "-"}</td>
                   <td className="px-4 py-3 whitespace-nowrap">{row.responseDate || <span className="text-amber-500">لە چاوەڕوانیدایە</span>}</td>
                   <td className="px-4 py-3 whitespace-nowrap">{row.processingTime !== null ? row.processingTime : "-"}</td>
@@ -136,6 +233,29 @@ export const DataTable = () => {
                       {row.slaTime || "-"}
                     </span>
                   </td>
+                  {(user?.role === 'admin' || user?.role === 'user') && (
+                    <td className="px-4 py-3 whitespace-nowrap text-center">
+                      {editingId === row.id ? (
+                        <div className="flex items-center justify-center gap-2">
+                          <button onClick={() => handleSave(row.id)} disabled={isSaving} className="p-1.5 bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors" title="پاشەکەوتکردن">
+                            <Check size={16} />
+                          </button>
+                          <button onClick={handleCancelEdit} disabled={isSaving} className="p-1.5 bg-slate-100 text-slate-700 rounded hover:bg-slate-200 transition-colors" title="پاشگەزبوونەوە">
+                            <X size={16} />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center gap-2">
+                          <button onClick={() => handleEdit(row)} className="p-1.5 bg-blue-50 text-blue-600 rounded hover:bg-blue-100 transition-colors" title="دەستکاری">
+                            <Edit2 size={16} />
+                          </button>
+                          <button onClick={() => handleDelete(row.id)} className="p-1.5 bg-red-50 text-red-600 rounded hover:bg-red-100 transition-colors" title="سڕینەوە">
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  )}
                 </tr>
               ))
             ) : (

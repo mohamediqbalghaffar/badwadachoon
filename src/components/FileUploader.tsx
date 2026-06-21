@@ -1,15 +1,46 @@
 "use client";
 
-import React, { useCallback, useState } from "react";
-import { UploadCloud, FileType, CheckCircle, AlertCircle } from "lucide-react";
+import React, { useCallback, useState, useEffect } from "react";
+import { UploadCloud, FileType, AlertCircle, Database } from "lucide-react";
 import { parseFile } from "../utils/parser";
 import { useData } from "../context/DataContext";
+import { useAuth } from "../context/AuthContext";
 
 export const FileUploader = () => {
   const [isDragging, setIsDragging] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadingText, setLoadingText] = useState("خوێندنەوەی داتابەیس لە سێرڤەر...");
   const [error, setError] = useState<string | null>(null);
   const { setData, setSentData } = useData();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    const fetchLatestData = async () => {
+      try {
+        const res = await fetch("/api/data");
+        if (res.ok) {
+          const { url } = await res.json();
+          if (url) {
+            setLoadingText("دابەزاندنی پەڕگە...");
+            const fileRes = await fetch(url);
+            const blob = await fileRes.blob();
+            const file = new File([blob], "latest_data.xlsx", { type: blob.type });
+            setLoadingText("شیکردنەوەی داتا...");
+            const result = await parseFile(file);
+            setData(result.receivedData);
+            setSentData(result.sentData);
+            return;
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch initial data:", err);
+      }
+      // If we reach here, no data was loaded
+      setIsLoading(false);
+    };
+
+    fetchLatestData();
+  }, [setData, setSentData]);
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -41,21 +72,77 @@ export const FileUploader = () => {
 
   const processFile = async (file: File) => {
     setIsLoading(true);
+    setLoadingText("خوێندنەوەی پەڕگەکە...");
     setError(null);
     try {
+      // 1. Parse locally
       const result = await parseFile(file);
       if (result.receivedData.length === 0 && result.sentData.length === 0) {
         throw new Error("پەڕگەکە بەتاڵە یان داتای دروستی تێدا نییە.");
       }
+      
+      // 2. Upload to Vercel Blob
+      setLoadingText("بارکردنی پەڕگە بۆ سێرڤەر (داتابەیس)...");
+      const formData = new FormData();
+      formData.append("file", file);
+      
+      const uploadRes = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!uploadRes.ok) {
+        throw new Error("سێرڤەر نەیتوانی پەڕگەکە پاشەکەوت بکات.");
+      }
+
+      // 3. Set data in UI
       setData(result.receivedData);
       setSentData(result.sentData);
     } catch (err: any) {
-      setError("هەڵەیەک ڕوویدا لە کاتی خوێندنەوەی پەڕگەکە.");
+      setError(err.message || "هەڵەیەک ڕوویدا لە کاتی خوێندنەوەی پەڕگەکە.");
       console.error(err);
-    } finally {
       setIsLoading(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] p-4">
+        <div className="relative w-full max-w-xl p-12 glass glass-card text-center flex flex-col items-center gap-6">
+          <div className="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center animate-pulse">
+            <Database size={32} className="text-blue-600 dark:text-blue-400" />
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center gap-3 justify-center text-blue-600 dark:text-blue-400">
+              <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+              <h2 className="text-xl font-semibold tracking-tight">{loadingText}</h2>
+            </div>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">
+              تکایە چاوەڕێبە...
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (user?.role === "viewer") {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] p-4">
+        <div className="relative w-full max-w-xl p-12 glass glass-card text-center flex flex-col items-center gap-4">
+          <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
+            <Database size={32} />
+          </div>
+          <h2 className="text-xl font-semibold tracking-tight text-slate-700 dark:text-slate-200">
+            هیچ داتایەک نەدۆزرایەوە لە سێرڤەر
+          </h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm">
+            چاوەڕێی کارگێڕی بکە بۆ بارکردنی پەڕگەی داتا.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center justify-center min-h-[60vh] p-4">
@@ -85,7 +172,7 @@ export const FileUploader = () => {
           <label className="cursor-pointer group relative inline-flex items-center justify-center px-8 py-3.5 text-sm font-medium text-white transition-all duration-200 bg-blue-600 rounded-full hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600">
             <span className="relative z-10 flex items-center gap-2">
               <FileType size={18} />
-              هەڵبژاردنی پەڕگە
+              هەڵبژاردنی پەڕگە بۆ بارکردن لە داتابەیس
             </span>
             <input
               type="file"
@@ -95,13 +182,6 @@ export const FileUploader = () => {
               disabled={isLoading}
             />
           </label>
-
-          {isLoading && (
-            <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
-              <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-              <span className="text-sm font-medium">پەڕگەکە دەخوێندرێتەوە...</span>
-            </div>
-          )}
 
           {error && (
             <div className="flex items-center gap-2 text-red-500 bg-red-50 dark:bg-red-900/20 px-4 py-2 rounded-full text-sm">

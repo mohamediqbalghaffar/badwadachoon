@@ -15,6 +15,7 @@ export interface DashboardData {
   responseDate: string | null;
   processingTime: number | null;
   slaTime: string;
+  _raw?: any;
 }
 
 export interface SentLetterData {
@@ -28,6 +29,7 @@ export interface SentLetterData {
   refCode: string;
   letterType: string;
   sentDate: string | null;
+  _raw?: any;
 }
 
 export interface ParseResult {
@@ -139,27 +141,23 @@ const mapRow = <T extends Record<string, any>>(
 
       // Handle dates
       if (dateFields.includes(mappedKey)) {
-        if (finalValue instanceof Date) {
-          finalValue = format(finalValue, 'yyyy-MM-dd');
-        } else if (typeof finalValue === 'number') {
-          const jsDate = new Date((finalValue - (25567 + 2)) * 86400 * 1000);
-          if (!isNaN(jsDate.getTime())) {
-            finalValue = format(jsDate, 'yyyy-MM-dd');
-          } else {
-            finalValue = null;
-          }
-        }
+        finalValue = parseDate(value);
       }
-
-      // Handle integer fields
-      if (intFields.includes(mappedKey) && finalValue !== null) {
-        finalValue = parseInt(finalValue as string, 10);
+      // Handle integers
+      else if (intFields.includes(mappedKey)) {
+        finalValue = typeof value === 'number' ? Math.round(value) : parseInt(String(value), 10);
         if (isNaN(finalValue as number)) finalValue = null;
+      }
+      // Handle strings
+      else if (typeof value === 'string') {
+        finalValue = value.trim();
       }
 
       item[mappedKey] = finalValue;
     }
   }
+
+  item['_raw'] = row;
 
   return item as Partial<T>;
 };

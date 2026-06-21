@@ -9,6 +9,9 @@ import { ParticlesCanvas } from "../components/ParticlesCanvas";
 import { LandingPortals } from "../components/LandingPortals";
 import { ArrowRight } from "lucide-react";
 
+import { AuthProvider, useAuth } from "../context/AuthContext";
+import { LoginPage } from "../components/LoginPage";
+
 interface MainContentProps {
   onBack: () => void;
 }
@@ -35,13 +38,29 @@ const MainContent: React.FC<MainContentProps> = ({ onBack }) => {
   );
 };
 
-export default function Home() {
+const AppContent = () => {
   const [activeModule, setActiveModule] = useState<'landing' | 'admin'>('landing');
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+    </div>;
+  }
+
+  if (!user) {
+    return (
+      <main className="min-h-screen relative overflow-hidden bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 transition-colors duration-500">
+        <HTSLogoBackground />
+        <ParticlesCanvas />
+        <LoginPage />
+      </main>
+    );
+  }
 
   return (
     <DataProvider>
       <main className="min-h-screen relative overflow-hidden bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 transition-colors duration-500">
-        {/* Interactive Motion Graphic Backgrounds */}
         <HTSLogoBackground />
         <ParticlesCanvas />
         
@@ -51,7 +70,6 @@ export default function Home() {
           <MainContent onBack={() => setActiveModule('landing')} />
         )}
 
-        {/* Copyright Footer */}
         <div className="absolute bottom-4 left-0 w-full text-center z-10 pointer-events-none">
           <p className="text-xs md:text-sm text-slate-500/80 dark:text-slate-400/80 font-medium tracking-wide">
             © ٢٠٢٦ - دروستکراوە لەلایەن بەشی کارگێڕی HTS-HQ
@@ -59,5 +77,13 @@ export default function Home() {
         </div>
       </main>
     </DataProvider>
+  );
+};
+
+export default function Home() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
