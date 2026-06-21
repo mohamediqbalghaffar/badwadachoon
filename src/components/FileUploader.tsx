@@ -21,10 +21,11 @@ export const FileUploader = () => {
         const cachedDataStr = localStorage.getItem("dashboard_data");
         const cachedTimeStr = localStorage.getItem("dashboard_last_updated");
         
-        if (cachedDataStr && cachedTimeStr) {
+        if (cachedDataStr) {
           try {
             const cachedData = JSON.parse(cachedDataStr);
             if (cachedData.receivedData && cachedData.sentData) {
+              // Immediately update UI with whatever we have in cache
               setData(cachedData.receivedData);
               setSentData(cachedData.sentData);
             }
@@ -41,7 +42,7 @@ export const FileUploader = () => {
           const { url, uploadedAt } = await res.json();
           if (url) {
             // Compare timestamps
-            if (cachedTimeStr && uploadedAt === cachedTimeStr) {
+            if (cachedDataStr && cachedTimeStr && uploadedAt === cachedTimeStr) {
               console.log("Local cache is up to date!");
               return; // We already loaded the freshest data
             }
@@ -78,10 +79,10 @@ export const FileUploader = () => {
         }
       } catch (err) {
         console.error("Failed to fetch initial data:", err);
-      }
-      
-      // If we reach here and have no cached data, stop loading
-      if (!localStorage.getItem("dashboard_data")) {
+      } finally {
+        // Always stop loading when the process finishes or fails.
+        // If data was loaded, the component will unmount anyway.
+        // If it failed or was empty, this lets the user upload a new file.
         setIsLoading(false);
       }
     };
