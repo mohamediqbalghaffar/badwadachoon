@@ -1,35 +1,45 @@
 "use client";
 
 import React, { useState } from "react";
-import { useAuth } from "../context/AuthContext";
+import { signIn } from "next-auth/react";
 import { HTSLogo } from "./HTSLogoBackground";
-import { Lock, User, KeyRound, ArrowRight, ShieldCheck } from "lucide-react";
+import { KeyRound, ArrowRight, ShieldCheck, User } from "lucide-react";
 
 export const LoginPage = () => {
-  const { login } = useAuth();
   const [activeTab, setActiveTab] = useState<"staff" | "viewer">("staff");
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
   const [viewerCode, setViewerCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [shake, setShake] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleViewerSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setIsSubmitting(true);
 
-    let success = false;
-    if (activeTab === "staff") {
-      success = login(username, password);
-    } else {
-      success = login("viewer", viewerCode);
-    }
+    try {
+      const res = await signIn("viewer-login", {
+        code: viewerCode,
+        redirect: false,
+      });
 
-    if (!success) {
-      setError("زانیارییەکان هەڵەن. تکایە دووبارە هەوڵ بدەرەوە.");
-      setShake(true);
-      setTimeout(() => setShake(false), 500);
+      if (res?.error) {
+        setError("کۆدی بینین هەڵەیە. تکایە دووبارە هەوڵ بدەرەوە.");
+        setShake(true);
+        setTimeout(() => setShake(false), 500);
+      } else if (res?.ok) {
+        window.location.reload();
+      }
+    } catch (err) {
+      setError("هەڵەیەک ڕوویدا لە کاتی چوونەژوورەوە.");
+    } finally {
+      setIsSubmitting(false);
     }
+  };
+
+  const handleOAuthSignIn = (provider: "google" | "azure-ad") => {
+    setIsSubmitting(true);
+    signIn(provider, { callbackUrl: "/" });
   };
 
   return (
@@ -76,45 +86,33 @@ export const LoginPage = () => {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {activeTab === "staff" ? (
-            <>
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-600 dark:text-slate-300 ml-1">نازناو</label>
-                <div className="relative group">
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-400 group-focus-within:text-blue-500 transition-colors">
-                    <User size={18} />
-                  </div>
-                  <input
-                    type="text"
-                    dir="ltr"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="w-full bg-white/50 dark:bg-black/20 border border-slate-200 dark:border-slate-700/50 rounded-2xl py-3 pl-4 pr-12 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all backdrop-blur-sm"
-                    placeholder="admin"
-                    required
-                  />
-                </div>
-              </div>
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-slate-600 dark:text-slate-300 ml-1">تێپەڕوشە</label>
-                <div className="relative group">
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-400 group-focus-within:text-blue-500 transition-colors">
-                    <Lock size={18} />
-                  </div>
-                  <input
-                    type="password"
-                    dir="ltr"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-white/50 dark:bg-black/20 border border-slate-200 dark:border-slate-700/50 rounded-2xl py-3 pl-4 pr-12 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all backdrop-blur-sm"
-                    placeholder="••••••••"
-                    required
-                  />
-                </div>
-              </div>
-            </>
-          ) : (
+        {activeTab === "staff" ? (
+          <div className="space-y-4">
+            <button
+              onClick={() => handleOAuthSignIn("azure-ad")}
+              disabled={isSubmitting}
+              className="w-full flex items-center justify-center gap-3 py-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold transition-all shadow-sm hover:shadow-md hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 21 21"><path fill="#f25022" d="M0 0h10v10H0z"/><path fill="#7fba00" d="M11 0h10v10H11z"/><path fill="#00a4ef" d="M0 11h10v10H0z"/><path fill="#ffb900" d="M11 11h10v10H11z"/></svg>
+              Sign in with Microsoft
+            </button>
+
+            <button
+              onClick={() => handleOAuthSignIn("google")}
+              disabled={isSubmitting}
+              className="w-full flex items-center justify-center gap-3 py-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold transition-all shadow-sm hover:shadow-md hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C12.955 4 4 12.955 4 24s8.955 20 20 20s20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/><path fill="#FF3D00" d="m6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C16.318 4 9.656 8.337 6.306 14.691z"/><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.222 0-9.654-3.343-11.303-8l-6.571 4.819C9.656 39.663 16.318 44 24 44z"/><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/></svg>
+              Sign in with Google
+            </button>
+            <div className="text-center mt-4">
+               <p className="text-xs text-slate-500">
+                 ڕێگەپێدراوە بۆ ئیمەیڵی کار (Outlook) و ئیمەیڵی کەسی (Google)
+               </p>
+            </div>
+          </div>
+        ) : (
+          <form onSubmit={handleViewerSubmit} className="space-y-5">
             <div className="space-y-1">
               <label className="text-xs font-semibold text-slate-600 dark:text-slate-300 ml-1">کۆدی بینین</label>
               <div className="relative group">
@@ -132,26 +130,23 @@ export const LoginPage = () => {
                 />
               </div>
             </div>
-          )}
 
-          {error && (
-            <div className="text-rose-500 dark:text-rose-400 text-sm font-medium text-center bg-rose-50 dark:bg-rose-950/30 py-2 rounded-lg border border-rose-100 dark:border-rose-900/50">
-              {error}
-            </div>
-          )}
+            {error && (
+              <div className="text-rose-500 dark:text-rose-400 text-sm font-medium text-center bg-rose-50 dark:bg-rose-950/30 py-2 rounded-lg border border-rose-100 dark:border-rose-900/50">
+                {error}
+              </div>
+            )}
 
-          <button
-            type="submit"
-            className={`w-full mt-6 flex items-center justify-center gap-2 py-3.5 rounded-2xl text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 ${
-              activeTab === "staff"
-                ? "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-blue-500/25"
-                : "bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 shadow-teal-500/25"
-            }`}
-          >
-            <span>چوونەژوورەوە</span>
-            <ArrowRight size={18} className="rotate-180" />
-          </button>
-        </form>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className={`w-full mt-6 flex items-center justify-center gap-2 py-3.5 rounded-2xl text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 shadow-teal-500/25 disabled:opacity-50`}
+            >
+              <span>چوونەژوورەوە</span>
+              <ArrowRight size={18} className="rotate-180" />
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );

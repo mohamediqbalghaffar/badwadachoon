@@ -1,88 +1,57 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext } from "react";
+import { SessionProvider, useSession, signOut } from "next-auth/react";
 
 export type UserRole = "admin" | "user" | "viewer" | null;
 
 export interface AuthUser {
   username: string;
   role: UserRole;
+  email?: string;
 }
 
 interface AuthContextType {
   user: AuthUser | null;
   viewerCode: string;
-  login: (username: string, password?: string) => boolean;
   logout: () => void;
   isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Hardcoded presets
-const PRESET_USERS = {
-  admin: { password: "admin2026", role: "admin" as UserRole },
-  htsmanager: { password: "hts2026", role: "admin" as UserRole },
-  htsceo: { password: "ceo2026", role: "user" as UserRole },
-};
-
 const HARDCODED_VIEWER_CODE = "view2026";
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+const AuthStateProvider = ({ children }: { children: React.ReactNode }) => {
+  const { data: session, status } = useSession();
 
-  // Initialize from localStorage
-  useEffect(() => {
-    try {
-      const storedUser = localStorage.getItem("auth_user");
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-      }
-    } catch (e) {
-      console.error("Failed to parse stored user", e);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const isLoading = status === "loading";
+  
+  const user: AuthUser | null = session?.user ? {
+    username: (session.user as any).username || session.user.name || "User",
+    role: (session.user as any).role || "viewer",
+    email: session.user.email || undefined
+  } : null;
 
-  const login = (username: string, password?: string): boolean => {
-    // Viewer login
-    if (username === "viewer") {
-      if (password === HARDCODED_VIEWER_CODE) {
-        const viewerUser = { username: "Viewer", role: "viewer" as UserRole };
-        setUser(viewerUser);
-        localStorage.setItem("auth_user", JSON.stringify(viewerUser));
-        return true;
-      }
-      return false;
-    }
-
-    // Admin/User login
-    const normalizedUsername = username.toLowerCase().trim();
-    const preset = PRESET_USERS[normalizedUsername as keyof typeof PRESET_USERS];
-
-    if (preset && preset.password === password) {
-      const authUser = { username: normalizedUsername, role: preset.role };
-      setUser(authUser);
-      localStorage.setItem("auth_user", JSON.stringify(authUser));
-      return true;
-    }
-
-    return false;
-  };
-
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem("auth_user");
-    // Clear data so next login starts fresh
-    localStorage.removeItem("dashboard_data");
+  const logout = async () => {
+    localStorage.removeItem("dashboard_data"); // Clear cached data
+    await signOut({ redirect: true, callbackUrl: "/" });
   };
 
   return (
-    <AuthContext.Provider value={{ user, viewerCode: HARDCODED_VIEWER_CODE, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, viewerCode: HARDCODED_VIEWER_CODE, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
+  );
+};
+
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <SessionProvider>
+      <AuthStateProvider>
+        {children}
+      </AuthStateProvider>
+    </SessionProvider>
   );
 };
 
