@@ -10,7 +10,8 @@ import { useAuth } from "../context/AuthContext";
 import { PresentationView } from "./PresentationView";
 import { SentDashboard } from "./SentDashboard";
 import { ComparisonView } from "./ComparisonView";
-import { MonitorPlay, X, Inbox, Send, GitCompareArrows, LogOut, User, ShieldCheck } from "lucide-react";
+import { MonitorPlay, X, Inbox, Send, GitCompareArrows, LogOut, User, ShieldCheck, Settings } from "lucide-react";
+import { AdminSettingsModal } from "./AdminSettingsModal";
 
 const VIEW_SEGMENTS: { key: ActiveView; label: string; icon: React.ReactNode }[] = [
   { key: 'received', label: 'پێویست بە وەڵام', icon: <Inbox size={16} /> },
@@ -21,6 +22,7 @@ const VIEW_SEGMENTS: { key: ActiveView; label: string; icon: React.ReactNode }[]
 export const Dashboard = () => {
   const { isPresentationMode, setIsPresentationMode, activeView, setActiveView, sentData, clearFilters } = useData();
   const { user, logout } = useAuth();
+  const [isAdminSettingsOpen, setIsAdminSettingsOpen] = React.useState(false);
 
   const handleViewChange = (view: ActiveView) => {
     clearFilters();
@@ -71,6 +73,19 @@ export const Dashboard = () => {
                 </button>
                 <div className="w-px h-8 bg-slate-200 dark:bg-slate-700 mx-1"></div>
                 
+                {user.role === 'admin' && (
+                  <>
+                    <button 
+                      onClick={() => setIsAdminSettingsOpen(true)}
+                      title="ڕێکخستنەکانی داتابەیس"
+                      className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:text-slate-400 dark:hover:bg-blue-500/10 rounded-xl transition-colors flex items-center gap-2"
+                    >
+                      <Settings size={20} />
+                    </button>
+                    <div className="w-px h-8 bg-slate-200 dark:bg-slate-700 mx-1"></div>
+                  </>
+                )}
+
                 <div className="flex flex-col items-end">
                   <span className="text-sm font-bold text-slate-800 dark:text-slate-100 capitalize">{user.username}</span>
                   <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">

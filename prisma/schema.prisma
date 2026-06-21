@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+model ReceivedLetter {
+  id             Int       @id @default(autoincrement())
+  subject        String
+  department     String
+  departments    String[]  @default([])
+  dept1          String?
+  dept2          String?
+  dept3          String?
+  refCode        String
+  letterType     String
+  sentDate       DateTime?
+  responseDate   DateTime?
+  processingTime Int?
+  slaTime        String
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model SentLetter {
+  id             Int       @id @default(autoincrement())
+  subject        String
+  department     String
+  departments    String[]  @default([])
+  dept1          String?
+  dept2          String?
+  dept3          String?
+  refCode        String
+  letterType     String
+  sentDate       DateTime?
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}

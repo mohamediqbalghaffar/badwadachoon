@@ -33,6 +33,7 @@ interface DataContextType {
   setActiveView: React.Dispatch<React.SetStateAction<ActiveView>>;
   isPresentationMode: boolean;
   setIsPresentationMode: React.Dispatch<React.SetStateAction<boolean>>;
+  dbLoading: boolean;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -49,6 +50,35 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     completionStatus: 'all',
   });
   const [isPresentationMode, setIsPresentationMode] = useState<boolean>(false);
+  const [dbLoading, setDbLoading] = useState(true);
+
+  // Fetch initial data from DB on mount
+  React.useEffect(() => {
+    const fetchFromDb = async () => {
+      try {
+        setDbLoading(true);
+        const [resReceived, resSent] = await Promise.all([
+          fetch('/api/db/received'),
+          fetch('/api/db/sent')
+        ]);
+        
+        if (resReceived.ok) {
+          const received = await resReceived.json();
+          setData(received);
+        }
+        if (resSent.ok) {
+          const sent = await resSent.json();
+          setSentData(sent);
+        }
+      } catch (err) {
+        console.error("Failed to fetch data from DB:", err);
+      } finally {
+        setDbLoading(false);
+      }
+    };
+
+    fetchFromDb();
+  }, []);
 
   // === RECEIVED DATA FILTERS ===
 
@@ -143,6 +173,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
         filters, setFilters, clearFilters,
         activeView, setActiveView,
         isPresentationMode, setIsPresentationMode,
+        dbLoading,
       }}
     >
       {children}

@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { DataProvider, useData } from "../context/DataContext";
-import { FileUploader } from "../components/FileUploader";
 import { Dashboard } from "../components/Dashboard";
 import { HTSLogoBackground } from "../components/HTSLogoBackground";
 import { ParticlesCanvas } from "../components/ParticlesCanvas";
@@ -17,8 +16,18 @@ interface MainContentProps {
 }
 
 const MainContent: React.FC<MainContentProps> = ({ onBack }) => {
-  const { data, sentData } = useData();
-  const hasData = data.length > 0 || sentData.length > 0;
+  const { data, sentData, dbLoading } = useData();
+
+  if (dbLoading) {
+    return (
+      <div className="relative z-10 w-full h-full min-h-screen flex flex-col items-center justify-center pt-20 pb-12">
+        <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md p-8 rounded-3xl shadow-xl flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-lg font-bold text-slate-700 dark:text-slate-300">خوێندنەوەی داتابەیس...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -32,7 +41,7 @@ const MainContent: React.FC<MainContentProps> = ({ onBack }) => {
       </button>
 
       <div className="relative z-10 w-full h-full min-h-screen flex flex-col items-center justify-center pt-20 pb-12">
-        {!hasData ? <FileUploader /> : <Dashboard />}
+        <Dashboard />
       </div>
     </>
   );

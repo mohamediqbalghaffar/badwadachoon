@@ -391,22 +391,17 @@ const SentDataTable = () => {
   };
 
   const handleSave = async (id: string | number) => {
-    if (!editForm._raw) return;
     setIsSaving(true);
     try {
-      const updatedRaw = { ...editForm._raw };
-      updatedRaw["بابەت"] = editForm.subject;
-      updatedRaw["جۆر"] = editForm.refCode;
-      updatedRaw["جۆری نامە"] = editForm.letterType;
-      
-      const response = await fetch("/api/records", {
-        method: "POST",
+      const response = await fetch("/api/db/sent", {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "edit", sheet: "sent", id, data: updatedRaw }),
+        body: JSON.stringify(editForm),
       });
       
       if (response.ok) {
-        setSentData(sentData.map(d => d.id === id ? { ...d, ...editForm, _raw: updatedRaw } as SentLetterData : d));
+        const updatedRecord = await response.json();
+        setSentData(sentData.map(d => d.id === id ? { ...d, ...updatedRecord } : d));
         setEditingId(null);
       } else {
         alert("هەڵەیەک ڕوویدا لە کاتی پاشەکەوتکردن");
@@ -423,10 +418,8 @@ const SentDataTable = () => {
     if (!confirm("دڵنیایت لە سڕینەوەی ئەم تۆمارە؟")) return;
     setIsSaving(true);
     try {
-      const response = await fetch("/api/records", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "delete", sheet: "sent", id }),
+      const response = await fetch(`/api/db/sent?id=${id}`, {
+        method: "DELETE",
       });
       if (response.ok) {
         setSentData(sentData.filter(d => d.id !== id));
