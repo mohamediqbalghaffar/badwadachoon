@@ -32,30 +32,44 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose 
       // 1. Parse Excel locally
       const parsedData = await parseFile(file);
       
-      setSyncStatus({ type: 'idle', message: 'بەرزکردنەوە بۆ داتابەیس...' });
+      setSyncStatus({ type: 'idle', message: 'سڕینەوەی داتای کۆن...' });
 
-      // 2. Sync to Database in chunks to avoid payload limits
+      // 2. Clear DB first
+      const clearRes = await fetch('/api/db/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clearFirst: true })
+      });
+
+      if (!clearRes.ok) {
+        throw new Error('سێرڤەر نەیتوانی داتابەیس کۆن بسڕێتەوە');
+      }
+
+      // 3. Sync chunks to Database
       const CHUNK_SIZE = 500;
-      const totalReceived = parsedData.receivedData.length;
-      const totalSent = parsedData.sentData.length;
-      const maxLen = Math.max(totalReceived, totalSent);
-      const totalChunks = Math.max(1, Math.ceil(maxLen / CHUNK_SIZE));
+      const { receivedData, sentData } = parsedData;
 
-      for (let i = 0; i < totalChunks; i++) {
-        setSyncStatus({ type: 'idle', message: `بەرزکردنەوەی بەشەکان... ${i + 1} لە ${totalChunks}` });
+      const receivedChunks = [];
+      for (let i = 0; i < receivedData.length; i += CHUNK_SIZE) {
+        receivedChunks.push(receivedData.slice(i, i + CHUNK_SIZE));
+      }
 
-        const rChunk = parsedData.receivedData.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
-        const sChunk = parsedData.sentData.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+      const sentChunks = [];
+      for (let i = 0; i < sentData.length; i += CHUNK_SIZE) {
+        sentChunks.push(sentData.slice(i, i + CHUNK_SIZE));
+      }
+
+      const totalChunks = receivedChunks.length + sentChunks.length;
+      let processedChunks = 0;
+
+      for (const chunk of receivedChunks) {
+        processedChunks++;
+        setSyncStatus({ type: 'idle', message: `بەرزکردنەوەی داتا... (${processedChunks}/${totalChunks})` });
 
         const res = await fetch('/api/db/sync', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            receivedData: rChunk,
-            sentData: sChunk,
-            isFirstChunk: i === 0,
-            isLastChunk: i === totalChunks - 1
-          })
+          body: JSON.stringify({ receivedData: chunk })
         });
 
         if (!res.ok) {
@@ -63,7 +77,22 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose 
         }
       }
 
-      // 3. Update local state
+      for (const chunk of sentChunks) {
+        processedChunks++;
+        setSyncStatus({ type: 'idle', message: `بەرزکردنەوەی داتا... (${processedChunks}/${totalChunks})` });
+
+        const res = await fetch('/api/db/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sentData: chunk })
+        });
+
+        if (!res.ok) {
+          throw new Error('سێرڤەر نەیتوانی داتابەیس نوێ بکاتەوە');
+        }
+      }
+
+      // 4. Update local state
       setData(parsedData.receivedData);
       setSentData(parsedData.sentData);
 
@@ -126,7 +155,7 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose 
                 accept=".xlsx, .xls"
                 onChange={handleFileUpload}
                 disabled={isSyncing}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed z-10"
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
               />
             </div>
 
