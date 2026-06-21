@@ -26,7 +26,7 @@ model ReceivedLetter {
   createdAt      DateTime  @default(now()) @map("کاتی دروستکردن")
   updatedAt      DateTime  @updatedAt @map("کاتی نوێکردنەوە")
 
-  @@map("وەڵامی نووسراوە نێردراوەکان")
+  @@map("وەڵامی_نووسراوە_نێردراوەکان")
 }
 
 model SentLetter {
@@ -44,5 +44,5 @@ model SentLetter {
   createdAt      DateTime  @default(now()) @map("کاتی دروستکردن")
   updatedAt      DateTime  @updatedAt @map("کاتی نوێکردنەوە")
 
-  @@map("سەرجەم نووسراوە ڕەوانەکراوەکان")
+  @@map("سەرجەم_نووسراوە_ڕەوانەکراوەکان")
 }
