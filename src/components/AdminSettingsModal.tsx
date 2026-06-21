@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { X, UploadCloud, Download, Database, AlertCircle, CheckCircle2, Trash2 } from "lucide-react";
+import { X, UploadCloud, Download, Database, AlertCircle, CheckCircle2, Trash2, FileSpreadsheet } from "lucide-react";
 import * as XLSX from "xlsx";
 import { useData } from "../context/DataContext";
 import { parseFile } from "../utils/parser";
@@ -19,6 +19,29 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose 
 
   const handleExport = () => {
     window.open('/api/db/export', '_blank');
+  };
+
+  const handleDownloadTemplate = () => {
+    const workbook = XLSX.utils.book_new();
+
+    const receivedHeaders = [
+      "#", "بابەت", "لایەنی پەیوەندیدار 1", "لایەنی پەیوەندیدار 2", "لایەنی پەیوەندیدار 3",
+      "جۆر", "جۆری نامە", "ڕۆژی ناردن", "ڕۆژی وەڵام", "تێبینی",
+      "کاتی تێچوو بە کۆد بۆ خشتەی تێبینی2", "hollidays", "کاتی تێچوو بەپێی ڕێنمایی"
+    ];
+    
+    const sentHeaders = [
+      "#", "بابەت", "لایەنی پەیوەندیدار 1", "لایەنی پەیوەندیدار 2", "لایەنی پەیوەندیدار 3",
+      "جۆر", "جۆری نامە", "ڕۆژی ناردن"
+    ];
+
+    const wsReceived = XLSX.utils.aoa_to_sheet([receivedHeaders]);
+    const wsSent = XLSX.utils.aoa_to_sheet([sentHeaders]);
+
+    XLSX.utils.book_append_sheet(workbook, wsReceived, "وەڵامی نووسراوە نێردراوەکان");
+    XLSX.utils.book_append_sheet(workbook, wsSent, "سەرجەم نووسراوە ڕەوانەکراوەکان");
+
+    XLSX.writeFile(workbook, "فایلی_بەتاڵ.xlsx");
   };
 
   const handleDeleteData = async () => {
@@ -166,7 +189,7 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose 
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-3 gap-4">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-4">
             
             {/* Import Card */}
             <div className="relative group overflow-hidden rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-500 transition-colors bg-slate-50 dark:bg-slate-800/50 p-6 flex flex-col items-center justify-center gap-4 text-center">
@@ -214,6 +237,21 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose 
               <div>
                 <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-1">سڕینەوەی داتابەیس</h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">سڕینەوەی سەرجەم داتاکان</p>
+              </div>
+            </button>
+
+            {/* Template Card */}
+            <button 
+              onClick={handleDownloadTemplate}
+              disabled={isSyncing}
+              className="group overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-violet-500 dark:hover:border-violet-500 transition-colors bg-slate-50 dark:bg-slate-800/50 p-6 flex flex-col items-center justify-center gap-4 text-center disabled:opacity-50"
+            >
+              <div className="p-4 bg-white dark:bg-slate-800 rounded-full shadow-sm text-violet-500 group-hover:scale-110 transition-transform">
+                <FileSpreadsheet size={32} />
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-1">فایلی بەتاڵ</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">داگرتنی فایل بۆ پڕکردنەوە</p>
               </div>
             </button>
             
