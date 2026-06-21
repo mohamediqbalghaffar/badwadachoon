@@ -18,12 +18,11 @@ export async function GET() {
       "جۆر": r.refCode,
       "جۆری نامە": r.letterType,
       "ڕۆژی ناردن": r.sentDate || "",
-      "ڕۆژی وەڵام ": r.responseDate || "",
+      "ڕۆژی وەڵام": r.responseDate || "",
       "تێبینی": r.processingTime !== null ? r.processingTime : "",
-      "تێبینی2": "",
-      "کۆد بۆ خشتەی D": "",
-      "کاتی تێچوو بەپێی ڕێنمایی": r.slaTime,
+      "کاتی تێچوو بە کۆد بۆ خشتەی تێبینی2": "",
       "hollidays": "",
+      "کاتی تێچوو بەپێی ڕێنمایی": r.slaTime || "",
     }));
 
     // Format sent letters for excel

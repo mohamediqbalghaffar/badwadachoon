@@ -6,11 +6,18 @@ export async function POST(request: Request) {
     const data = await request.json();
     const { receivedData, sentData, clearFirst } = data;
 
+    // Fast-path for clearing database (avoiding long transactions)
+    if (clearFirst && (!receivedData || receivedData.length === 0) && (!sentData || sentData.length === 0)) {
+      await prisma.receivedLetter.deleteMany({});
+      await prisma.sentLetter.deleteMany({});
+      return NextResponse.json({ success: true, message: 'Database cleared' });
+    }
+
     await prisma.$transaction(async (tx) => {
-      // Clear existing records if requested
+      // Clear existing records if requested alongside data insertion
       if (clearFirst) {
-        await tx.receivedLetter.deleteMany();
-        await tx.sentLetter.deleteMany();
+        await tx.receivedLetter.deleteMany({});
+        await tx.sentLetter.deleteMany({});
       }
 
       // Insert new received letters
