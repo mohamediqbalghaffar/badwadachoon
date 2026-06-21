@@ -8,7 +8,7 @@ export async function GET() {
     const received = await prisma.receivedLetter.findMany({ orderBy: { id: 'asc' } });
     const sent = await prisma.sentLetter.findMany({ orderBy: { id: 'asc' } });
 
-    // Format received letters for excel
+    // Format received letters for excel (matching the exact template design)
     const formattedReceived = received.map(r => ({
       "#": r.id,
       "بابەت": r.subject,
@@ -17,10 +17,13 @@ export async function GET() {
       "لایەنی پەیوەندیدار 3": r.dept3 || "",
       "جۆر": r.refCode,
       "جۆری نامە": r.letterType,
-      "ڕۆژی ناردن": r.sentDate ? format(r.sentDate, 'yyyy-MM-dd') : "",
-      "ڕۆژی وەڵام": r.responseDate ? format(r.responseDate, 'yyyy-MM-dd') : "",
+      "ڕۆژی ناردن": r.sentDate || "",
+      "ڕۆژی وەڵام ": r.responseDate || "",
       "تێبینی": r.processingTime !== null ? r.processingTime : "",
+      "تێبینی2": "",
+      "کۆد بۆ خشتەی D": "",
       "کاتی تێچوو بەپێی ڕێنمایی": r.slaTime,
+      "hollidays": "",
     }));
 
     // Format sent letters for excel
@@ -32,7 +35,7 @@ export async function GET() {
       "لایەنی پەیوەندیدار 3": s.dept3 || "",
       "جۆر": s.refCode,
       "جۆری نامە": s.letterType,
-      "ڕۆژی ناردن": s.sentDate ? format(s.sentDate, 'yyyy-MM-dd') : "",
+      "ڕۆژی ناردن": s.sentDate || "",
     }));
 
     // Create workbook
@@ -44,7 +47,7 @@ export async function GET() {
     const wsSent = XLSX.utils.json_to_sheet(formattedSent);
     XLSX.utils.book_append_sheet(workbook, wsSent, "سەرجەم نووسراوە ڕەوانەکراوەکان");
 
-    const buffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'buffer' });
+    const buffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'buffer', cellDates: true });
 
     return new NextResponse(buffer, {
       status: 200,
