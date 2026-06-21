@@ -38,7 +38,7 @@ const normalizeHeader = (str: string): string => {
 const ReceivedHeaderMap: Record<string, keyof DashboardData> = {
   "#": "id",
   "بابەت": "subject",
-  "لایەنی پەیوەندیدار": "department",
+  "لایەنی پەیوەندیدار 3": "department",
   "جۆر": "refCode",
   "جۆری نامە": "letterType",
   "ڕۆژی ناردن": "sentDate",
@@ -53,7 +53,7 @@ const ReceivedHeaderMap: Record<string, keyof DashboardData> = {
 const SentHeaderMap: Record<string, keyof SentLetterData> = {
   "#": "id",
   "بابەت": "subject",
-  "لایەنی پەیوەندیدار": "department",
+  "لایەنی پەیوەندیدار 3": "department",
   "جۆر": "refCode",
   "جۆری نامە": "letterType",
   "ڕۆژی ناردن": "sentDate",
