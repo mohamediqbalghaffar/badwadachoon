@@ -191,7 +191,7 @@ export const DashboardCharts = () => {
   const chartTitle = isSingleDeptSelected ? "قەبارەی نامەکان بەپێی مانگ" : "قەبارەی نامەکان بەپێی لایەن";
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
       {/* Department Bar Chart */}
       <div className="glass glass-card glass-interactive p-6 flex flex-col min-h-96 h-auto relative overflow-hidden group">
         <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-blue-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -298,7 +298,7 @@ export const DashboardCharts = () => {
       </div>
 
       {/* SLA Enhanced Status Chart */}
-      <div className="glass glass-card glass-interactive p-6 flex flex-col min-h-96 h-auto relative overflow-hidden group">
+      <div className="glass glass-card glass-interactive p-6 flex flex-col min-h-96 h-auto relative overflow-hidden group lg:col-span-2">
         <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-amber-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
         <div className="flex justify-between items-start mb-6">
           <h3 className="text-lg font-semibold">کاتی تێچوو (SLA)</h3>
@@ -373,7 +373,7 @@ export const DashboardCharts = () => {
       </div>
 
       {/* Timeline Area Chart - Full Width */}
-      <div className="glass glass-card glass-interactive p-6 flex flex-col h-96 lg:col-span-3 relative overflow-hidden group">
+      <div className="glass glass-card glass-interactive p-6 flex flex-col h-96 lg:col-span-2 relative overflow-hidden group">
         <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-purple-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
         <h3 className="text-lg font-semibold mb-6">هەڵکشان و داکشانی نامەکان بەپێی کات</h3>
         <div className="flex-1 min-h-0" dir="ltr">
