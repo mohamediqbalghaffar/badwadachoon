@@ -19,7 +19,8 @@ import {
   GitCompareArrows,
   Send,
   Lightbulb,
-  LightbulbOff
+  LightbulbOff,
+  Inbox
 } from "lucide-react";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import {
@@ -397,7 +398,7 @@ export const PresentationView = () => {
     <div className="relative w-full min-h-[85vh] flex flex-col items-center justify-between overflow-hidden rounded-3xl bg-slate-900/5 dark:bg-slate-950/60 backdrop-blur-3xl border border-white/20 dark:border-slate-800/80 shadow-2xl p-6 sm:p-10 select-none">
       
       {/* Top Slide Progress and Title */}
-      <div className="w-full flex justify-between items-center mb-6 z-20">
+      <div className="w-full flex flex-col lg:flex-row justify-between items-center gap-4 mb-6 z-20">
         <div className="flex gap-4 items-center">
           <span className="text-sm font-semibold text-slate-500 dark:text-slate-400 bg-slate-200/50 dark:bg-slate-800/50 px-3 py-1.5 rounded-full">
             سڵاید {activeSlide + 1} لە {slideCount}
@@ -407,7 +408,32 @@ export const PresentationView = () => {
             className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold transition-all duration-300 ${showInsights ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.2)]' : 'bg-slate-200/50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 hover:bg-slate-300/50 dark:hover:bg-slate-700/50'}`}
           >
             {showInsights ? <Lightbulb size={16} className="text-amber-500" /> : <LightbulbOff size={16} />}
-            {showInsights ? 'شیکاری هۆشمەند چالاکە' : 'شیکاری هۆشمەند'}
+            <span className="hidden sm:inline">{showInsights ? 'شیکاری هۆشمەند چالاکە' : 'شیکاری هۆشمەند'}</span>
+          </button>
+        </div>
+
+        {/* TOP CENTER: View Toggle */}
+        <div className="flex bg-slate-200/50 dark:bg-slate-800/50 p-1.5 rounded-2xl backdrop-blur-md shadow-sm border border-white/20 dark:border-slate-700/50">
+          <button 
+            onClick={() => { setActiveView('received'); setActiveSlide(0); }} 
+            className={`px-4 py-2 text-sm font-bold rounded-xl transition-all duration-300 flex items-center gap-2 ${activeView === 'received' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
+          >
+            <Inbox size={16} />
+            هاتووەکان
+          </button>
+          <button 
+            onClick={() => { setActiveView('sent'); setActiveSlide(0); }} 
+            className={`px-4 py-2 text-sm font-bold rounded-xl transition-all duration-300 flex items-center gap-2 ${activeView === 'sent' ? 'bg-white dark:bg-slate-700 text-teal-600 dark:text-teal-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
+          >
+            <Send size={16} />
+            ڕەوانەکراوەکان
+          </button>
+          <button 
+            onClick={() => { setActiveView('comparison'); setActiveSlide(0); }} 
+            className={`px-4 py-2 text-sm font-bold rounded-xl transition-all duration-300 flex items-center gap-2 ${activeView === 'comparison' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
+          >
+            <GitCompareArrows size={16} />
+            بەراوردکردن
           </button>
         </div>
         <div className="flex gap-1.5">
