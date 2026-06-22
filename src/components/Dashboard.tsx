@@ -54,7 +54,7 @@ export const Dashboard = () => {
       {!isPresentationMode ? (
         <>
           {/* Header */}
-          <div className="mb-8 flex flex-col md:flex-row md:items-start justify-between gap-4 animate-fade-up">
+          <div className="mb-8 flex flex-col md:flex-row md:items-start justify-between gap-4 animate-fade-up relative z-50">
             <div>
               <h1 className="text-3xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-blue-600 to-red-600 dark:from-red-500 dark:via-blue-500 dark:to-red-500 text-gradient-animate pb-2 tracking-tight">
                 بەدواداچوون
