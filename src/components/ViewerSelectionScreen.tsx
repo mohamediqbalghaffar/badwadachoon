@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import { useData } from "../context/DataContext";
-import { User, Activity, Clock, MonitorPlay } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+import { User, Activity, Clock, MonitorPlay, LogOut } from "lucide-react";
 
 interface SessionData {
   userId: string;
@@ -15,6 +16,7 @@ interface SessionData {
 
 export const ViewerSelectionScreen = () => {
   const { setViewerSelectedUserId } = useData();
+  const { logout } = useAuth();
   const [sessions, setSessions] = useState<SessionData[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -44,6 +46,15 @@ export const ViewerSelectionScreen = () => {
 
   return (
     <div className="min-h-screen bg-[#0f172a] text-slate-200 flex flex-col items-center p-8 pt-20 relative overflow-hidden" dir="rtl">
+      {/* Logout Button */}
+      <button
+        onClick={logout}
+        className="absolute top-6 left-6 z-50 flex items-center gap-2 px-4 py-2 bg-white/5 dark:bg-slate-800/50 backdrop-blur-md border border-white/10 dark:border-slate-700 rounded-full shadow-md text-slate-300 hover:bg-rose-500/20 hover:text-rose-400 hover:border-rose-500/50 transition-all group cursor-pointer"
+      >
+        <span className="font-medium text-sm hidden sm:block">چوونەدەرەوە</span>
+        <LogOut size={18} className="group-hover:-translate-x-1 transition-transform" />
+      </button>
+
       {/* Background Orbs */}
       <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] rounded-full blur-[120px] bg-teal-500/10 pointer-events-none" />
       <div className="absolute bottom-[-10%] left-[-5%] w-[600px] h-[600px] rounded-full blur-[120px] bg-blue-500/10 pointer-events-none" />
