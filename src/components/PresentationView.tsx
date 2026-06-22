@@ -578,7 +578,7 @@ export const PresentationView = () => {
                 <Lightbulb className="text-blue-500 shrink-0" size={28} />
                 <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
                   <strong className="text-blue-600 dark:text-blue-400">شیکاری هۆشمەند: </strong> 
-                  زۆرترین پاڵەپەستۆی کار لەسەر <strong className="text-blue-500">{(chartData[0] as any).name}</strong>ە بە قەبارەی <strong className="text-blue-500">{(chartData[0] as any).count}</strong> نامە، کە دەکاتە نزیکەی <strong className="text-emerald-500">{Math.round(((chartData[0] as any).count / Math.max(totalLetters, 1)) * 100)}%</strong>ی کۆی گشتی کارەکان.
+                  زۆرترین پاڵەپەستۆی کار لەسەر <strong className="text-blue-500">{(chartData[0] as any).name || (chartData[0] as any).date}</strong>ە بە قەبارەی <strong className="text-blue-500">{(chartData[0] as any).count}</strong> نامە، کە دەکاتە نزیکەی <strong className="text-emerald-500">{Math.round(((chartData[0] as any).count / Math.max(totalLetters, 1)) * 100)}%</strong>ی کۆی گشتی کارەکان.
                 </p>
               </motion.div>
             )}
@@ -745,7 +745,7 @@ export const PresentationView = () => {
                 <Lightbulb className="text-amber-500 shrink-0" size={28} />
                 <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
                   <strong className="text-amber-600 dark:text-amber-400">شیکاری هۆشمەند: </strong> 
-                  ڕێژەی گشتی پابەندبوون بە کات <strong className="text-emerald-500">{Math.round((slaEnhancedData.totalOnTime / (slaEnhancedData.totalOnTime + slaEnhancedData.totalLate)) * 100)}%</strong>ە. ئەو جۆرە نامانەی زۆرترین ڕێژەی دواکەوتنیان هەیە بریتین لە جۆری <strong className="text-red-500">{slaEnhancedData.data.sort((a,b)=>b.late-a.late)[0]?.name || '-'}</strong>. تەرکیز کردن لەسەر خێراکردنی ئەم جۆرە، ڕێژەی پابەندبوونی گشتی بەرز دەکاتەوە.
+                  ڕێژەی گشتی پابەندبوون بە کات <strong className="text-emerald-500">{Math.round((slaEnhancedData.totalOnTime / (slaEnhancedData.totalOnTime + slaEnhancedData.totalLate)) * 100)}%</strong>ە. ئەو جۆرە نامانەی زۆرترین ڕێژەی دواکەوتنیان هەیە بریتین لە جۆری <strong className="text-red-500">{[...slaEnhancedData.data].sort((a,b)=>b.late-a.late)[0]?.name || '-'}</strong>. تەرکیز کردن لەسەر خێراکردنی ئەم جۆرە، ڕێژەی پابەندبوونی گشتی بەرز دەکاتەوە.
                 </p>
               </motion.div>
             )}
