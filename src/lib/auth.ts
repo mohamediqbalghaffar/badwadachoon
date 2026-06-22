@@ -33,7 +33,7 @@ export const authOptions: NextAuthOptions = {
       name: "Guest",
       credentials: {},
       async authorize() {
-        return { id: "guest", name: "Guest User", email: "guest@badwadachoon.local", role: "viewer" };
+        return { id: "guest", name: "Guest User", email: "guest@badwadachoon.local", role: "user" };
       },
     }),
   ],
@@ -45,7 +45,7 @@ export const authOptions: NextAuthOptions = {
           token.username = "Viewer";
           token.status = "active";
         } else if (user.id === "guest") {
-          token.role = "viewer";
+          token.role = "user";
           token.username = "Guest User";
           token.status = "active";
         } else if (user.email) {
