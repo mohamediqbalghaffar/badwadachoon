@@ -11,7 +11,8 @@ import Image from "next/image";
 import { PresentationView } from "./PresentationView";
 import { SentDashboard } from "./SentDashboard";
 import { ComparisonView } from "./ComparisonView";
-import { MonitorPlay, X, Inbox, Send, GitCompareArrows, LogOut, User, ShieldCheck, Settings, Database } from "lucide-react";
+import { MonitorPlay, X, Inbox, Send, GitCompareArrows, LogOut, User, ShieldCheck, Settings, Database, UploadCloud } from "lucide-react";
+import { parseFile } from "../utils/parser";
 import { AdminSettingsModal } from "./AdminSettingsModal";
 import { LiveActivityTracker } from "./LiveActivityTracker";
 
@@ -27,6 +28,50 @@ export const Dashboard = () => {
   const [isAdminSettingsOpen, setIsAdminSettingsOpen] = React.useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = React.useState(false);
   const [adminModalTab, setAdminModalTab] = React.useState<'database' | 'approvals' | 'profile'>('database');
+  const [isUploading, setIsUploading] = React.useState(false);
+
+  const handleDirectUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setIsUploading(true);
+      const parsedData = await parseFile(file);
+
+      if (mode === 'live') {
+        const clearRes = await fetch('/api/db/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ clearFirst: true })
+        });
+        if (!clearRes.ok) throw new Error('سێرڤەر نەیتوانی داتابەیس کۆن بسڕێتەوە');
+
+        const CHUNK_SIZE = 500;
+        for (let i = 0; i < parsedData.receivedData.length; i += CHUNK_SIZE) {
+          await fetch('/api/db/sync', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ receivedData: parsedData.receivedData.slice(i, i + CHUNK_SIZE) })
+          });
+        }
+        for (let i = 0; i < parsedData.sentData.length; i += CHUNK_SIZE) {
+          await fetch('/api/db/sync', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sentData: parsedData.sentData.slice(i, i + CHUNK_SIZE) })
+          });
+        }
+      }
+
+      setData(parsedData.receivedData);
+      setSentData(parsedData.sentData);
+    } catch (err) {
+      console.error(err);
+      alert('هەڵەیەک ڕوویدا لە کاتی بارکردن');
+    } finally {
+      setIsUploading(false);
+    }
+  };
   
   // Create a stable viewer ID for anonymous viewers
   const viewerIdRef = useRef(`viewer-${Math.random().toString(36).substring(7)}`);
@@ -134,6 +179,29 @@ export const Dashboard = () => {
                     <MonitorPlay size={20} />
                   </button>
                 </div>
+
+                {/* Direct Upload Button (Only when empty) */}
+                {(data.length === 0 && sentData.length === 0) && user?.role === 'admin' && (
+                  <div className="relative bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 backdrop-blur-md px-4 py-2 rounded-2xl shadow-lg shadow-blue-500/30 transition-all group overflow-hidden cursor-pointer flex items-center justify-center">
+                    <label className="flex items-center gap-2 cursor-pointer w-full h-full text-white">
+                      {isUploading ? (
+                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      ) : (
+                         <UploadCloud size={20} className="group-hover:scale-110 transition-transform" />
+                      )}
+                      <span className="text-sm font-semibold whitespace-nowrap hidden sm:inline">
+                        {isUploading ? 'بارکردن...' : 'بارکردنی داتابەیس'}
+                      </span>
+                      <input 
+                        type="file" 
+                        accept=".xlsx, .xls"
+                        onChange={handleDirectUpload}
+                        disabled={isUploading}
+                        className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                      />
+                    </label>
+                  </div>
+                )}
 
                 {/* Profile Dropdown */}
                 <div className="relative">
