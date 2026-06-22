@@ -33,6 +33,7 @@ export const LandingPortals: React.FC<LandingPortalsProps> = ({ onSelectAdmin })
           className={liquidGlassClasses}
         >
           <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-orange-600/0 dark:from-orange-500/20 dark:to-orange-600/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <span className="text-4xl drop-shadow-xl mb-2 z-10 animate-pulse" title="Under Construction">🚧</span>
           <h2 className="text-2xl font-semibold tracking-wide text-slate-800 dark:text-slate-100 z-10">گەنجینە</h2>
         </button>
 
@@ -51,6 +52,7 @@ export const LandingPortals: React.FC<LandingPortalsProps> = ({ onSelectAdmin })
           className={liquidGlassClasses}
         >
           <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-emerald-600/0 dark:from-emerald-500/20 dark:to-emerald-600/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <span className="text-4xl drop-shadow-xl mb-2 z-10 animate-pulse" title="Under Construction">🚧</span>
           <h2 className="text-2xl font-semibold tracking-wide text-slate-800 dark:text-slate-100 z-10">تەکنیکی</h2>
         </button>
       </div>
@@ -80,13 +82,16 @@ export const LandingPortals: React.FC<LandingPortalsProps> = ({ onSelectAdmin })
             <div className="p-6 space-y-4">
               <button 
                 onClick={() => { setShowModeModal(false); onSelectAdmin('live'); }}
-                className="w-full group overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-500 transition-colors bg-slate-50 dark:bg-slate-800/50 p-5 flex items-center gap-4 text-right"
+                className="w-full relative group overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-500 transition-colors bg-slate-50 dark:bg-slate-800/50 p-5 flex items-center gap-4 text-right"
               >
                 <div className="p-3 bg-white dark:bg-slate-800 rounded-full shadow-sm text-blue-500 group-hover:scale-110 transition-transform">
                   <Database size={24} />
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-1">داتابەیسی سەرهێڵ (Online Live)</h3>
+                  <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-1 flex items-center gap-2">
+                    داتابەیسی سەرهێڵ (Online Live)
+                    <span className="text-2xl drop-shadow-md animate-pulse" title="Under Construction">🚧</span>
+                  </h3>
                   <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">بینین و بارکردنی داتا ڕاستەوخۆ لەسەر داتابەیسی سەرەکی.</p>
                 </div>
               </button>
