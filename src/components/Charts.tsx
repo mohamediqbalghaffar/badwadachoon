@@ -4,6 +4,8 @@ import React, { useMemo } from "react";
 import { useData } from "../context/DataContext";
 import {
   BarChart,
+  ComposedChart,
+  Line,
   Bar,
   XAxis,
   YAxis,
@@ -90,9 +92,18 @@ export const DashboardCharts = () => {
     });
   }, [filteredData]);
 
-  // Prepare Enhanced SLA Data (Stacked Bar)
+  // Prepare Enhanced SLA Data (Stacked Bar + Line)
   const slaEnhancedData = useMemo(() => {
-    const groups: Record<string, { name: string, originalCategory: string, onTime: number, late: number, exactOnTimeName: string, exactLateName: string }> = {};
+    const groups: Record<string, { 
+      name: string, 
+      originalCategory: string, 
+      onTime: number, 
+      late: number, 
+      exactOnTimeName: string, 
+      exactLateName: string,
+      processingTimeSum: number,
+      processingTimeCount: number
+    }> = {};
 
     let totalOnTime = 0;
     let totalLate = 0;
@@ -103,7 +114,21 @@ export const DashboardCharts = () => {
 
       if (!groups[category]) {
         const cleanName = category.replace('بەشی ', '').replace('سێکتەری ', '');
-        groups[category] = { name: cleanName, originalCategory: category, onTime: 0, late: 0, exactOnTimeName: '', exactLateName: '' };
+        groups[category] = { 
+          name: cleanName, 
+          originalCategory: category, 
+          onTime: 0, 
+          late: 0, 
+          exactOnTimeName: '', 
+          exactLateName: '',
+          processingTimeSum: 0,
+          processingTimeCount: 0
+        };
+      }
+
+      if (d.processingTime != null && !isNaN(d.processingTime)) {
+        groups[category].processingTimeSum += d.processingTime;
+        groups[category].processingTimeCount += 1;
       }
 
       const isLate = sla.includes('زیاتر');
@@ -121,6 +146,11 @@ export const DashboardCharts = () => {
 
     const data = Object.values(groups)
       .filter(g => g.onTime > 0 || g.late > 0)
+      .map(g => ({
+        ...g,
+        complianceRate: Math.round((g.onTime / (g.onTime + g.late)) * 100) || 0,
+        avgProcessingTime: g.processingTimeCount > 0 ? parseFloat((g.processingTimeSum / g.processingTimeCount).toFixed(1)) : 0
+      }))
       .sort((a, b) => (b.onTime + b.late) - (a.onTime + a.late));
 
     return { data, totalOnTime, totalLate };
@@ -301,21 +331,57 @@ export const DashboardCharts = () => {
         
         <div className="flex-1 min-h-[300px]" dir="ltr">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={slaEnhancedData.data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <ComposedChart data={slaEnhancedData.data} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#cbd5e1" opacity={0.3} />
               <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#64748b', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
+              <YAxis yAxisId="left" tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
+              <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
               <Tooltip
                 cursor={{ fill: 'rgba(241, 245, 249, 0.2)' }}
-                contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(10px)' }}
-                formatter={(value: any, name: any, props: any) => {
-                  if (name === 'onTime') return [value, props.payload.exactOnTimeName || 'کەمتر / لە کاتی'];
-                  if (name === 'late') return [value, props.payload.exactLateName || 'زیاتر / دواکەوتوو'];
-                  return [value, name];
+                contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(10px)', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}
+                content={(props: any) => {
+                  const { active, payload, label } = props;
+                  if (active && payload && payload.length) {
+                    const data = payload[0].payload;
+                    return (
+                      <div className="bg-white/95 dark:bg-slate-900/95 p-4 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800" dir="rtl">
+                        <p className="font-bold text-slate-800 dark:text-white mb-3 pb-2 border-b border-slate-100 dark:border-slate-800 text-base">{label}</p>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between gap-6">
+                            <div className="flex items-center gap-2">
+                              <span className="w-3 h-3 rounded-full bg-[#10b981]"></span>
+                              <span className="text-sm font-medium text-slate-600 dark:text-slate-300">لە کاتی خۆی (کەمتر)</span>
+                            </div>
+                            <span className="text-sm font-bold text-slate-800 dark:text-white">{data.onTime}</span>
+                          </div>
+                          <div className="flex items-center justify-between gap-6">
+                            <div className="flex items-center gap-2">
+                              <span className="w-3 h-3 rounded-full bg-[#ef4444]"></span>
+                              <span className="text-sm font-medium text-slate-600 dark:text-slate-300">دواکەوتوو (زیاتر)</span>
+                            </div>
+                            <span className="text-sm font-bold text-slate-800 dark:text-white">{data.late}</span>
+                          </div>
+                          <div className="h-px bg-slate-100 dark:bg-slate-800 my-2"></div>
+                          <div className="flex items-center justify-between gap-6">
+                            <span className="text-sm font-medium text-slate-600 dark:text-slate-300">ڕێژەی پابەندبوون</span>
+                            <span className="text-sm font-bold text-[#10b981]">{data.complianceRate}%</span>
+                          </div>
+                          <div className="flex items-center justify-between gap-6">
+                            <div className="flex items-center gap-2">
+                              <span className="w-3 h-1 rounded-full bg-[#f59e0b]"></span>
+                              <span className="text-sm font-medium text-slate-600 dark:text-slate-300">تێکڕای کاتی تێچوو</span>
+                            </div>
+                            <span className="text-sm font-bold text-[#f59e0b]">{data.avgProcessingTime} ڕۆژ</span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  }
+                  return null;
                 }}
-                labelFormatter={(label) => `ئامانجی: ${label}`}
               />
               <Bar 
+                yAxisId="left"
                 dataKey="onTime" 
                 stackId="a" 
                 fill="#10b981" 
@@ -332,6 +398,7 @@ export const DashboardCharts = () => {
                 }}
               />
               <Bar 
+                yAxisId="left"
                 dataKey="late" 
                 stackId="a" 
                 fill="#ef4444" 
@@ -348,7 +415,16 @@ export const DashboardCharts = () => {
                   }
                 }}
               />
-            </BarChart>
+              <Line 
+                yAxisId="right"
+                type="monotone" 
+                dataKey="avgProcessingTime" 
+                stroke="#f59e0b" 
+                strokeWidth={3} 
+                dot={{ r: 4, strokeWidth: 2, fill: '#fff' }}
+                activeDot={{ r: 6, fill: '#f59e0b', stroke: '#fff', strokeWidth: 2 }}
+              />
+            </ComposedChart>
           </ResponsiveContainer>
         </div>
         
@@ -361,6 +437,10 @@ export const DashboardCharts = () => {
           <div className="flex items-center gap-2 text-xs">
             <span className="w-3 h-3 rounded-full shrink-0 bg-[#ef4444]"></span>
             <span className="font-bold text-slate-700 dark:text-slate-300">دواکەوتوو (زیاتر)</span>
+          </div>
+          <div className="flex items-center gap-2 text-xs ml-4">
+            <span className="w-4 h-1 rounded-full shrink-0 bg-[#f59e0b]"></span>
+            <span className="font-bold text-slate-700 dark:text-slate-300">تێکڕای کاتی تێچوو (ڕۆژ)</span>
           </div>
         </div>
       </div>
