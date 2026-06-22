@@ -109,7 +109,7 @@ export const DataProvider = ({ children, mode }: { children: React.ReactNode, mo
     };
 
     fetchViewerData();
-    const interval = setInterval(fetchViewerData, 3000); // Polling every 3s to keep live view synced
+    const interval = setInterval(fetchViewerData, 2000); // Polling every 2s to keep live view synced
     return () => {
       isSubscribed = false;
       clearInterval(interval);

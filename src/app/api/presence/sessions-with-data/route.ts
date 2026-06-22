@@ -11,6 +11,7 @@ export async function GET() {
       where: {
         lastActive: { gte: cutoff },
         hasData: true,
+        role: { not: 'viewer' },
       },
       select: {
         userId: true,

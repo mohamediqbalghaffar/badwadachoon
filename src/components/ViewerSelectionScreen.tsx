@@ -37,7 +37,7 @@ export const ViewerSelectionScreen = () => {
     };
 
     fetchSessions();
-    const interval = setInterval(fetchSessions, 5000);
+    const interval = setInterval(fetchSessions, 2000);
     return () => {
       isSubscribed = false;
       clearInterval(interval);
