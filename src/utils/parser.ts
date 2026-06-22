@@ -171,7 +171,7 @@ const mapRow = <T extends Record<string, any>>(
     }
   }
 
-  // item['_raw'] = row; // Removed to reduce payload size
+  item['_raw'] = row;
 
   return item as Partial<T>;
 };

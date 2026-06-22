@@ -10,6 +10,7 @@ import { ArrowRight } from "lucide-react";
 
 import { AuthProvider, useAuth } from "../context/AuthContext";
 import { LoginPage } from "../components/LoginPage";
+import { PendingApprovalView } from "../components/PendingApprovalView";
 
 interface MainContentProps {
   onBack: () => void;
@@ -65,6 +66,16 @@ const AppContent = () => {
         <HTSLogoBackground />
         <ParticlesCanvas />
         <LoginPage />
+      </main>
+    );
+  }
+
+  if (user.status === "pending" || user.status === "approved") {
+    return (
+      <main className="min-h-screen relative overflow-hidden bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 transition-colors duration-500">
+        <HTSLogoBackground />
+        <ParticlesCanvas />
+        <PendingApprovalView />
       </main>
     );
   }

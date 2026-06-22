@@ -46,3 +46,13 @@ model SentLetter {
 
   @@map("سەرجەم_نووسراوە_ڕەوانەکراوەکان")
 }
+
+model UserAccount {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  role      String   @default("user")
+  status    String   @default("pending") // pending, approved, active
+  authCode  String?
+  createdAt DateTime @default(now())
+}

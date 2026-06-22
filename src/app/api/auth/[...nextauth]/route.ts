@@ -3,6 +3,8 @@ import GoogleProvider from "next-auth/providers/google";
 import AzureADProvider from "next-auth/providers/azure-ad";
 import CredentialsProvider from "next-auth/providers/credentials";
 
+import { prisma } from "@/lib/prisma";
+
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
@@ -31,24 +33,40 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user, account }) {
       if (user) {
-        // If logged in via credentials (viewer)
         if (user.id === "viewer") {
           token.role = "viewer";
           token.username = "Viewer";
+          token.status = "active";
         } else if (user.email) {
-          // If logged in via OAuth
           const email = user.email.toLowerCase();
-          if (email === "mohammed.iqbal@halabjagroup.com") {
-            token.role = "admin";
-            token.username = user.name || "Admin";
-          } else if (email.endsWith("@halabjagroup.com")) {
-            token.role = "user";
-            token.username = user.name || "User";
-          } else {
-            // Default role for other authenticated emails (or could reject)
-            token.role = "user";
-            token.username = user.name || "User";
+          
+          let dbUser = await prisma.userAccount.findUnique({
+            where: { email },
+          });
+
+          if (!dbUser) {
+            let role = "user";
+            let status = "pending";
+            if (email === "mohammed.iqbal@halabjagroup.com") {
+              role = "admin";
+              status = "active";
+            }
+
+            const authCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+            dbUser = await prisma.userAccount.create({
+              data: {
+                email,
+                name: user.name || "User",
+                role,
+                status,
+                authCode
+              }
+            });
           }
+
+          token.role = dbUser.role;
+          token.status = dbUser.status;
+          token.username = dbUser.name || "User";
         }
       }
       return token;
@@ -56,6 +74,7 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session.user) {
         (session.user as any).role = token.role;
+        (session.user as any).status = token.status;
         (session.user as any).username = token.username;
       }
       return session;

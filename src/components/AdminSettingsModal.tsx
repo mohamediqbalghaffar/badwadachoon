@@ -283,8 +283,86 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose 
             </div>
           )}
 
+          {/* User Approvals Section */}
+          <div className="mt-8 border-t border-slate-200 dark:border-slate-800 pt-8">
+            <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+              <AlertCircle className="text-amber-500" size={20} />
+              پەسەندکردنی بەکارهێنەران
+            </h3>
+            <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+              <PendingUsersList />
+            </div>
+          </div>
+
         </div>
       </div>
+    </div>
+  );
+};
+
+const PendingUsersList = () => {
+  const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchUsers = async () => {
+    try {
+      const res = await fetch('/api/admin/users');
+      const data = await res.json();
+      if (data.users) {
+        setUsers(data.users.filter((u: any) => u.status === 'pending'));
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const handleAction = async (id: string, action: 'approve' | 'reject') => {
+    try {
+      await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, action })
+      });
+      fetchUsers();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  if (loading) return <div className="p-6 text-center text-slate-500">خوێندنەوە...</div>;
+  if (users.length === 0) return <div className="p-6 text-center text-slate-500">هیچ داواکارییەکی نوێ نییە بۆ پەسەندکردن.</div>;
+
+  return (
+    <div className="divide-y divide-slate-200 dark:divide-slate-700">
+      {users.map((user) => (
+        <div key={user.id} className="p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 hover:bg-slate-100/50 dark:hover:bg-slate-800/80 transition-colors">
+          <div>
+            <h4 className="font-bold text-slate-800 dark:text-slate-200">{user.name}</h4>
+            <p className="text-sm text-slate-500 dark:text-slate-400 font-mono mt-1">{user.email}</p>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => handleAction(user.id, 'reject')}
+              className="px-4 py-2 rounded-xl text-sm font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 transition-colors"
+            >
+              ڕەتکردنەوە
+            </button>
+            <button 
+              onClick={() => handleAction(user.id, 'approve')}
+              className="px-4 py-2 rounded-xl text-sm font-semibold text-white bg-emerald-500 hover:bg-emerald-600 shadow-sm shadow-emerald-500/20 transition-colors"
+            >
+              پەسەندکردن
+            </button>
+          </div>
+        </div>
+      ))}
     </div>
   );
 };

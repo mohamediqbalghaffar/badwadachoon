@@ -9,6 +9,7 @@ export interface AuthUser {
   username: string;
   role: UserRole;
   email?: string;
+  status?: string;
 }
 
 interface AuthContextType {
@@ -16,6 +17,7 @@ interface AuthContextType {
   viewerCode: string;
   logout: () => void;
   isLoading: boolean;
+  updateSession: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -23,14 +25,15 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const HARDCODED_VIEWER_CODE = "view2026";
 
 const AuthStateProvider = ({ children }: { children: React.ReactNode }) => {
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
 
   const isLoading = status === "loading";
   
   const user: AuthUser | null = session?.user ? {
     username: (session.user as any).username || session.user.name || "User",
     role: (session.user as any).role || "viewer",
-    email: session.user.email || undefined
+    email: session.user.email || undefined,
+    status: (session.user as any).status || "pending"
   } : null;
 
   const logout = async () => {
@@ -39,7 +42,7 @@ const AuthStateProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, viewerCode: HARDCODED_VIEWER_CODE, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, viewerCode: HARDCODED_VIEWER_CODE, logout, isLoading, updateSession: update }}>
       {children}
     </AuthContext.Provider>
   );
