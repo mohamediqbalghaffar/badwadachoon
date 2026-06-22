@@ -23,7 +23,7 @@ const VIEW_SEGMENTS: { key: ActiveView; label: string; icon: React.ReactNode }[]
 ];
 
 export const Dashboard = () => {
-  const { data, sentData, mode, isPresentationMode, setIsPresentationMode, activeView, setActiveView, clearFilters } = useData();
+  const { data, setData, sentData, setSentData, mode, isPresentationMode, setIsPresentationMode, activeView, setActiveView, clearFilters } = useData();
   const { user, logout } = useAuth();
   const [isAdminSettingsOpen, setIsAdminSettingsOpen] = React.useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = React.useState(false);
