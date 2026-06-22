@@ -150,8 +150,8 @@ export const DataTable = () => {
       </div>
 
       {/* Table Content */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm text-right">
+      <div className="w-full overflow-x-auto pb-4 custom-scrollbar">
+        <table className="w-full text-sm text-right min-w-[1100px] border-collapse">
           <thead className="text-xs text-slate-500 dark:text-slate-400 bg-slate-50/50 dark:bg-slate-900/50">
             <tr>
               {/* Table Headers */}
@@ -188,35 +188,35 @@ export const DataTable = () => {
                   key={row.id}
                   className="border-b border-slate-100 dark:border-slate-800/50 hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors"
                 >
-                  <td className="px-4 py-3 font-medium text-slate-900 dark:text-slate-100">{row.id}</td>
-                  <td className="px-4 py-3 max-w-xs truncate" title={row.subject}>
+                  <td className="px-4 py-3 font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">{row.id}</td>
+                  <td className="px-4 py-3 max-w-[250px] truncate font-medium text-slate-700 dark:text-slate-300" title={row.subject}>
                     {editingId === row.id ? (
                       <input 
                         type="text" 
                         value={editForm.subject || ''} 
                         onChange={e => setEditForm({...editForm, subject: e.target.value})}
-                        className="w-full bg-white dark:bg-slate-900 border border-blue-300 rounded px-2 py-1 text-right outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full bg-white dark:bg-slate-900 border border-blue-300 rounded px-3 py-1.5 text-right outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
                       />
                     ) : (row.subject)}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap">
+                  <td className="px-4 py-3 whitespace-nowrap text-slate-600 dark:text-slate-400">
                     {/* Simplified: Array editing is hard in a single cell, so we keep it read-only for now */}
                     {row.departments?.join("، ") || row.dept1}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap font-mono text-xs">
+                  <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-slate-500 dark:text-slate-400">
                     {editingId === row.id ? (
                       <input 
                         type="text" 
                         value={editForm.refCode || ''} 
                         onChange={e => setEditForm({...editForm, refCode: e.target.value})}
-                        className="w-24 bg-white dark:bg-slate-900 border border-blue-300 rounded px-2 py-1 text-left outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-28 bg-white dark:bg-slate-900 border border-blue-300 rounded px-2 py-1 text-left outline-none focus:ring-2 focus:ring-blue-500"
                         dir="ltr"
                       />
                     ) : (row.refCode)}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap">{row.sentDate || "-"}</td>
-                  <td className="px-4 py-3 whitespace-nowrap">{row.responseDate || <span className="text-amber-500">لە چاوەڕوانیدایە</span>}</td>
-                  <td className="px-4 py-3 whitespace-nowrap">{row.processingTime !== null ? row.processingTime : "-"}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-slate-600 dark:text-slate-400">{row.sentDate || "-"}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-slate-600 dark:text-slate-400">{row.responseDate || <span className="text-amber-500 font-medium">لە چاوەڕوانیدایە</span>}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-center font-semibold text-slate-700 dark:text-slate-300">{row.processingTime !== null ? row.processingTime : "-"}</td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     <span className={`px-2.5 py-1 text-xs font-medium border rounded-full ${getSLAColor(row.slaTime)}`}>
                       {row.slaTime || "-"}
