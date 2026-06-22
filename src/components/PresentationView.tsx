@@ -268,7 +268,7 @@ export const PresentationView = () => {
 
   // --- Sent Data Calculations ---
   const hasSentData = sentData.length > 0;
-  const { activeView } = useData();
+  const { activeView, setActiveView } = useData();
 
   const slideCount = useMemo(() => {
     if (activeView === 'sent') return 4;
