@@ -36,6 +36,8 @@ interface DataContextType {
   setIsPresentationMode: React.Dispatch<React.SetStateAction<boolean>>;
   dbLoading: boolean;
   mode: AdminMode;
+  viewerSelectedUserId: string | null;
+  setViewerSelectedUserId: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -53,6 +55,7 @@ export const DataProvider = ({ children, mode }: { children: React.ReactNode, mo
   });
   const [isPresentationMode, setIsPresentationMode] = useState<boolean>(false);
   const [dbLoading, setDbLoading] = useState(true);
+  const [viewerSelectedUserId, setViewerSelectedUserId] = useState<string | null>(null);
 
   // Fetch initial data from DB on mount
   React.useEffect(() => {
@@ -86,6 +89,32 @@ export const DataProvider = ({ children, mode }: { children: React.ReactNode, mo
 
     fetchFromDb();
   }, [mode]);
+
+  // === VIEWER LIVE DATA FETCHING ===
+  React.useEffect(() => {
+    if (!viewerSelectedUserId) return;
+    
+    let isSubscribed = true;
+    const fetchViewerData = async () => {
+      try {
+        const res = await fetch(`/api/presence/data?userId=${viewerSelectedUserId}`);
+        if (res.ok && isSubscribed) {
+          const json = await res.json();
+          setData(json.data || []);
+          setSentData(json.sentData || []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch viewer data:", err);
+      }
+    };
+
+    fetchViewerData();
+    const interval = setInterval(fetchViewerData, 3000); // Polling every 3s to keep live view synced
+    return () => {
+      isSubscribed = false;
+      clearInterval(interval);
+    };
+  }, [viewerSelectedUserId]);
 
   // === RECEIVED DATA FILTERS ===
 
@@ -181,6 +210,7 @@ export const DataProvider = ({ children, mode }: { children: React.ReactNode, mo
         activeView, setActiveView,
         isPresentationMode, setIsPresentationMode,
         dbLoading, mode,
+        viewerSelectedUserId, setViewerSelectedUserId,
       }}
     >
       {children}

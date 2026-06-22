@@ -7,7 +7,7 @@ export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
     const body = await request.json();
-    const { activeView, viewerId } = body;
+    const { activeView, viewerId, hasData } = body;
 
     let userId = session?.user?.email;
     let name = session?.user?.name || 'بەکارهێنەری نەناسراو';
@@ -29,14 +29,22 @@ export async function POST(request: Request) {
         lastActive: new Date(),
         name,
         role,
+        hasData: hasData || false,
       },
       create: {
         userId,
         name,
         role,
         activeView: activeView || 'unknown',
+        hasData: hasData || false,
       },
     });
+
+    if (hasData === false) {
+      await prisma.sessionData.deleteMany({
+        where: { userId }
+      });
+    }
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

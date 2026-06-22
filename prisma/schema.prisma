@@ -59,10 +59,20 @@ model UserAccount {
 }
 
 model ActiveSession {
-  id         String   @id @default(cuid())
-  userId     String   @unique
-  name       String
-  role       String
-  activeView String
-  lastActive DateTime @default(now())
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  name        String
+  role        String
+  activeView  String
+  lastActive  DateTime @default(now())
+  hasData     Boolean  @default(false)
+  sessionData SessionData?
+}
+
+model SessionData {
+  userId    String        @id
+  data      Json
+  sentData  Json
+  updatedAt DateTime      @updatedAt
+  session   ActiveSession @relation(fields: [userId], references: [userId], onDelete: Cascade)
 }

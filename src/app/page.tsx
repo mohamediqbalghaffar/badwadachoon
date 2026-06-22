@@ -11,6 +11,7 @@ import { ArrowRight } from "lucide-react";
 import { AuthProvider, useAuth } from "../context/AuthContext";
 import { LoginPage } from "../components/LoginPage";
 import { PendingApprovalView } from "../components/PendingApprovalView";
+import { ViewerSelectionScreen } from "../components/ViewerSelectionScreen";
 
 interface MainContentProps {
   onBack: () => void;
@@ -48,6 +49,16 @@ const MainContent: React.FC<MainContentProps> = ({ onBack }) => {
   );
 };
 
+const ViewerContent = () => {
+  const { viewerSelectedUserId, setViewerSelectedUserId } = useData();
+
+  if (!viewerSelectedUserId) {
+    return <ViewerSelectionScreen />;
+  }
+
+  return <MainContent onBack={() => setViewerSelectedUserId(null)} />;
+};
+
 export type ActiveModule = 'landing' | { type: 'admin', mode: AdminMode };
 
 const AppContent = () => {
@@ -70,7 +81,19 @@ const AppContent = () => {
     );
   }
 
-  if (user.status === "pending" || user.status === "approved") {
+  if (user.role === 'viewer') {
+    return (
+      <main className="min-h-screen relative overflow-hidden bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 transition-colors duration-500">
+        <HTSLogoBackground />
+        <ParticlesCanvas />
+        <DataProvider mode="live">
+          <ViewerContent />
+        </DataProvider>
+      </main>
+    );
+  }
+
+  if (user.role !== 'admin' && (user.status === "pending" || user.status === "approved")) {
     return (
       <main className="min-h-screen relative overflow-hidden bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 transition-colors duration-500">
         <HTSLogoBackground />

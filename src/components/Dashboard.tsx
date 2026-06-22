@@ -22,7 +22,7 @@ const VIEW_SEGMENTS: { key: ActiveView; label: string; icon: React.ReactNode }[]
 ];
 
 export const Dashboard = () => {
-  const { isPresentationMode, setIsPresentationMode, activeView, setActiveView, sentData, clearFilters } = useData();
+  const { data, sentData, mode, isPresentationMode, setIsPresentationMode, activeView, setActiveView, clearFilters } = useData();
   const { user, logout } = useAuth();
   const [isAdminSettingsOpen, setIsAdminSettingsOpen] = React.useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = React.useState(false);
@@ -39,7 +39,8 @@ export const Dashboard = () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
             activeView: isPresentationMode ? 'presentation' : activeView,
-            viewerId: user?.role === 'viewer' ? viewerIdRef.current : undefined
+            viewerId: user?.role === 'viewer' ? viewerIdRef.current : undefined,
+            hasData: mode === 'local' && (data.length > 0 || sentData.length > 0)
           })
         });
       } catch (err) {
@@ -50,7 +51,25 @@ export const Dashboard = () => {
     broadcastPresence();
     const interval = setInterval(broadcastPresence, 15000);
     return () => clearInterval(interval);
-  }, [activeView, isPresentationMode, user]);
+  }, [activeView, isPresentationMode, user, mode, data.length, sentData.length]);
+
+  useEffect(() => {
+    if (mode === 'local' && user?.role !== 'viewer' && (data.length > 0 || sentData.length > 0)) {
+      const uploadLocalData = async () => {
+        try {
+          await fetch('/api/presence/data', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ data, sentData })
+          });
+        } catch (err) {
+          console.error("Failed to upload local data to presence cache:", err);
+        }
+      };
+
+      uploadLocalData();
+    }
+  }, [data, sentData, mode, user]);
 
   const handleViewChange = (view: ActiveView) => {
     clearFilters();
