@@ -22,7 +22,7 @@ export const authOptions: NextAuthOptions = {
         code: { label: "Code", type: "password" },
       },
       async authorize(credentials) {
-        if (credentials?.code === "view2026") {
+        if (credentials?.code?.toLowerCase() === "view2026") {
           return { id: "viewer", name: "Viewer", email: "viewer@badwadachoon.local", role: "viewer" };
         }
         return null;

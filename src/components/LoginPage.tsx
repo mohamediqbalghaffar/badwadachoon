@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { useAuth } from "../context/AuthContext";
 import { HTSLogo } from "./HTSLogoBackground";
 import { KeyRound, ArrowRight, ShieldCheck, User } from "lucide-react";
 
@@ -12,7 +12,7 @@ export const LoginPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [shake, setShake] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const router = useRouter();
+  const { updateSession } = useAuth();
 
   const handleViewerSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,8 +30,7 @@ export const LoginPage = () => {
         setShake(true);
         setTimeout(() => setShake(false), 500);
       } else if (res?.ok) {
-        router.refresh();
-        router.push("/");
+        await updateSession();
       }
     } catch (err) {
       setError("هەڵەیەک ڕوویدا لە کاتی چوونەژوورەوە.");
