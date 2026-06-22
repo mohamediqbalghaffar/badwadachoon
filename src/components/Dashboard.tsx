@@ -141,7 +141,7 @@ export const Dashboard = () => {
   };
 
   return (
-    <div className="w-full max-w-[95%] 2xl:max-w-[1600px] mx-auto p-4 sm:p-6 lg:p-8 relative">
+    <div className="w-full max-w-[98%] 2xl:max-w-[98%] mx-auto p-2 sm:p-4 lg:p-6 relative">
       {/* Presentation Mode Toggle (Only visible in presentation mode) */}
       {isPresentationMode && (
         <button
