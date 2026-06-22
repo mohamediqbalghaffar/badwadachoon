@@ -40,7 +40,7 @@ export const Dashboard = () => {
           body: JSON.stringify({ 
             activeView: isPresentationMode ? 'presentation' : activeView,
             viewerId: user?.role === 'viewer' ? viewerIdRef.current : undefined,
-            hasData: mode === 'local' && (data.length > 0 || sentData.length > 0)
+            hasData: data.length > 0 || sentData.length > 0
           })
         });
       } catch (err) {
@@ -51,16 +51,29 @@ export const Dashboard = () => {
     broadcastPresence();
     const interval = setInterval(broadcastPresence, 15000);
     return () => clearInterval(interval);
-  }, [activeView, isPresentationMode, user, mode, data.length, sentData.length]);
+  }, [activeView, isPresentationMode, user, data.length, sentData.length]);
 
   useEffect(() => {
-    if (mode === 'local' && user?.role !== 'viewer' && (data.length > 0 || sentData.length > 0)) {
+    if (user?.role !== 'viewer' && (data.length > 0 || sentData.length > 0)) {
       const uploadLocalData = async () => {
         try {
+          // Strip _raw to drastically reduce JSON payload size and prevent Vercel 413 limit
+          const strippedData = data.map(d => {
+            const { _raw, ...rest } = d;
+            return rest;
+          });
+          const strippedSentData = sentData.map(d => {
+            const { _raw, ...rest } = d;
+            return rest;
+          });
+
+          // Wait 1.5 seconds to ensure the ActiveSession was created by the presence ping first (FK Constraint)
+          await new Promise(resolve => setTimeout(resolve, 1500));
+
           await fetch('/api/presence/data', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ data, sentData })
+            body: JSON.stringify({ data: strippedData, sentData: strippedSentData })
           });
         } catch (err) {
           console.error("Failed to upload local data to presence cache:", err);
@@ -69,7 +82,7 @@ export const Dashboard = () => {
 
       uploadLocalData();
     }
-  }, [data, sentData, mode, user]);
+  }, [data, sentData, user]);
 
   const handleViewChange = (view: ActiveView) => {
     clearFilters();
