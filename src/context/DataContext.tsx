@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useMemo } from "react";
+import { useSession } from "next-auth/react";
 import { DashboardData, SentLetterData } from "../utils/parser";
 
 export type ActiveView = 'received' | 'sent' | 'comparison';
@@ -57,9 +58,12 @@ export const DataProvider = ({ children, mode }: { children: React.ReactNode, mo
   const [dbLoading, setDbLoading] = useState(true);
   const [viewerSelectedUserId, setViewerSelectedUserId] = useState<string | null>(null);
 
+  const { data: session } = useSession();
+  const userRole = (session?.user as any)?.role;
+
   // Fetch initial data from DB on mount
   React.useEffect(() => {
-    if (mode === 'local') {
+    if (mode === 'local' || userRole === 'viewer') {
       setDbLoading(false);
       return;
     }
