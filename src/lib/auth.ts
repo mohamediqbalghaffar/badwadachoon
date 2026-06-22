@@ -28,6 +28,14 @@ export const authOptions: NextAuthOptions = {
         return null;
       },
     }),
+    CredentialsProvider({
+      id: "guest-login",
+      name: "Guest",
+      credentials: {},
+      async authorize() {
+        return { id: "guest", name: "Guest User", email: "guest@badwadachoon.local", role: "viewer" };
+      },
+    }),
   ],
   callbacks: {
     async jwt({ token, user, account }) {
@@ -35,6 +43,10 @@ export const authOptions: NextAuthOptions = {
         if (user.id === "viewer") {
           token.role = "viewer";
           token.username = "Viewer";
+          token.status = "active";
+        } else if (user.id === "guest") {
+          token.role = "viewer";
+          token.username = "Guest User";
           token.status = "active";
         } else if (user.email) {
           const email = user.email.toLowerCase();
