@@ -67,6 +67,7 @@ export const authOptions: NextAuthOptions = {
           token.role = dbUser.role;
           token.status = dbUser.status;
           token.username = dbUser.name || "User";
+          token.image = dbUser.image || user.image;
         }
       }
       return token;
@@ -76,6 +77,9 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).role = token.role;
         (session.user as any).status = token.status;
         (session.user as any).username = token.username;
+        if (token.image) {
+          (session.user as any).image = token.image;
+        }
       }
       return session;
     },

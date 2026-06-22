@@ -1,0 +1,46 @@
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../auth/[...nextauth]/route';
+import { prisma } from '@/lib/prisma';
+
+export async function POST(request: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+    const body = await request.json();
+    const { activeView, viewerId } = body;
+
+    let userId = session?.user?.email;
+    let name = session?.user?.name || 'بەکارهێنەری نەناسراو';
+    let role = (session?.user as any)?.role || 'viewer';
+
+    if (!userId && viewerId) {
+      userId = viewerId;
+      name = 'بینەر (کاتی)';
+    }
+
+    if (!userId) {
+      return NextResponse.json({ error: 'No identifier provided' }, { status: 400 });
+    }
+
+    await prisma.activeSession.upsert({
+      where: { userId },
+      update: {
+        activeView: activeView || 'unknown',
+        lastActive: new Date(),
+        name,
+        role,
+      },
+      create: {
+        userId,
+        name,
+        role,
+        activeView: activeView || 'unknown',
+      },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error('Presence update error:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
+}

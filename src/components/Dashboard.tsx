@@ -1,17 +1,19 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { OmniFilter } from "./OmniFilter";
 import { KPICards } from "./KPICards";
 import { DashboardCharts } from "./Charts";
 import { DataTable } from "./DataTable";
 import { useData, ActiveView } from "../context/DataContext";
 import { useAuth } from "../context/AuthContext";
+import Image from "next/image";
 import { PresentationView } from "./PresentationView";
 import { SentDashboard } from "./SentDashboard";
 import { ComparisonView } from "./ComparisonView";
 import { MonitorPlay, X, Inbox, Send, GitCompareArrows, LogOut, User, ShieldCheck, Settings, Database } from "lucide-react";
 import { AdminSettingsModal } from "./AdminSettingsModal";
+import { LiveActivityTracker } from "./LiveActivityTracker";
 
 const VIEW_SEGMENTS: { key: ActiveView; label: string; icon: React.ReactNode }[] = [
   { key: 'received', label: 'پێویست بە وەڵام', icon: <Inbox size={16} /> },
@@ -25,6 +27,30 @@ export const Dashboard = () => {
   const [isAdminSettingsOpen, setIsAdminSettingsOpen] = React.useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = React.useState(false);
   const [adminModalTab, setAdminModalTab] = React.useState<'database' | 'approvals' | 'profile'>('database');
+  
+  // Create a stable viewer ID for anonymous viewers
+  const viewerIdRef = useRef(`viewer-${Math.random().toString(36).substring(7)}`);
+
+  useEffect(() => {
+    const broadcastPresence = async () => {
+      try {
+        await fetch('/api/presence', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            activeView: isPresentationMode ? 'presentation' : activeView,
+            viewerId: user?.role === 'viewer' ? viewerIdRef.current : undefined
+          })
+        });
+      } catch (err) {
+        // Silent fail for presence
+      }
+    };
+
+    broadcastPresence();
+    const interval = setInterval(broadcastPresence, 15000);
+    return () => clearInterval(interval);
+  }, [activeView, isPresentationMode, user]);
 
   const handleViewChange = (view: ActiveView) => {
     clearFilters();
@@ -90,8 +116,12 @@ export const Dashboard = () => {
                         {user.role === 'admin' ? 'بەڕێوەبەر' : user.role === 'user' ? 'بەکارهێنەر' : 'بینەر'}
                       </span>
                     </div>
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white shadow-sm transition-transform ${isProfileMenuOpen ? 'scale-105' : ''} ${user.role === 'admin' ? 'bg-gradient-to-br from-blue-500 to-blue-600' : user.role === 'user' ? 'bg-gradient-to-br from-indigo-500 to-indigo-600' : 'bg-gradient-to-br from-teal-500 to-teal-600'}`}>
-                      <User size={20} />
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white shadow-sm transition-transform overflow-hidden ${isProfileMenuOpen ? 'scale-105' : ''} ${user.role === 'admin' ? 'bg-gradient-to-br from-blue-500 to-blue-600' : user.role === 'user' ? 'bg-gradient-to-br from-indigo-500 to-indigo-600' : 'bg-gradient-to-br from-teal-500 to-teal-600'}`}>
+                      {(user as any).image ? (
+                        <Image src={(user as any).image} alt="Profile" width={40} height={40} className="object-cover w-full h-full" />
+                      ) : (
+                        <User size={20} />
+                      )}
                     </div>
                   </button>
 
@@ -232,6 +262,9 @@ export const Dashboard = () => {
 
       {/* Admin Settings Modal */}
       {isAdminSettingsOpen && <AdminSettingsModal onClose={() => setIsAdminSettingsOpen(false)} initialTab={adminModalTab} />}
+
+      {/* Live Activity Tracker */}
+      <LiveActivityTracker />
     </div>
   );
 };

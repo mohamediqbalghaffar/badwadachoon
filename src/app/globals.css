@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
 :root {
   --background: #f8fafc;
   --foreground: #020617;
@@ -9,11 +11,9 @@
   --glass-border-dark: rgba(255, 255, 255, 0.1);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #020617;
-    --foreground: #f8fafc;
-  }
+.dark {
+  --background: #020617;
+  --foreground: #f8fafc;
 }
 
 body {
@@ -39,12 +39,10 @@ body {
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
   }
 
-  @media (prefers-color-scheme: dark) {
-    .glass {
-      background-color: var(--glass-bg-dark);
-      border-color: var(--glass-border-dark);
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-    }
+  .dark .glass {
+    background-color: var(--glass-bg-dark);
+    border-color: var(--glass-border-dark);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
   }
 
   .glass-card {
@@ -62,11 +60,9 @@ body {
     border-color: rgba(59, 130, 246, 0.3);
   }
 
-  @media (prefers-color-scheme: dark) {
-    .glass-interactive:hover {
-      box-shadow: 0 12px 40px -10px rgba(59, 130, 246, 0.2);
-      border-color: rgba(59, 130, 246, 0.4);
-    }
+  .dark .glass-interactive:hover {
+    box-shadow: 0 12px 40px -10px rgba(59, 130, 246, 0.2);
+    border-color: rgba(59, 130, 246, 0.4);
   }
 
   /* Animated gradient text */
@@ -166,11 +162,9 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(148, 163, 184, 0.5);
 }
-@media (prefers-color-scheme: dark) {
-  ::-webkit-scrollbar-thumb {
-    background: rgba(71, 85, 105, 0.5);
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: rgba(71, 85, 105, 0.8);
-  }
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(71, 85, 105, 0.5);
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(71, 85, 105, 0.8);
 }

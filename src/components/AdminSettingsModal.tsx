@@ -4,8 +4,11 @@ import React, { useState, useRef } from "react";
 import { X, UploadCloud, Download, Database, AlertCircle, CheckCircle2, Trash2, FileSpreadsheet, ShieldCheck, User } from "lucide-react";
 import * as XLSX from "xlsx";
 import { useData } from "../context/DataContext";
-import { parseFile } from "../utils/parser";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "next-themes";
+import { useSession } from "next-auth/react";
+import Image from "next/image";
+import { parseFile } from "../utils/parser";
 
 type Tab = 'database' | 'approvals' | 'profile';
 
@@ -22,6 +25,14 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose,
   
   const { setData, setSentData, mode } = useData();
   const { user } = useAuth();
+  const { update } = useSession();
+  const { theme, setTheme } = useTheme();
+
+  const [profileName, setProfileName] = useState(user?.username || '');
+  const [profileImage, setProfileImage] = useState<File | null>(null);
+  const [profileImagePreview, setProfileImagePreview] = useState<string | null>(null);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const profileImageInputRef = useRef<HTMLInputElement>(null);
 
   const handleExport = () => {
     window.open('/api/db/export', '_blank');
@@ -166,6 +177,54 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose,
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
+    }
+  };
+
+  const handleProfileImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setProfileImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    setIsSavingProfile(true);
+    try {
+      const formData = new FormData();
+      if (profileName && profileName !== user?.username) {
+        formData.append('name', profileName);
+      }
+      if (profileImage) {
+        formData.append('image', profileImage);
+      }
+
+      if (!formData.has('name') && !formData.has('image')) {
+        setIsSavingProfile(false);
+        return;
+      }
+
+      const res = await fetch('/api/user/profile', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (res.ok) {
+        // Trigger a session update to refresh the profile picture and name across the app
+        await update();
+        alert('زانیارییەکان بە سەرکەوتوویی نوێکرانەوە');
+      } else {
+        alert('هەڵەیەک ڕوویدا لە کاتی نوێکردنەوەی زانیارییەکان');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('هەڵەیەک ڕوویدا لە کاتی پەیوەندیکردن بە سێرڤەر');
+    } finally {
+      setIsSavingProfile(false);
     }
   };
 
@@ -328,25 +387,102 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose,
           )}
 
           {activeTab === 'profile' && (
-            <div className="animate-in fade-in space-y-6">
-              <div className="flex flex-col items-center justify-center py-6 text-center">
-                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white mb-4 shadow-xl">
-                  <User size={48} />
+            <div className="animate-in fade-in space-y-8">
+              
+              {/* Profile Header */}
+              <div className="flex flex-col items-center justify-center py-4">
+                <div className="relative group">
+                  <div className="w-28 h-28 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white mb-4 shadow-xl overflow-hidden border-4 border-white dark:border-slate-800">
+                    {profileImagePreview || (user as any)?.image ? (
+                      <Image 
+                        src={profileImagePreview || (user as any)?.image} 
+                        alt="Profile" 
+                        fill 
+                        className="object-cover"
+                      />
+                    ) : (
+                      <User size={48} />
+                    )}
+                    <div 
+                      onClick={() => profileImageInputRef.current?.click()}
+                      className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                    >
+                      <UploadCloud size={24} className="text-white" />
+                    </div>
+                  </div>
+                  <input 
+                    type="file" 
+                    ref={profileImageInputRef}
+                    accept="image/*"
+                    onChange={handleProfileImageChange}
+                    className="hidden"
+                  />
                 </div>
-                <h3 className="text-2xl font-bold text-slate-800 dark:text-white capitalize">{user?.username}</h3>
-                <p className="text-slate-500 dark:text-slate-400 mt-1">{user?.email}</p>
                 
-                <div className="mt-4 px-4 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-sm font-semibold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                <div className="mt-2 px-4 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                   {user?.role === 'admin' ? 'بەڕێوەبەر' : user?.role === 'user' ? 'بەکارهێنەر' : 'بینەر'}
                 </div>
               </div>
-              
-              <div className="bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 rounded-2xl p-5 text-blue-800 dark:text-blue-300 flex gap-4 text-sm leading-relaxed">
-                <AlertCircle className="shrink-0 mt-0.5" size={20} />
-                <p>
-                  لە داهاتوودا لێرەوە دەتوانیت گۆڕانکاری لە وشەی نهێنی و زانیارییەکانی تری هەژمارەکەتدا بکەیت.
-                </p>
+
+              {/* Profile Form (Glassmorphism) */}
+              <div className="bg-slate-50/80 dark:bg-slate-800/80 backdrop-blur-md rounded-2xl border border-slate-200 dark:border-slate-700 p-6 space-y-5">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">ناوی بەکارهێنەر</label>
+                  <input 
+                    type="text" 
+                    value={profileName}
+                    onChange={(e) => setProfileName(e.target.value)}
+                    className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">ئیمەیڵ</label>
+                  <input 
+                    type="text" 
+                    value={user?.email || ''}
+                    disabled
+                    className="w-full bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-500 dark:text-slate-400 cursor-not-allowed"
+                  />
+                </div>
+
+                <div className="pt-2">
+                  <button 
+                    onClick={handleSaveProfile}
+                    disabled={isSavingProfile}
+                    className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-medium transition-colors disabled:opacity-50"
+                  >
+                    {isSavingProfile ? 'پاشەکەوتکردن...' : 'پاشەکەوتکردنی گۆڕانکارییەکان'}
+                  </button>
+                </div>
               </div>
+              
+              {/* Appearance Settings */}
+              <div className="bg-slate-50/80 dark:bg-slate-800/80 backdrop-blur-md rounded-2xl border border-slate-200 dark:border-slate-700 p-6">
+                <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">شێوازی ڕووکار (Appearance)</h4>
+                
+                <div className="flex bg-slate-200/50 dark:bg-slate-900/50 p-1.5 rounded-xl gap-1">
+                  <button 
+                    onClick={() => setTheme('light')}
+                    className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${theme === 'light' ? 'bg-white dark:bg-slate-700 shadow-sm text-blue-600 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800'}`}
+                  >
+                    ڕووناک
+                  </button>
+                  <button 
+                    onClick={() => setTheme('dark')}
+                    className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${theme === 'dark' ? 'bg-white dark:bg-slate-700 shadow-sm text-blue-600 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800'}`}
+                  >
+                    تاریک
+                  </button>
+                  <button 
+                    onClick={() => setTheme('system')}
+                    className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${theme === 'system' ? 'bg-white dark:bg-slate-700 shadow-sm text-blue-600 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800'}`}
+                  >
+                    سیستەم
+                  </button>
+                </div>
+              </div>
+
             </div>
           )}
 
