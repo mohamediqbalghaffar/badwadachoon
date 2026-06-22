@@ -12,7 +12,7 @@ export async function GET() {
     }
 
     const user = await prisma.userAccount.findUnique({
-      where: { email: session.user.email },
+      where: { email: session.user.email.toLowerCase() },
     });
 
     if (!user) {

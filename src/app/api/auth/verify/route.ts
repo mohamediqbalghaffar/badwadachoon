@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     const { code } = await request.json();
 
     const user = await prisma.userAccount.findUnique({
-      where: { email: session.user.email },
+      where: { email: session.user.email.toLowerCase() },
     });
 
     if (!user) {
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
 
     // Update status to active and clear authCode
     await prisma.userAccount.update({
-      where: { email: session.user.email },
+      where: { email: session.user.email.toLowerCase() },
       data: {
         status: 'active',
         authCode: null

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../../auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { put } from '@vercel/blob';
 
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     }
 
     const updatedUser = await prisma.userAccount.update({
-      where: { email: session.user.email },
+      where: { email: session.user.email.toLowerCase() },
       data: dataToUpdate,
     });
 
