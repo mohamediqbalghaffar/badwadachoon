@@ -21,6 +21,8 @@ import {
 } from "lucide-react";
 import {
   BarChart,
+  ComposedChart,
+  Line,
   Bar,
   XAxis,
   YAxis,
@@ -134,49 +136,64 @@ export const PresentationView = () => {
 
   // Prepare Enhanced SLA Data
   const slaEnhancedData = useMemo(() => {
-    const groups: Record<string, { name: string, onTime: number, late: number, order: number, exactOnTimeName: string, exactLateName: string }> = {
-      '12': { name: '12 ڕۆژ', onTime: 0, late: 0, order: 6, exactOnTimeName: '', exactLateName: '' },
-      '10': { name: '10 ڕۆژ', onTime: 0, late: 0, order: 5, exactOnTimeName: '', exactLateName: '' },
-      '8': { name: '8 ڕۆژ', onTime: 0, late: 0, order: 4, exactOnTimeName: '', exactLateName: '' },
-      '5': { name: '5 ڕۆژ', onTime: 0, late: 0, order: 3, exactOnTimeName: '', exactLateName: '' },
-      '4': { name: '4 ڕۆژ', onTime: 0, late: 0, order: 2, exactOnTimeName: '', exactLateName: '' },
-      '2': { name: '2 ڕۆژ', onTime: 0, late: 0, order: 1, exactOnTimeName: '', exactLateName: '' },
-      'ڕێنمایی': { name: 'ڕێنمایی', onTime: 0, late: 0, order: 7, exactOnTimeName: '', exactLateName: '' },
-      '-': { name: 'نەزانراو', onTime: 0, late: 0, order: 8, exactOnTimeName: '', exactLateName: '' },
-    };
+    const groups: Record<string, { 
+      name: string, 
+      originalCategory: string, 
+      onTime: number, 
+      late: number, 
+      exactOnTimeName: string, 
+      exactLateName: string,
+      processingTimeSum: number,
+      processingTimeCount: number
+    }> = {};
 
     let totalOnTime = 0;
     let totalLate = 0;
 
     baseFilteredData.forEach((d) => {
       const sla = d.slaTime || '-';
-      
-      let matchedKey = '-';
-      if (sla.includes('12')) matchedKey = '12';
-      else if (sla.includes('10')) matchedKey = '10';
-      else if (sla.includes('8')) matchedKey = '8';
-      else if (sla.includes('5')) matchedKey = '5';
-      else if (sla.includes('4')) matchedKey = '4';
-      else if (sla.includes('2')) matchedKey = '2';
-      else if (sla.includes('ڕێنمایی')) matchedKey = 'ڕێنمایی';
+      const category = d.letterType || 'نەزانراو';
+
+      if (!groups[category]) {
+        const cleanName = category.replace('بەشی ', '').replace('سێکتەری ', '');
+        groups[category] = { 
+          name: cleanName, 
+          originalCategory: category, 
+          onTime: 0, 
+          late: 0, 
+          exactOnTimeName: '', 
+          exactLateName: '',
+          processingTimeSum: 0,
+          processingTimeCount: 0
+        };
+      }
+
+      if (d.processingTime != null && !isNaN(d.processingTime)) {
+        groups[category].processingTimeSum += d.processingTime;
+        groups[category].processingTimeCount += 1;
+      }
 
       const isLate = sla.includes('زیاتر');
 
       if (isLate) {
-        groups[matchedKey].late += 1;
-        groups[matchedKey].exactLateName = sla;
+        groups[category].late += 1;
+        groups[category].exactLateName = sla;
         totalLate += 1;
       } else {
-        groups[matchedKey].onTime += 1;
-        groups[matchedKey].exactOnTimeName = sla;
-        if (matchedKey !== '-' && matchedKey !== 'ڕێنمایی') totalOnTime += 1;
-        if (matchedKey === 'ڕێنمایی') totalOnTime += 1;
+        groups[category].onTime += 1;
+        groups[category].exactOnTimeName = sla;
+        if (sla !== '-') totalOnTime += 1;
       }
     });
 
     const data = Object.values(groups)
       .filter(g => g.onTime > 0 || g.late > 0)
-      .sort((a, b) => a.order - b.order);
+      .map(g => ({
+        ...g,
+        complianceRate: Math.round((g.onTime / (g.onTime + g.late)) * 100) || 0,
+        avgProcessingTime: g.processingTimeCount > 0 ? parseFloat((g.processingTimeSum / g.processingTimeCount).toFixed(1)) : 0
+      }))
+      .sort((a, b) => (b.onTime + b.late) - (a.onTime + a.late));
 
     return { data, totalOnTime, totalLate };
   }, [baseFilteredData]);
@@ -600,27 +617,71 @@ export const PresentationView = () => {
             
             <div className="w-full h-[350px] bg-white/5 dark:bg-slate-900/40 rounded-2xl p-6 border border-white/10" dir="ltr">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={slaEnhancedData.data} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
+                <ComposedChart data={slaEnhancedData.data} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#475569" opacity={0.2} />
                   <XAxis dataKey="name" tick={{ fontSize: 13, fill: '#94a3b8', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 13, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <YAxis yAxisId="left" tick={{ fontSize: 13, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 13, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
                   <Tooltip
                     cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
-                    contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff' }}
-                    formatter={(value: any, name: any, props: any) => {
-                      if (name === 'onTime') return [value, props.payload.exactOnTimeName || 'کەمتر / لە کاتی'];
-                      if (name === 'late') return [value, props.payload.exactLateName || 'زیاتر / دواکەوتوو'];
-                      return [value, name];
+                    contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5)' }}
+                    content={(props: any) => {
+                      const { active, payload, label } = props;
+                      if (active && payload && payload.length) {
+                        const data = payload[0].payload;
+                        return (
+                          <div className="bg-slate-900/95 p-4 rounded-2xl shadow-xl border border-slate-700" dir="rtl">
+                            <p className="font-bold text-white mb-3 pb-2 border-b border-slate-700 text-base">{label}</p>
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between gap-6">
+                                <div className="flex items-center gap-2">
+                                  <span className="w-3 h-3 rounded-full bg-[#10b981]"></span>
+                                  <span className="text-sm font-medium text-slate-300">لە کاتی خۆی (کەمتر)</span>
+                                </div>
+                                <span className="text-sm font-bold text-white">{data.onTime}</span>
+                              </div>
+                              <div className="flex items-center justify-between gap-6">
+                                <div className="flex items-center gap-2">
+                                  <span className="w-3 h-3 rounded-full bg-[#ef4444]"></span>
+                                  <span className="text-sm font-medium text-slate-300">دواکەوتوو (زیاتر)</span>
+                                </div>
+                                <span className="text-sm font-bold text-white">{data.late}</span>
+                              </div>
+                              <div className="h-px bg-slate-700 my-2"></div>
+                              <div className="flex items-center justify-between gap-6">
+                                <span className="text-sm font-medium text-slate-300">ڕێژەی پابەندبوون</span>
+                                <span className="text-sm font-bold text-[#10b981]">{data.complianceRate}%</span>
+                              </div>
+                              <div className="flex items-center justify-between gap-6">
+                                <div className="flex items-center gap-2">
+                                  <span className="w-3 h-1 rounded-full bg-[#f59e0b]"></span>
+                                  <span className="text-sm font-medium text-slate-300">تێکڕای کاتی تێچوو</span>
+                                </div>
+                                <span className="text-sm font-bold text-[#f59e0b]">{data.avgProcessingTime} ڕۆژ</span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
                     }}
-                    labelFormatter={(label) => `ئامانجی: ${label}`}
                   />
-                  <Bar dataKey="onTime" stackId="a" fill="#10b981" maxBarSize={55}>
+                  <Bar yAxisId="left" dataKey="onTime" stackId="a" fill="#10b981" maxBarSize={55}>
                     <LabelList dataKey="onTime" position="center" fill="#fff" fontSize={14} fontWeight="bold" />
                   </Bar>
-                  <Bar dataKey="late" stackId="a" fill="#ef4444" radius={[8, 8, 0, 0]} maxBarSize={55}>
+                  <Bar yAxisId="left" dataKey="late" stackId="a" fill="#ef4444" radius={[8, 8, 0, 0]} maxBarSize={55}>
                     <LabelList dataKey="late" position="center" fill="#fff" fontSize={14} fontWeight="bold" />
                   </Bar>
-                </BarChart>
+                  <Line 
+                    yAxisId="right"
+                    type="monotone" 
+                    dataKey="avgProcessingTime" 
+                    stroke="#f59e0b" 
+                    strokeWidth={3} 
+                    dot={{ r: 4, strokeWidth: 2, fill: '#fff' }}
+                    activeDot={{ r: 6, fill: '#f59e0b', stroke: '#fff', strokeWidth: 2 }}
+                  />
+                </ComposedChart>
               </ResponsiveContainer>
             </div>
             <div className="mt-6 flex flex-wrap gap-x-8 gap-y-2 justify-center" dir="rtl">
@@ -631,6 +692,10 @@ export const PresentationView = () => {
               <div className="flex items-center gap-2 text-sm">
                 <span className="w-4 h-4 rounded-full bg-[#ef4444]"></span>
                 <span className="font-bold text-slate-700 dark:text-slate-300">دواکەوتوو (زیاتر)</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm ml-4">
+                <span className="w-5 h-1.5 rounded-full bg-[#f59e0b]"></span>
+                <span className="font-bold text-slate-700 dark:text-slate-300">تێکڕای کاتی تێچوو (ڕۆژ)</span>
               </div>
             </div>
           </div>
