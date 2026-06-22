@@ -1,21 +1,27 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { X, UploadCloud, Download, Database, AlertCircle, CheckCircle2, Trash2, FileSpreadsheet } from "lucide-react";
+import { X, UploadCloud, Download, Database, AlertCircle, CheckCircle2, Trash2, FileSpreadsheet, ShieldCheck, User } from "lucide-react";
 import * as XLSX from "xlsx";
 import { useData } from "../context/DataContext";
 import { parseFile } from "../utils/parser";
+import { useAuth } from "../context/AuthContext";
+
+type Tab = 'database' | 'approvals' | 'profile';
 
 interface AdminSettingsModalProps {
   onClose: () => void;
+  initialTab?: Tab;
 }
 
-export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose }) => {
+export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose, initialTab = 'database' }) => {
+  const [activeTab, setActiveTab] = useState<Tab>(initialTab);
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncStatus, setSyncStatus] = useState<{ type: 'idle' | 'success' | 'error', message: string }>({ type: 'idle', message: '' });
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const { setData, setSentData, mode } = useData();
+  const { user } = useAuth();
 
   const handleExport = () => {
     window.open('/api/db/export', '_blank');
@@ -165,15 +171,17 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose 
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden border border-slate-200 dark:border-slate-800">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden border border-slate-200 dark:border-slate-800 flex flex-col max-h-[90vh]">
         
         {/* Header */}
         <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-900/50">
           <div className="flex items-center gap-3 text-slate-800 dark:text-white">
             <div className="p-2 bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-xl">
-              <Database size={20} />
+              {activeTab === 'database' ? <Database size={20} /> : activeTab === 'approvals' ? <ShieldCheck size={20} /> : <User size={20} />}
             </div>
-            <h2 className="text-xl font-bold">ڕێکخستنەکانی سیستەم (Admin)</h2>
+            <h2 className="text-xl font-bold">
+              {activeTab === 'database' ? 'ڕێکخستنەکانی داتابەیس' : activeTab === 'approvals' ? 'پەسەندکردنی بەکارهێنەران' : 'ڕێکخستنەکانی هەژمار'}
+            </h2>
           </div>
           <button 
             onClick={onClose}
@@ -183,116 +191,164 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose 
           </button>
         </div>
 
+        {/* Tabs Navigation */}
+        <div className="flex border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 px-6 pt-2 gap-4 overflow-x-auto">
+          {user?.role === 'admin' && (
+            <>
+              <button 
+                onClick={() => setActiveTab('database')}
+                className={`pb-3 px-2 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'database' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
+              >
+                داتابەیس
+              </button>
+              <button 
+                onClick={() => setActiveTab('approvals')}
+                className={`pb-3 px-2 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'approvals' ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
+              >
+                پەسەندکردنی بەکارهێنەر
+              </button>
+            </>
+          )}
+          <button 
+            onClick={() => setActiveTab('profile')}
+            className={`pb-3 px-2 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'profile' ? 'border-violet-500 text-violet-600 dark:text-violet-400' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
+          >
+            هەژماری من
+          </button>
+        </div>
+
         {/* Content */}
-        <div className="p-6 sm:p-8 space-y-8">
+        <div className="p-6 sm:p-8 overflow-y-auto">
           
-          <div className="bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 rounded-2xl p-5 text-blue-800 dark:text-blue-300 flex gap-4 text-sm leading-relaxed">
-            <AlertCircle className="shrink-0 mt-0.5" size={20} />
-            <p>
-              لێرە دەتوانیت داتابەیسی سیستەمەکە نوێ بکەیتەوە لە ڕێگەی فایلی ئێکسڵ، یان سەرجەم داتاکان دابەزێنیت. تکایە ئاگاداربە کە بارکردنی فایلی ئێکسڵ <span className="font-bold">سەرجەم داتاکانی پێشوو دەسڕێتەوە</span> و داتای نوێ جێگیر دەکات.
-            </p>
-          </div>
+          {activeTab === 'database' && user?.role === 'admin' && (
+            <div className="space-y-8 animate-in fade-in">
+              <div className="bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 rounded-2xl p-5 text-blue-800 dark:text-blue-300 flex gap-4 text-sm leading-relaxed">
+                <AlertCircle className="shrink-0 mt-0.5" size={20} />
+                <p>
+                  لێرە دەتوانیت داتابەیسی سیستەمەکە نوێ بکەیتەوە لە ڕێگەی فایلی ئێکسڵ، یان سەرجەم داتاکان دابەزێنیت. تکایە ئاگاداربە کە بارکردنی فایلی ئێکسڵ <span className="font-bold">سەرجەم داتاکانی پێشوو دەسڕێتەوە</span> و داتای نوێ جێگیر دەکات.
+                </p>
+              </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-4">
-            
-            {/* Import Card */}
-            <div className="relative group overflow-hidden rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-500 transition-colors bg-slate-50 dark:bg-slate-800/50 p-6 flex flex-col items-center justify-center gap-4 text-center">
-              <div className="p-4 bg-white dark:bg-slate-800 rounded-full shadow-sm text-blue-500 group-hover:scale-110 transition-transform">
-                <UploadCloud size={32} />
-              </div>
-              <div>
-                <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-1">بارکردنی داتابەیس</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">فایلی .xlsx لێرە هەڵبژێرە</p>
-              </div>
-              <input 
-                ref={fileInputRef}
-                type="file" 
-                accept=".xlsx, .xls"
-                onChange={handleFileUpload}
-                disabled={isSyncing}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
-              />
-            </div>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-4">
+                {/* Import Card */}
+                <div className="relative group overflow-hidden rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-500 transition-colors bg-slate-50 dark:bg-slate-800/50 p-6 flex flex-col items-center justify-center gap-4 text-center">
+                  <div className="p-4 bg-white dark:bg-slate-800 rounded-full shadow-sm text-blue-500 group-hover:scale-110 transition-transform">
+                    <UploadCloud size={32} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-1">بارکردنی داتابەیس</h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">فایلی .xlsx لێرە هەڵبژێرە</p>
+                  </div>
+                  <input 
+                    ref={fileInputRef}
+                    type="file" 
+                    accept=".xlsx, .xls"
+                    onChange={handleFileUpload}
+                    disabled={isSyncing}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                  />
+                </div>
 
-            {/* Export Card */}
-            <button 
-              onClick={handleExport}
-              disabled={isSyncing}
-              className="group overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-emerald-500 dark:hover:border-emerald-500 transition-colors bg-slate-50 dark:bg-slate-800/50 p-6 flex flex-col items-center justify-center gap-4 text-center disabled:opacity-50"
-            >
-              <div className="p-4 bg-white dark:bg-slate-800 rounded-full shadow-sm text-emerald-500 group-hover:scale-110 transition-transform">
-                <Download size={32} />
-              </div>
-              <div>
-                <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-1">دابەزاندنی داتابەیس</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">سەرجەم داتاکان بە ئێکسڵ</p>
-              </div>
-            </button>
+                {/* Export Card */}
+                <button 
+                  onClick={handleExport}
+                  disabled={isSyncing}
+                  className="group overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-emerald-500 dark:hover:border-emerald-500 transition-colors bg-slate-50 dark:bg-slate-800/50 p-6 flex flex-col items-center justify-center gap-4 text-center disabled:opacity-50"
+                >
+                  <div className="p-4 bg-white dark:bg-slate-800 rounded-full shadow-sm text-emerald-500 group-hover:scale-110 transition-transform">
+                    <Download size={32} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-1">دابەزاندنی داتابەیس</h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">سەرجەم داتاکان بە ئێکسڵ</p>
+                  </div>
+                </button>
 
-            {/* Delete Card */}
-            <button 
-              onClick={handleDeleteData}
-              disabled={isSyncing}
-              className="group overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-rose-500 dark:hover:border-rose-500 transition-colors bg-slate-50 dark:bg-slate-800/50 p-6 flex flex-col items-center justify-center gap-4 text-center disabled:opacity-50"
-            >
-              <div className="p-4 bg-white dark:bg-slate-800 rounded-full shadow-sm text-rose-500 group-hover:scale-110 transition-transform">
-                <Trash2 size={32} />
-              </div>
-              <div>
-                <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-1">سڕینەوەی داتابەیس</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">سڕینەوەی سەرجەم داتاکان</p>
-              </div>
-            </button>
+                {/* Delete Card */}
+                <button 
+                  onClick={handleDeleteData}
+                  disabled={isSyncing}
+                  className="group overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-rose-500 dark:hover:border-rose-500 transition-colors bg-slate-50 dark:bg-slate-800/50 p-6 flex flex-col items-center justify-center gap-4 text-center disabled:opacity-50"
+                >
+                  <div className="p-4 bg-white dark:bg-slate-800 rounded-full shadow-sm text-rose-500 group-hover:scale-110 transition-transform">
+                    <Trash2 size={32} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-1">سڕینەوەی داتابەیس</h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">سڕینەوەی سەرجەم داتاکان</p>
+                  </div>
+                </button>
 
-            {/* Template Card */}
-            <button 
-              onClick={handleDownloadTemplate}
-              disabled={isSyncing}
-              className="group overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-violet-500 dark:hover:border-violet-500 transition-colors bg-slate-50 dark:bg-slate-800/50 p-6 flex flex-col items-center justify-center gap-4 text-center disabled:opacity-50"
-            >
-              <div className="p-4 bg-white dark:bg-slate-800 rounded-full shadow-sm text-violet-500 group-hover:scale-110 transition-transform">
-                <FileSpreadsheet size={32} />
+                {/* Template Card */}
+                <button 
+                  onClick={handleDownloadTemplate}
+                  disabled={isSyncing}
+                  className="group overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-violet-500 dark:hover:border-violet-500 transition-colors bg-slate-50 dark:bg-slate-800/50 p-6 flex flex-col items-center justify-center gap-4 text-center disabled:opacity-50"
+                >
+                  <div className="p-4 bg-white dark:bg-slate-800 rounded-full shadow-sm text-violet-500 group-hover:scale-110 transition-transform">
+                    <FileSpreadsheet size={32} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-1">فایلی بەتاڵ</h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">داگرتنی فایل بۆ پڕکردنەوە</p>
+                  </div>
+                </button>
               </div>
-              <div>
-                <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-1">فایلی بەتاڵ</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">داگرتنی فایل بۆ پڕکردنەوە</p>
-              </div>
-            </button>
-            
-          </div>
 
-          {/* Status Display */}
-          {isSyncing && (
-            <div className="flex items-center justify-center gap-3 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 p-4 rounded-xl animate-pulse">
-              <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-              <span className="font-medium">{syncStatus.message}</span>
+              {/* Status Display */}
+              {isSyncing && (
+                <div className="flex items-center justify-center gap-3 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 p-4 rounded-xl animate-pulse">
+                  <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  <span className="font-medium">{syncStatus.message}</span>
+                </div>
+              )}
+
+              {syncStatus.type === 'success' && (
+                <div className="flex items-center justify-center gap-2 text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 p-4 rounded-xl">
+                  <CheckCircle2 size={20} />
+                  <span className="font-medium">{syncStatus.message}</span>
+                </div>
+              )}
+
+              {syncStatus.type === 'error' && (
+                <div className="flex items-center justify-center gap-2 text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 p-4 rounded-xl text-center">
+                  <AlertCircle size={20} />
+                  <span className="font-medium">{syncStatus.message}</span>
+                </div>
+              )}
             </div>
           )}
 
-          {syncStatus.type === 'success' && (
-            <div className="flex items-center justify-center gap-2 text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 p-4 rounded-xl">
-              <CheckCircle2 size={20} />
-              <span className="font-medium">{syncStatus.message}</span>
+          {activeTab === 'approvals' && user?.role === 'admin' && (
+            <div className="animate-in fade-in">
+              <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                <PendingUsersList />
+              </div>
             </div>
           )}
 
-          {syncStatus.type === 'error' && (
-            <div className="flex items-center justify-center gap-2 text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 p-4 rounded-xl text-center">
-              <AlertCircle size={20} />
-              <span className="font-medium">{syncStatus.message}</span>
+          {activeTab === 'profile' && (
+            <div className="animate-in fade-in space-y-6">
+              <div className="flex flex-col items-center justify-center py-6 text-center">
+                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white mb-4 shadow-xl">
+                  <User size={48} />
+                </div>
+                <h3 className="text-2xl font-bold text-slate-800 dark:text-white capitalize">{user?.username}</h3>
+                <p className="text-slate-500 dark:text-slate-400 mt-1">{user?.email}</p>
+                
+                <div className="mt-4 px-4 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-sm font-semibold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                  {user?.role === 'admin' ? 'بەڕێوەبەر' : user?.role === 'user' ? 'بەکارهێنەر' : 'بینەر'}
+                </div>
+              </div>
+              
+              <div className="bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 rounded-2xl p-5 text-blue-800 dark:text-blue-300 flex gap-4 text-sm leading-relaxed">
+                <AlertCircle className="shrink-0 mt-0.5" size={20} />
+                <p>
+                  لە داهاتوودا لێرەوە دەتوانیت گۆڕانکاری لە وشەی نهێنی و زانیارییەکانی تری هەژمارەکەتدا بکەیت.
+                </p>
+              </div>
             </div>
           )}
-
-          {/* User Approvals Section */}
-          <div className="mt-8 border-t border-slate-200 dark:border-slate-800 pt-8">
-            <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
-              <AlertCircle className="text-amber-500" size={20} />
-              پەسەندکردنی بەکارهێنەران
-            </h3>
-            <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-              <PendingUsersList />
-            </div>
-          </div>
 
         </div>
       </div>

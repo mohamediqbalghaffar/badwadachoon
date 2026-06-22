@@ -10,7 +10,7 @@ import { useAuth } from "../context/AuthContext";
 import { PresentationView } from "./PresentationView";
 import { SentDashboard } from "./SentDashboard";
 import { ComparisonView } from "./ComparisonView";
-import { MonitorPlay, X, Inbox, Send, GitCompareArrows, LogOut, User, ShieldCheck, Settings } from "lucide-react";
+import { MonitorPlay, X, Inbox, Send, GitCompareArrows, LogOut, User, ShieldCheck, Settings, Database } from "lucide-react";
 import { AdminSettingsModal } from "./AdminSettingsModal";
 
 const VIEW_SEGMENTS: { key: ActiveView; label: string; icon: React.ReactNode }[] = [
@@ -24,6 +24,7 @@ export const Dashboard = () => {
   const { user, logout } = useAuth();
   const [isAdminSettingsOpen, setIsAdminSettingsOpen] = React.useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = React.useState(false);
+  const [adminModalTab, setAdminModalTab] = React.useState<'database' | 'approvals' | 'profile'>('database');
 
   const handleViewChange = (view: ActiveView) => {
     clearFilters();
@@ -98,27 +99,64 @@ export const Dashboard = () => {
                   {isProfileMenuOpen && (
                     <>
                       <div className="fixed inset-0 z-40" onClick={() => setIsProfileMenuOpen(false)}></div>
-                      <div className="absolute left-0 top-full mt-2 w-56 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                      <div className="absolute left-0 top-full mt-2 w-64 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                         <div className="p-2 space-y-1">
                           
                           {user.role === 'admin' && (
-                            <button 
-                              onClick={() => {
-                                setIsAdminSettingsOpen(true);
-                                setIsProfileMenuOpen(false);
-                              }}
-                              className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-xl transition-colors"
-                            >
-                              <Settings size={18} className="text-slate-400" />
-                              <span className="font-medium">ڕێکخستنەکانی داتابەیس</span>
-                            </button>
+                            <>
+                              <button 
+                                onClick={() => {
+                                  setAdminModalTab('database');
+                                  setIsAdminSettingsOpen(true);
+                                  setIsProfileMenuOpen(false);
+                                }}
+                                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-xl transition-colors"
+                              >
+                                <div className="p-1.5 bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-lg">
+                                  <Database size={16} />
+                                </div>
+                                <span className="font-medium">ڕێکخستنەکانی داتابەیس</span>
+                              </button>
+
+                              <button 
+                                onClick={() => {
+                                  setAdminModalTab('approvals');
+                                  setIsAdminSettingsOpen(true);
+                                  setIsProfileMenuOpen(false);
+                                }}
+                                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-xl transition-colors"
+                              >
+                                <div className="p-1.5 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-lg">
+                                  <ShieldCheck size={16} />
+                                </div>
+                                <span className="font-medium">پەسەندکردنی بەکارهێنەر</span>
+                              </button>
+                            </>
                           )}
+
+                          <button 
+                            onClick={() => {
+                              setAdminModalTab('profile');
+                              setIsAdminSettingsOpen(true);
+                              setIsProfileMenuOpen(false);
+                            }}
+                            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-xl transition-colors"
+                          >
+                            <div className="p-1.5 bg-violet-100 dark:bg-violet-500/20 text-violet-600 dark:text-violet-400 rounded-lg">
+                              <User size={16} />
+                            </div>
+                            <span className="font-medium">ڕێکخستنەکانی هەژمار</span>
+                          </button>
+
+                          <div className="h-px bg-slate-100 dark:bg-slate-700/50 my-1"></div>
 
                           <button 
                             onClick={logout}
                             className="w-full flex items-center gap-3 px-4 py-3 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl transition-colors"
                           >
-                            <LogOut size={18} />
+                            <div className="p-1.5 bg-rose-100 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 rounded-lg">
+                              <LogOut size={16} />
+                            </div>
                             <span className="font-medium">چوونەدەرەوە</span>
                           </button>
                           
@@ -193,7 +231,7 @@ export const Dashboard = () => {
       )}
 
       {/* Admin Settings Modal */}
-      {isAdminSettingsOpen && <AdminSettingsModal onClose={() => setIsAdminSettingsOpen(false)} />}
+      {isAdminSettingsOpen && <AdminSettingsModal onClose={() => setIsAdminSettingsOpen(false)} initialTab={adminModalTab} />}
     </div>
   );
 };
