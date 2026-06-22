@@ -92,49 +92,36 @@ export const DashboardCharts = () => {
 
   // Prepare Enhanced SLA Data (Stacked Bar)
   const slaEnhancedData = useMemo(() => {
-    const groups: Record<string, { name: string, onTime: number, late: number, order: number, exactOnTimeName: string, exactLateName: string }> = {
-      '12': { name: '12 ڕۆژ', onTime: 0, late: 0, order: 6, exactOnTimeName: '', exactLateName: '' },
-      '10': { name: '10 ڕۆژ', onTime: 0, late: 0, order: 5, exactOnTimeName: '', exactLateName: '' },
-      '8': { name: '8 ڕۆژ', onTime: 0, late: 0, order: 4, exactOnTimeName: '', exactLateName: '' },
-      '5': { name: '5 ڕۆژ', onTime: 0, late: 0, order: 3, exactOnTimeName: '', exactLateName: '' },
-      '4': { name: '4 ڕۆژ', onTime: 0, late: 0, order: 2, exactOnTimeName: '', exactLateName: '' },
-      '2': { name: '2 ڕۆژ', onTime: 0, late: 0, order: 1, exactOnTimeName: '', exactLateName: '' },
-      'ڕێنمایی': { name: 'ڕێنمایی', onTime: 0, late: 0, order: 7, exactOnTimeName: '', exactLateName: '' },
-      '-': { name: 'نەزانراو', onTime: 0, late: 0, order: 8, exactOnTimeName: '', exactLateName: '' },
-    };
+    const groups: Record<string, { name: string, originalCategory: string, onTime: number, late: number, exactOnTimeName: string, exactLateName: string }> = {};
 
     let totalOnTime = 0;
     let totalLate = 0;
 
     filteredData.forEach((d) => {
       const sla = d.slaTime || '-';
-      
-      let matchedKey = '-';
-      if (sla.includes('12')) matchedKey = '12';
-      else if (sla.includes('10')) matchedKey = '10';
-      else if (sla.includes('8')) matchedKey = '8';
-      else if (sla.includes('5')) matchedKey = '5';
-      else if (sla.includes('4')) matchedKey = '4';
-      else if (sla.includes('2')) matchedKey = '2';
-      else if (sla.includes('ڕێنمایی')) matchedKey = 'ڕێنمایی';
+      const category = d.letterType || 'نەزانراو';
+
+      if (!groups[category]) {
+        const cleanName = category.replace('بەشی ', '').replace('سێکتەری ', '');
+        groups[category] = { name: cleanName, originalCategory: category, onTime: 0, late: 0, exactOnTimeName: '', exactLateName: '' };
+      }
 
       const isLate = sla.includes('زیاتر');
 
       if (isLate) {
-        groups[matchedKey].late += 1;
-        groups[matchedKey].exactLateName = sla;
+        groups[category].late += 1;
+        groups[category].exactLateName = sla;
         totalLate += 1;
       } else {
-        groups[matchedKey].onTime += 1;
-        groups[matchedKey].exactOnTimeName = sla;
-        if (matchedKey !== '-' && matchedKey !== 'ڕێنمایی') totalOnTime += 1;
-        if (matchedKey === 'ڕێنمایی') totalOnTime += 1; // Count instructions as on-time
+        groups[category].onTime += 1;
+        groups[category].exactOnTimeName = sla;
+        if (sla !== '-') totalOnTime += 1;
       }
     });
 
     const data = Object.values(groups)
       .filter(g => g.onTime > 0 || g.late > 0)
-      .sort((a, b) => a.order - b.order);
+      .sort((a, b) => (b.onTime + b.late) - (a.onTime + a.late));
 
     return { data, totalOnTime, totalLate };
   }, [filteredData]);
@@ -335,8 +322,11 @@ export const DashboardCharts = () => {
                 maxBarSize={45}
                 cursor="pointer"
                 onClick={(data: any) => {
-                  if (data && data.exactOnTimeName) {
-                    setFilters(prev => ({ ...prev, slaStatus: [data.exactOnTimeName as string] }));
+                  if (data) {
+                    const newFilters: any = {};
+                    if (data.originalCategory) newFilters.letterType = [data.originalCategory];
+                    if (data.exactOnTimeName) newFilters.slaStatus = [data.exactOnTimeName];
+                    setFilters(prev => ({ ...prev, ...newFilters }));
                     document.getElementById('data-table-section')?.scrollIntoView({ behavior: 'smooth' });
                   }
                 }}
@@ -349,8 +339,11 @@ export const DashboardCharts = () => {
                 maxBarSize={45}
                 cursor="pointer"
                 onClick={(data: any) => {
-                  if (data && data.exactLateName) {
-                    setFilters(prev => ({ ...prev, slaStatus: [data.exactLateName as string] }));
+                  if (data) {
+                    const newFilters: any = {};
+                    if (data.originalCategory) newFilters.letterType = [data.originalCategory];
+                    if (data.exactLateName) newFilters.slaStatus = [data.exactLateName];
+                    setFilters(prev => ({ ...prev, ...newFilters }));
                     document.getElementById('data-table-section')?.scrollIntoView({ behavior: 'smooth' });
                   }
                 }}
