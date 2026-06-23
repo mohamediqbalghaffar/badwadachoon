@@ -11,7 +11,7 @@ export const GlobalProfileButton = () => {
 
   if (!user) return null;
 
-  const getRoleText = (role: string) => {
+  const getRoleText = (role: string | null) => {
     if (role === "admin") return "بەڕێوەبەر";
     if (role === "user") return "بەکارهێنەر";
     return "بینەر";
