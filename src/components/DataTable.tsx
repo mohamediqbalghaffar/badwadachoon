@@ -133,7 +133,7 @@ export const DataTable = () => {
       <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-indigo-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10"></div>
       {/* Table Header Controls */}
       <div className="p-4 border-b border-slate-200/50 dark:border-slate-800/50 flex flex-col sm:flex-row justify-between items-center gap-4">
-        <h3 className="text-lg font-semibold">داتای وردی نامەکان</h3>
+        <h3 className="text-lg font-semibold">داتای وردی پێویست بە وەڵامەکان</h3>
         <div className="relative w-full sm:w-72">
           <input
             type="text"
@@ -170,7 +170,7 @@ export const DataTable = () => {
                   className="px-4 py-3 cursor-pointer hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors whitespace-nowrap"
                   onClick={() => requestSort(col.key as keyof DashboardData)}
                 >
-                  <div className="flex items-center gap-1 justify-end">
+                  <div className="flex items-center gap-1 justify-start">
                     <span>{col.label}</span>
                     <ArrowUpDown size={12} className="opacity-50" />
                   </div>
