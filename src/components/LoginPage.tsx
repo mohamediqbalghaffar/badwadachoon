@@ -42,6 +42,10 @@ export const LoginPage = () => {
   const handleOAuthSignIn = (provider: "google" | "azure-ad") => {
     setIsSubmitting(true);
     signIn(provider, { callbackUrl: "/" });
+    
+    // In case the user cancels the OAuth popup or navigates back using the browser's back button,
+    // we reset the submitting state so the buttons don't stay permanently stuck.
+    setTimeout(() => setIsSubmitting(false), 3000);
   };
 
   return (
