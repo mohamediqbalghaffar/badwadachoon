@@ -1043,6 +1043,128 @@ export const PresentationView = () => {
           </motion.div>
         )}
 
+        {/* ===================== INCOMING SLIDES ===================== */}
+        {/* INCOMING SLIDE 0: Summary */}
+        {activeView === 'incoming' && activeSlide === 0 && (
+          <motion.div key="incoming-slide-0" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-teal-500/10 -z-10" />
+            <motion.div variants={itemVariants} className="flex justify-between items-start mb-6">
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+                  <Send className="text-teal-500" size={32} />
+                  سەرجەم هاتووەکان
+                </h2>
+                <span className="text-sm text-slate-400 mt-2 block">ئاماری گشتی نامە هاتووەکان</span>
+              </div>
+            </motion.div>
+            
+            <motion.div variants={itemVariants} className="grid grid-cols-1 gap-6 mt-4">
+              <div className="glass p-12 rounded-3xl flex flex-col items-center justify-center text-center border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] backdrop-blur-3xl relative overflow-hidden group hover:scale-[1.02] transition-transform">
+                <div className="absolute inset-0 bg-teal-500/5 group-hover:bg-teal-500/10 transition-colors" />
+                <Send className="text-teal-500 mb-6 relative z-10" size={56} />
+                <span className="text-7xl font-black bg-clip-text text-transparent bg-gradient-to-r from-teal-500 to-cyan-500 mb-4 relative z-10">{totalSent}</span>
+                <span className="text-xl text-slate-500 font-bold relative z-10">سەرجەم ڕەوانەکراوەکان</span>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {/* INCOMING SLIDE 1: Timeline Trend */}
+        {activeView === 'incoming' && activeSlide === 1 && (
+          <motion.div key="incoming-slide-1" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-teal-500/10 -z-10" />
+            <motion.div variants={itemVariants} className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+                <TrendingUp className="text-teal-500" size={32} />
+                هەڵکشان و داکشانی نامە هاتووەکان
+              </h2>
+            </motion.div>
+            <motion.div variants={itemVariants} className="w-full h-[380px] glass rounded-3xl p-6 border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] backdrop-blur-3xl" dir="ltr">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={sentTimelineData} margin={{ top: 20, right: 20, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorTimelineSent" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.4} />
+                      <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#475569" opacity={0.2} />
+                  <XAxis dataKey="date" tick={{ fontSize: 13, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 13, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <Tooltip contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff' }} />
+                  <Area type="monotone" dataKey="count" stroke="#06b6d4" strokeWidth={4} fillOpacity={1} fill="url(#colorTimelineSent)" dot={{ r: 6, stroke: '#06b6d4', strokeWidth: 3, fill: '#fff' }}>
+                    <LabelList dataKey="count" position="top" offset={12} fill="#06b6d4" fontSize={14} fontWeight="bold" />
+                  </Area>
+                </AreaChart>
+              </ResponsiveContainer>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {/* INCOMING SLIDE 2: Depts */}
+        {activeView === 'incoming' && activeSlide === 2 && (
+          <motion.div key="incoming-slide-2" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-teal-500/10 -z-10" />
+            <motion.div variants={itemVariants} className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+                <Building2 className="text-teal-500" size={32} />
+                لایەنە سەرەکییەکان بەپێی نامەی هاتوو
+              </h2>
+            </motion.div>
+            <motion.div variants={itemVariants} className="w-full h-[380px] glass rounded-3xl p-6 border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] backdrop-blur-3xl" dir="ltr">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={sentDeptData} margin={{ top: 25, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#475569" opacity={0.2} />
+                  <XAxis dataKey="abbr" tick={{ fontSize: 13, fill: '#94a3b8', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 13, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <Tooltip contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff' }} formatter={(value, name, props) => [value, props.payload.name]} labelFormatter={(abbr) => { const entry = sentDeptData.find(d => d.abbr === abbr); return entry ? entry.name : abbr; }} />
+                  <Bar dataKey="count" radius={[8, 8, 0, 0]} maxBarSize={45}>
+                    <LabelList dataKey="count" position="top" offset={8} fill="#94a3b8" fontSize={12} fontWeight="bold" />
+                    {sentDeptData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {/* INCOMING SLIDE 3: Types */}
+        {activeView === 'incoming' && activeSlide === 3 && (
+          <motion.div key="incoming-slide-3" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-purple-500/10 -z-10" />
+            <motion.div variants={itemVariants} className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+                <PieIcon className="text-purple-500" size={32} />
+                جۆری نامە هاتووەکان
+              </h2>
+            </motion.div>
+            <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center glass rounded-3xl p-6 border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] backdrop-blur-3xl">
+              <div className="h-[300px]" dir="ltr">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={sentTypeDataPres} cx="50%" cy="50%" innerRadius={70} outerRadius={100} paddingAngle={5} dataKey="value" stroke="none">
+                      {sentTypeDataPres.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
+                    </Pie>
+                    <Tooltip contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff' }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="flex flex-col gap-4" dir="rtl">
+                {sentTypeDataPres.map((entry, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 rounded-xl bg-slate-800/10 dark:bg-slate-850/50 border border-white/5 hover:bg-slate-800/20 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <span className="w-4 h-4 rounded-full shadow-sm" style={{ backgroundColor: COLORS[index % COLORS.length] }}></span>
+                      <span className="font-semibold text-slate-800 dark:text-slate-200">{entry.name}</span>
+                    </div>
+                    <span className="text-lg font-bold text-slate-600 dark:text-slate-400">{entry.value} نامە</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+
+        
         {/* ===================== COMPARISON SLIDES ===================== */}
         {/* COMP SLIDE 0: Summary */}
         {activeView === 'comparison' && activeSlide === 0 && (
