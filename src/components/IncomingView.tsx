@@ -179,7 +179,7 @@ const IncomingCharts = () => {
       {/* Department Bar Chart */}
       <div className="glass glass-card glass-interactive p-6 flex flex-col min-h-96 h-auto relative overflow-hidden group">
         <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-teal-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-        <h3 className="text-lg font-semibold mb-6">قەبارەی نامە نێردراوەکان بەپێی لایەن</h3>
+        <h3 className="text-lg font-semibold mb-6">قەبارەی نامە هاتووەکان بەپێی لایەن</h3>
         <div className="flex-1 min-h-[300px]" dir="ltr">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={deptData} margin={{ top: 25, right: 10, left: -20, bottom: 0 }}>
@@ -231,7 +231,7 @@ const IncomingCharts = () => {
       {/* Letter Type Doughnut Chart */}
       <div className="glass glass-card glass-interactive p-6 flex flex-col min-h-96 h-auto relative overflow-hidden group">
         <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-cyan-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-        <h3 className="text-lg font-semibold mb-6">پۆلێنکردنی جۆری نامە نێردراوەکان</h3>
+        <h3 className="text-lg font-semibold mb-6">پۆلێنکردنی جۆری نامە هاتووەکان</h3>
         <div className="flex-1 min-h-[300px]" dir="ltr">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
@@ -283,7 +283,7 @@ const IncomingCharts = () => {
       {/* Timeline Area Chart */}
       <div className="glass glass-card glass-interactive p-6 flex flex-col min-h-96 h-auto relative overflow-hidden group">
         <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-sky-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-        <h3 className="text-lg font-semibold mb-6">هەڵکشان و داکشانی نامە نێردراوەکان بەپێی کات</h3>
+        <h3 className="text-lg font-semibold mb-6">هەڵکشان و داکشانی نامە هاتووەکان بەپێی کات</h3>
         <div className="flex-1 min-h-[300px]" dir="ltr">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={timelineData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
