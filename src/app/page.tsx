@@ -12,6 +12,7 @@ import { AuthProvider, useAuth } from "../context/AuthContext";
 import { LoginPage } from "../components/LoginPage";
 import { PendingApprovalView } from "../components/PendingApprovalView";
 import { ViewerSelectionScreen } from "../components/ViewerSelectionScreen";
+import { GlobalProfileButton } from "../components/GlobalProfileButton";
 
 interface MainContentProps {
   onBack: () => void;
@@ -63,6 +64,24 @@ export type ActiveModule = 'landing' | { type: 'admin', mode: AdminMode };
 
 const AppContent = () => {
   const [activeModule, setActiveModule] = useState<ActiveModule>('landing');
+  
+  React.useEffect(() => {
+    const handleOpenSettings = (e: any) => {
+      // If we are not in admin mode, switch to it first
+      setActiveModule(prev => {
+        if (prev === 'landing' || (typeof prev === 'object' && prev.type !== 'admin')) {
+          // Setting timeout ensures Dashboard mounts before we dispatch again or Dashboard's own listener catches it.
+          // Wait, if Dashboard's listener catches it, it needs to be mounted first.
+          setTimeout(() => window.dispatchEvent(new CustomEvent('open-admin-settings', { detail: e.detail })), 100);
+          return { type: 'admin', mode: 'live' };
+        }
+        return prev;
+      });
+    };
+    window.addEventListener('open-admin-settings', handleOpenSettings);
+    return () => window.removeEventListener('open-admin-settings', handleOpenSettings);
+  }, []);
+
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
@@ -128,6 +147,7 @@ const AppContent = () => {
 export default function Home() {
   return (
     <AuthProvider>
+      <GlobalProfileButton />
       <AppContent />
     </AuthProvider>
   );

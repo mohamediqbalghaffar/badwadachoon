@@ -129,6 +129,17 @@ export const Dashboard = () => {
     }
   }, [data, sentData, user]);
 
+  useEffect(() => {
+    const handleOpenSettings = (e: any) => {
+      if (e.detail?.tab) {
+        setAdminModalTab(e.detail.tab);
+        setIsAdminSettingsOpen(true);
+      }
+    };
+    window.addEventListener('open-admin-settings', handleOpenSettings);
+    return () => window.removeEventListener('open-admin-settings', handleOpenSettings);
+  }, []);
+
   const handleViewChange = (view: ActiveView) => {
     clearFilters();
     setActiveView(view);
@@ -202,99 +213,6 @@ export const Dashboard = () => {
                     </label>
                   </div>
                 )}
-
-                {/* Profile Dropdown */}
-                <div className="relative">
-                  <button 
-                    onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                    className="flex items-center gap-3 bg-white/50 hover:bg-white/80 dark:bg-slate-800/50 dark:hover:bg-slate-800/80 backdrop-blur-md px-3 py-2 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm transition-all"
-                  >
-                    <div className="flex flex-col items-end">
-                      <span className="text-sm font-bold text-slate-800 dark:text-slate-100 capitalize">{user.username}</span>
-                      <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
-                        {user.role === 'admin' && <ShieldCheck size={12} className="text-blue-500" />}
-                        {user.role === 'admin' ? 'بەڕێوەبەر' : user.role === 'user' ? 'بەکارهێنەر' : 'بینەر'}
-                      </span>
-                    </div>
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white shadow-sm transition-transform overflow-hidden ${isProfileMenuOpen ? 'scale-105' : ''} ${user.role === 'admin' ? 'bg-gradient-to-br from-blue-500 to-blue-600' : user.role === 'user' ? 'bg-gradient-to-br from-indigo-500 to-indigo-600' : 'bg-gradient-to-br from-teal-500 to-teal-600'}`}>
-                      {(user as any).image ? (
-                        <Image src={(user as any).image} alt="Profile" width={40} height={40} className="object-cover w-full h-full" />
-                      ) : (
-                        <User size={20} />
-                      )}
-                    </div>
-                  </button>
-
-                  {/* Dropdown Menu */}
-                  {isProfileMenuOpen && (
-                    <>
-                      <div className="fixed inset-0 z-40" onClick={() => setIsProfileMenuOpen(false)}></div>
-                      <div className="absolute left-0 top-full mt-2 w-64 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                        <div className="p-2 space-y-1">
-                          
-                          {user.role === 'admin' && (
-                            <>
-                              <button 
-                                onClick={() => {
-                                  setAdminModalTab('database');
-                                  setIsAdminSettingsOpen(true);
-                                  setIsProfileMenuOpen(false);
-                                }}
-                                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-xl transition-colors"
-                              >
-                                <div className="p-1.5 bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-lg">
-                                  <Database size={16} />
-                                </div>
-                                <span className="font-medium">ڕێکخستنەکانی داتابەیس</span>
-                              </button>
-
-                              <button 
-                                onClick={() => {
-                                  setAdminModalTab('approvals');
-                                  setIsAdminSettingsOpen(true);
-                                  setIsProfileMenuOpen(false);
-                                }}
-                                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-xl transition-colors"
-                              >
-                                <div className="p-1.5 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-lg">
-                                  <ShieldCheck size={16} />
-                                </div>
-                                <span className="font-medium">پەسەندکردنی بەکارهێنەر</span>
-                              </button>
-                            </>
-                          )}
-
-                          <button 
-                            onClick={() => {
-                              setAdminModalTab('profile');
-                              setIsAdminSettingsOpen(true);
-                              setIsProfileMenuOpen(false);
-                            }}
-                            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-xl transition-colors"
-                          >
-                            <div className="p-1.5 bg-violet-100 dark:bg-violet-500/20 text-violet-600 dark:text-violet-400 rounded-lg">
-                              <User size={16} />
-                            </div>
-                            <span className="font-medium">ڕێکخستنەکانی هەژمار</span>
-                          </button>
-
-                          <div className="h-px bg-slate-100 dark:bg-slate-700/50 my-1"></div>
-
-                          <button 
-                            onClick={logout}
-                            className="w-full flex items-center gap-3 px-4 py-3 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl transition-colors"
-                          >
-                            <div className="p-1.5 bg-rose-100 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 rounded-lg">
-                              <LogOut size={16} />
-                            </div>
-                            <span className="font-medium">چوونەدەرەوە</span>
-                          </button>
-                          
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
               </div>
             )}
           </div>
