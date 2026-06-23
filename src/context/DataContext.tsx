@@ -2,9 +2,9 @@
 
 import React, { createContext, useContext, useState, useMemo } from "react";
 import { useSession } from "next-auth/react";
-import { DashboardData, SentLetterData } from "../utils/parser";
+import { DashboardData, SentLetterData, IncomingLetterData } from "../utils/parser";
 
-export type ActiveView = 'received' | 'sent' | 'comparison';
+export type ActiveView = 'incoming' | 'received' | 'sent' | 'comparison';
 export type AdminMode = 'live' | 'local';
 
 interface FilterState {
@@ -26,6 +26,11 @@ interface DataContextType {
   setSentData: (data: SentLetterData[]) => void;
   filteredSentData: SentLetterData[];
   baseFilteredSentData: SentLetterData[];
+  // Incoming (Sheet 3)
+  incomingData: IncomingLetterData[];
+  setIncomingData: (data: IncomingLetterData[]) => void;
+  filteredIncomingData: IncomingLetterData[];
+  baseFilteredIncomingData: IncomingLetterData[];
   // Filters
   filters: FilterState;
   setFilters: React.Dispatch<React.SetStateAction<FilterState>>;
@@ -46,7 +51,8 @@ const DataContext = createContext<DataContextType | undefined>(undefined);
 export const DataProvider = ({ children, mode }: { children: React.ReactNode, mode: AdminMode }) => {
   const [data, setData] = useState<DashboardData[]>([]);
   const [sentData, setSentData] = useState<SentLetterData[]>([]);
-  const [activeView, setActiveView] = useState<ActiveView>('received');
+  const [incomingData, setIncomingData] = useState<IncomingLetterData[]>([]);
+  const [activeView, setActiveView] = useState<ActiveView>('incoming');
   const [filters, setFilters] = useState<FilterState>({
     dateRange: { start: null, end: null },
     departments: [],
@@ -71,9 +77,10 @@ export const DataProvider = ({ children, mode }: { children: React.ReactNode, mo
     const fetchFromDb = async () => {
       try {
         setDbLoading(true);
-        const [resReceived, resSent] = await Promise.all([
+        const [resReceived, resSent, resIncoming] = await Promise.all([
           fetch('/api/db/received'),
-          fetch('/api/db/sent')
+          fetch('/api/db/sent'),
+          fetch('/api/db/incoming')
         ]);
         
         if (resReceived.ok) {
@@ -83,6 +90,10 @@ export const DataProvider = ({ children, mode }: { children: React.ReactNode, mo
         if (resSent.ok) {
           const sent = await resSent.json();
           setSentData(sent);
+        }
+        if (resIncoming.ok) {
+          const incoming = await resIncoming.json();
+          setIncomingData(incoming);
         }
       } catch (err) {
         console.error("Failed to fetch data from DB:", err);
@@ -106,6 +117,7 @@ export const DataProvider = ({ children, mode }: { children: React.ReactNode, mo
           const json = await res.json();
           setData(json.data || []);
           setSentData(json.sentData || []);
+          setIncomingData(json.incomingData || []);
         }
       } catch (err) {
         console.error("Failed to fetch viewer data:", err);
@@ -191,7 +203,34 @@ export const DataProvider = ({ children, mode }: { children: React.ReactNode, mo
   }, [sentData, filters.dateRange, filters.departments, filters.letterType]);
 
   // For sent data, no completion status applies — same as base
-  const filteredSentData = baseFilteredSentData;
+  const filteredSentData = useMemo(() => baseFilteredSentData, [baseFilteredSentData]);
+
+  // === INCOMING DATA FILTERS ===
+  const baseFilteredIncomingData = useMemo(() => {
+    let filtered = [...incomingData];
+    if (filters.dateRange.start && filters.dateRange.end) {
+      const start = new Date(filters.dateRange.start).getTime();
+      const end = new Date(filters.dateRange.end).getTime();
+      filtered = filtered.filter(item => {
+        if (!item.sentDate) return false;
+        const itemDate = new Date(item.sentDate).getTime();
+        return itemDate >= start && itemDate <= end;
+      });
+    }
+    if (filters.departments.length > 0) {
+      filtered = filtered.filter(item => 
+        item.departments.some(d => filters.departments.includes(d))
+      );
+    }
+    if (filters.letterType.length > 0) {
+      filtered = filtered.filter(item => 
+        filters.letterType.includes(item.letterType)
+      );
+    }
+    return filtered;
+  }, [incomingData, filters.dateRange, filters.departments, filters.letterType]);
+
+  const filteredIncomingData = useMemo(() => baseFilteredIncomingData, [baseFilteredIncomingData]);
 
   const clearFilters = () => {
     setFilters({
@@ -210,6 +249,8 @@ export const DataProvider = ({ children, mode }: { children: React.ReactNode, mo
         filteredData, baseFilteredData,
         sentData, setSentData,
         filteredSentData, baseFilteredSentData,
+        incomingData, setIncomingData,
+        filteredIncomingData, baseFilteredIncomingData,
         filters, setFilters, clearFilters,
         activeView, setActiveView,
         isPresentationMode, setIsPresentationMode,

@@ -47,6 +47,25 @@ model SentLetter {
   @@map("سەرجەم_نووسراوە_ڕەوانەکراوەکان")
 }
 
+model IncomingLetter {
+  id             Int       @id @default(autoincrement()) @map("#")
+  subject        String    @map("بابەت")
+  sender         String?   @map("هاتووە لە")
+  department     String    @map("لایەنی پەیوەندیدار گشتی")
+  departments    String[]  @default([]) @map("لایەنە پەیوەندیدارەکان")
+  dept1          String?   @map("لایەنی پەیوەندیدار 1")
+  dept2          String?   @map("لایەنی پەیوەندیدار 2")
+  dept3          String?   @map("لایەنی پەیوەندیدار 3")
+  refCode        String    @map("جۆر")
+  letterType     String    @map("جۆری نامە")
+  sentDate       DateTime? @map("ڕۆژی ناردن")
+
+  createdAt      DateTime  @default(now()) @map("کاتی دروستکردن")
+  updatedAt      DateTime  @updatedAt @map("کاتی نوێکردنەوە")
+
+  @@map("سەرجەم_نووسراوە_هاتووەکان")
+}
+
 model UserAccount {
   id        String   @id @default(cuid())
   email     String   @unique
@@ -70,9 +89,10 @@ model ActiveSession {
 }
 
 model SessionData {
-  userId    String        @id
-  data      Json
-  sentData  Json
-  updatedAt DateTime      @updatedAt
+  userId       String        @id
+  data         Json
+  sentData     Json
+  incomingData Json?         @default("[]")
+  updatedAt    DateTime      @updatedAt
   session   ActiveSession @relation(fields: [userId], references: [userId], onDelete: Cascade)
 }

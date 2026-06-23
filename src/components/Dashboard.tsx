@@ -11,12 +11,14 @@ import Image from "next/image";
 import { PresentationView } from "./PresentationView";
 import { SentDashboard } from "./SentDashboard";
 import { ComparisonView } from "./ComparisonView";
-import { MonitorPlay, X, Inbox, Send, GitCompareArrows, LogOut, User, ShieldCheck, Settings, Database, UploadCloud } from "lucide-react";
+import { IncomingView } from "./IncomingView";
+import { MonitorPlay, X, Inbox, Send, GitCompareArrows, ArrowDownToLine, LogOut, User, ShieldCheck, Settings, Database, UploadCloud } from "lucide-react";
 import { parseFile } from "../utils/parser";
 import { AdminSettingsModal } from "./AdminSettingsModal";
 import { LiveActivityTracker } from "./LiveActivityTracker";
 
 const VIEW_SEGMENTS: { key: ActiveView; label: string; icon: React.ReactNode }[] = [
+  { key: 'incoming', label: 'سەرجەم هاتووەکان', icon: <ArrowDownToLine size={16} /> },
   { key: 'received', label: 'پێویست بە وەڵام', icon: <Inbox size={16} /> },
   { key: 'sent', label: 'سەرجەم ڕەوانەکراوەکان', icon: <Send size={16} /> },
   { key: 'comparison', label: 'بەراوردکردن', icon: <GitCompareArrows size={16} /> },
@@ -146,6 +148,7 @@ export const Dashboard = () => {
   };
 
   const subtitles: Record<ActiveView, string> = {
+    incoming: 'داشبۆردی شیکاری سەرجەم نووسراوە هاتووەکان',
     received: 'داشبۆردی بەدواداچوونی ئەو نامانەی پێویستیان بە وەڵامە',
     sent: 'داشبۆردی شیکاری سەرجەم نووسراوە ڕەوانەکراوەکان',
     comparison: 'بەراوردکردنی سەرجەم نامەکان لەگەڵ ئەوانەی پێویستیان بە وەڵامە',
@@ -243,6 +246,12 @@ export const Dashboard = () => {
           </div>
 
           {/* Main Content — Conditional on activeView */}
+          {activeView === 'incoming' && (
+            <div className="animate-fade-in">
+              <IncomingView />
+            </div>
+          )}
+
           {activeView === 'received' && (
             <div className="flex flex-col gap-4">
               <div className="animate-fade-up delay-200 relative z-30">

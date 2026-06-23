@@ -4,12 +4,13 @@ import { prisma } from '@/lib/prisma';
 export async function POST(request: Request) {
   try {
     const data = await request.json();
-    const { receivedData, sentData, clearFirst } = data;
+    const { receivedData, sentData, incomingData, clearFirst } = data;
 
     // Fast-path for clearing database (avoiding long transactions)
-    if (clearFirst && (!receivedData || receivedData.length === 0) && (!sentData || sentData.length === 0)) {
+    if (clearFirst && (!receivedData || receivedData.length === 0) && (!sentData || sentData.length === 0) && (!incomingData || incomingData.length === 0)) {
       await prisma.receivedLetter.deleteMany({});
       await prisma.sentLetter.deleteMany({});
+      await prisma.incomingLetter.deleteMany({});
       return NextResponse.json({ success: true, message: 'Database cleared' });
     }
 
@@ -18,6 +19,7 @@ export async function POST(request: Request) {
       if (clearFirst) {
         await tx.receivedLetter.deleteMany({});
         await tx.sentLetter.deleteMany({});
+        await tx.incomingLetter.deleteMany({});
       }
 
       // Insert new received letters
@@ -48,6 +50,26 @@ export async function POST(request: Request) {
           data: sentData.map((d: any) => ({
             id: parseInt(d.id),
             subject: d.subject || "نەزانراو",
+            department: d.department || "نەزانراو",
+            departments: d.departments || [],
+            dept1: d.dept1 || null,
+            dept2: d.dept2 || null,
+            dept3: d.dept3 || null,
+            refCode: d.refCode || "-",
+            letterType: d.letterType || "گشتی",
+            sentDate: d.sentDate ? new Date(d.sentDate) : null,
+          })),
+          skipDuplicates: true,
+        });
+      }
+
+      // Insert new incoming letters
+      if (incomingData && incomingData.length > 0) {
+        await tx.incomingLetter.createMany({
+          data: incomingData.map((d: any) => ({
+            id: parseInt(d.id),
+            subject: d.subject || "نەزانراو",
+            sender: d.sender || "نەزانراو",
             department: d.department || "نەزانراو",
             departments: d.departments || [],
             dept1: d.dept1 || null,

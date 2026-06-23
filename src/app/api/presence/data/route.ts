@@ -13,9 +13,9 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { data, sentData } = body;
+    const { data, sentData, incomingData } = body;
 
-    if (!data || !sentData) {
+    if (!data || !sentData || !incomingData) {
       return NextResponse.json({ error: 'Missing data' }, { status: 400 });
     }
 
@@ -24,12 +24,14 @@ export async function POST(request: Request) {
       update: {
         data,
         sentData,
+        incomingData,
         updatedAt: new Date(),
       },
       create: {
         userId,
         data,
         sentData,
+        incomingData,
       },
     });
 
@@ -59,12 +61,13 @@ export async function GET(request: Request) {
     });
 
     if (!sessionData) {
-      return NextResponse.json({ data: [], sentData: [] });
+      return NextResponse.json({ data: [], sentData: [], incomingData: [] });
     }
 
     return NextResponse.json({
       data: sessionData.data,
       sentData: sessionData.sentData,
+      incomingData: sessionData.incomingData || [],
     });
   } catch (error: any) {
     console.error('Data fetch error:', error);

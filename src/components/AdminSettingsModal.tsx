@@ -23,7 +23,7 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose,
   const [syncStatus, setSyncStatus] = useState<{ type: 'idle' | 'success' | 'error', message: string }>({ type: 'idle', message: '' });
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const { setData, setSentData, mode } = useData();
+  const { setData, setSentData, setIncomingData, mode } = useData();
   const { user } = useAuth();
   const { update } = useSession();
   const { theme, setTheme } = useTheme();
@@ -52,11 +52,18 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose,
       "جۆر", "جۆری نامە", "ڕۆژی ناردن"
     ];
 
+    const incomingHeaders = [
+      "#", "بابەت", "هاتووە لە", "لایەنی پەیوەندیدار", "لایەنی پەیوەندیدار 1", "لایەنی پەیوەندیدار 2", "لایەنی پەیوەندیدار 3",
+      "جۆر", "جۆری نامە", "ڕۆژی ناردن"
+    ];
+
     const wsReceived = XLSX.utils.aoa_to_sheet([receivedHeaders]);
     const wsSent = XLSX.utils.aoa_to_sheet([sentHeaders]);
+    const wsIncoming = XLSX.utils.aoa_to_sheet([incomingHeaders]);
 
     XLSX.utils.book_append_sheet(workbook, wsReceived, "وەڵامی نووسراوە نێردراوەکان");
     XLSX.utils.book_append_sheet(workbook, wsSent, "سەرجەم نووسراوە ڕەوانەکراوەکان");
+    XLSX.utils.book_append_sheet(workbook, wsIncoming, "سەرجەم نووسراوە هاتووەکان");
 
     XLSX.writeFile(workbook, "فایلی_بەتاڵ.xlsx");
   };
@@ -72,7 +79,7 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose,
         const clearRes = await fetch('/api/db/sync', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ clearFirst: true, receivedData: [], sentData: [] })
+          body: JSON.stringify({ clearFirst: true, receivedData: [], sentData: [], incomingData: [] })
         });
 
         if (!clearRes.ok) {
@@ -82,6 +89,7 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose,
 
       setData([]);
       setSentData([]);
+      setIncomingData([]);
       setSyncStatus({ type: 'success', message: mode === 'live' ? 'داتابەیس بە سەرکەوتوویی سڕایەوە!' : 'داتای لۆکاڵی سڕایەوە!' });
     } catch (error: any) {
       console.error(error);
@@ -118,7 +126,7 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose,
 
         // 3. Sync chunks to Database
         const CHUNK_SIZE = 500;
-        const { receivedData, sentData } = parsedData;
+        const { receivedData, sentData, incomingData } = parsedData;
 
         const receivedChunks = [];
         for (let i = 0; i < receivedData.length; i += CHUNK_SIZE) {
@@ -130,7 +138,12 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose,
           sentChunks.push(sentData.slice(i, i + CHUNK_SIZE));
         }
 
-        const totalChunks = receivedChunks.length + sentChunks.length;
+        const incomingChunks = [];
+        for (let i = 0; i < incomingData.length; i += CHUNK_SIZE) {
+          incomingChunks.push(incomingData.slice(i, i + CHUNK_SIZE));
+        }
+
+        const totalChunks = receivedChunks.length + sentChunks.length + incomingChunks.length;
         let processedChunks = 0;
 
         for (const chunk of receivedChunks) {
@@ -162,11 +175,27 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose,
             throw new Error('سێرڤەر نەیتوانی داتابەیس نوێ بکاتەوە');
           }
         }
+
+        for (const chunk of incomingChunks) {
+          processedChunks++;
+          setSyncStatus({ type: 'idle', message: `بەرزکردنەوەی داتا... (${processedChunks}/${totalChunks})` });
+
+          const res = await fetch('/api/db/sync', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ incomingData: chunk })
+          });
+
+          if (!res.ok) {
+            throw new Error('سێرڤەر نەیتوانی داتابەیس نوێ بکاتەوە');
+          }
+        }
       }
 
       // 4. Update local state
       setData(parsedData.receivedData);
       setSentData(parsedData.sentData);
+      setIncomingData(parsedData.incomingData);
 
       setSyncStatus({ type: 'success', message: mode === 'live' ? 'داتابەیس بە سەرکەوتوویی نوێ کرایەوە!' : 'داتای لۆکاڵی بارکرا!' });
     } catch (error: any) {

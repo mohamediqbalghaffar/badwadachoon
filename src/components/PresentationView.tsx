@@ -20,7 +20,8 @@ import {
   Send,
   Lightbulb,
   LightbulbOff,
-  Inbox
+  Inbox,
+  ArrowDownToLine
 } from "lucide-react";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import {
@@ -45,7 +46,7 @@ import { format, parseISO, isValid, startOfMonth, parse } from "date-fns";
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4"];
 
 export const PresentationView = () => {
-  const { baseFilteredData, filteredData, data, filters, sentData, baseFilteredSentData } = useData();
+  const { baseFilteredData, filteredData, data, filters, sentData, baseFilteredSentData, incomingData, baseFilteredIncomingData } = useData();
   const [activeSlide, setActiveSlide] = useState(0);
   const [showInsights, setShowInsights] = useState(false);
 
@@ -268,10 +269,12 @@ export const PresentationView = () => {
 
   // --- Sent Data Calculations ---
   const hasSentData = sentData.length > 0;
+    const hasIncomingData = incomingData.length > 0;
   const { activeView, setActiveView } = useData();
 
   const slideCount = useMemo(() => {
-    if (activeView === 'sent') return 4;
+    if (activeView === 'incoming') return 4;
+      if (activeView === 'sent') return 4;
     if (activeView === 'comparison') return 3;
     return 7;
   }, [activeView]);
@@ -428,6 +431,13 @@ export const PresentationView = () => {
             <Send size={16} />
             ڕەوانەکراوەکان
           </button>
+            <button 
+              onClick={() => { setActiveView('incoming'); setActiveSlide(0); }} 
+              className={`px-4 py-2 text-sm font-bold rounded-xl transition-all duration-300 flex items-center gap-2 ${activeView === 'incoming' ? 'bg-white dark:bg-slate-700 text-purple-600 dark:text-purple-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
+            >
+              <ArrowDownToLine size={18} />
+              سەرجەم هاتووەکان
+            </button>
           <button 
             onClick={() => { setActiveView('comparison'); setActiveSlide(0); }} 
             className={`px-4 py-2 text-sm font-bold rounded-xl transition-all duration-300 flex items-center gap-2 ${activeView === 'comparison' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}

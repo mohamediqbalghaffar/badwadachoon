@@ -32,9 +32,25 @@ export interface SentLetterData {
   _raw?: any;
 }
 
+export interface IncomingLetterData {
+  id: string | number;
+  subject: string;
+  sender?: string;
+  department: string;
+  departments: string[];
+  dept1?: string;
+  dept2?: string;
+  dept3?: string;
+  refCode: string;
+  letterType: string;
+  sentDate: string | null;
+  _raw?: any;
+}
+
 export interface ParseResult {
   receivedData: DashboardData[];
   sentData: SentLetterData[];
+  incomingData: IncomingLetterData[];
 }
 
 const normalizeHeader = (str: string): string => {
@@ -76,6 +92,20 @@ const SentHeaderMap: Record<string, keyof SentLetterData> = {
   "ڕۆژی ناردن": "sentDate",
 };
 
+// Map Kurdish headers to English keys for Sheet 3 (Incoming Letters)
+const IncomingHeaderMap: Record<string, keyof IncomingLetterData> = {
+  "#": "id",
+  "بابەت": "subject",
+  "هاتووە لە": "sender",
+  "لایەنی پەیوەندیدار": "dept1",
+  "لایەنی پەیوەندیدار 1": "dept1",
+  "لایەنی پەیوەندیدار 2": "dept2",
+  "لایەنی پەیوەندیدار 3": "dept3",
+  "جۆر": "refCode",
+  "جۆری نامە": "letterType",
+  "ڕۆژی ناردن": "sentDate",
+};
+
 // Known sheet names (with normalized matching)
 const RECEIVED_SHEET_NAMES = [
   "وەڵامی نووسراوە نێردراوەکان",
@@ -88,6 +118,11 @@ const SENT_SHEET_NAMES = [
   "نووسراوە ڕەوانەکراوەکان",
   "ڕەوانەکراوەکان",
   "دەرچوو"
+];
+const INCOMING_SHEET_NAMES = [
+  "سەرجەم نووسراوە هاتووەکان",
+  "سەرجەم هاتووەکان",
+  "نووسراوە هاتووەکان"
 ];
 
 const findSheetByName = (workbook: XLSX.WorkBook, targetNames: string[]): XLSX.WorkSheet | null => {
@@ -229,6 +264,32 @@ const parseSentSheet = (worksheet: XLSX.WorkSheet): SentLetterData[] => {
   });
 };
 
+const parseIncomingSheet = (worksheet: XLSX.WorkSheet): IncomingLetterData[] => {
+  const rawJson: any[] = XLSX.utils.sheet_to_json(worksheet, { defval: null });
+
+  return rawJson.map((row: any, index: number) => {
+    const item = mapRow<IncomingLetterData>(
+      row,
+      IncomingHeaderMap,
+      ['sentDate'],
+      []
+    );
+
+    const depts = [item.dept1, item.dept2, item.dept3].filter(Boolean) as string[];
+
+    return {
+      id: item.id || index + 1,
+      subject: item.subject || "نەزانراو",
+      sender: item.sender || "نەزانراو",
+      department: depts.length > 0 ? depts.join(", ") : "نەزانراو",
+      departments: depts,
+      refCode: item.refCode || "-",
+      letterType: item.letterType || "گشتی",
+      sentDate: item.sentDate || null,
+    } as IncomingLetterData;
+  });
+};
+
 export const parseFile = async (file: File): Promise<ParseResult> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -249,12 +310,18 @@ export const parseFile = async (file: File): Promise<ParseResult> => {
         // --- Parse Sheet 2 (Sent Letters) ---
         let sentSheet = findSheetByName(workbook, SENT_SHEET_NAMES);
         if (!sentSheet && workbook.SheetNames.length >= 2) {
-          // Fallback to second sheet
           sentSheet = workbook.Sheets[workbook.SheetNames[1]];
         }
         const sentData = sentSheet ? parseSentSheet(sentSheet) : [];
 
-        resolve({ receivedData, sentData });
+        // --- Parse Sheet 3 (Incoming Letters) ---
+        let incomingSheet = findSheetByName(workbook, INCOMING_SHEET_NAMES);
+        if (!incomingSheet && workbook.SheetNames.length >= 3) {
+          incomingSheet = workbook.Sheets[workbook.SheetNames[2]];
+        }
+        const incomingData = incomingSheet ? parseIncomingSheet(incomingSheet) : [];
+
+        resolve({ receivedData, sentData, incomingData });
       } catch (error) {
         reject(error);
       }
