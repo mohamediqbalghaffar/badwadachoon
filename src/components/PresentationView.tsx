@@ -418,26 +418,26 @@ export const PresentationView = () => {
         {/* TOP CENTER: View Toggle */}
         <div className="flex bg-slate-200/50 dark:bg-slate-800/50 p-1.5 rounded-2xl backdrop-blur-md shadow-sm border border-white/20 dark:border-slate-700/50">
           <button 
+            onClick={() => { setActiveView('incoming'); setActiveSlide(0); }} 
+            className={`px-4 py-2 text-sm font-bold rounded-xl transition-all duration-300 flex items-center gap-2 ${activeView === 'incoming' ? 'bg-white dark:bg-slate-700 text-purple-600 dark:text-purple-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
+          >
+            <ArrowDownToLine size={18} />
+            سەرجەم هاتووەکان
+          </button>
+          <button 
             onClick={() => { setActiveView('received'); setActiveSlide(0); }} 
             className={`px-4 py-2 text-sm font-bold rounded-xl transition-all duration-300 flex items-center gap-2 ${activeView === 'received' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
           >
             <Inbox size={16} />
-            هاتووەکان
+            پێویست بە وەڵام
           </button>
           <button 
             onClick={() => { setActiveView('sent'); setActiveSlide(0); }} 
             className={`px-4 py-2 text-sm font-bold rounded-xl transition-all duration-300 flex items-center gap-2 ${activeView === 'sent' ? 'bg-white dark:bg-slate-700 text-teal-600 dark:text-teal-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
           >
             <Send size={16} />
-            ڕەوانەکراوەکان
+            سەرجەم ڕەوانەکراوەکان
           </button>
-            <button 
-              onClick={() => { setActiveView('incoming'); setActiveSlide(0); }} 
-              className={`px-4 py-2 text-sm font-bold rounded-xl transition-all duration-300 flex items-center gap-2 ${activeView === 'incoming' ? 'bg-white dark:bg-slate-700 text-purple-600 dark:text-purple-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
-            >
-              <ArrowDownToLine size={18} />
-              سەرجەم هاتووەکان
-            </button>
           <button 
             onClick={() => { setActiveView('comparison'); setActiveSlide(0); }} 
             className={`px-4 py-2 text-sm font-bold rounded-xl transition-all duration-300 flex items-center gap-2 ${activeView === 'comparison' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
