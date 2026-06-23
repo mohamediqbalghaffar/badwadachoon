@@ -25,7 +25,7 @@ const VIEW_SEGMENTS: { key: ActiveView; label: string; icon: React.ReactNode }[]
 ];
 
 export const Dashboard = () => {
-  const { data, setData, sentData, setSentData, mode, isPresentationMode, setIsPresentationMode, activeView, setActiveView, clearFilters } = useData();
+  const { data, setData, sentData, setSentData, incomingData, setIncomingData, mode, isPresentationMode, setIsPresentationMode, activeView, setActiveView, clearFilters } = useData();
   const { user, logout } = useAuth();
   const [isAdminSettingsOpen, setIsAdminSettingsOpen] = React.useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = React.useState(false);
@@ -44,7 +44,7 @@ export const Dashboard = () => {
         const clearRes = await fetch('/api/db/sync', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ clearFirst: true })
+          body: JSON.stringify({ clearFirst: true, receivedData: [], sentData: [], incomingData: [] })
         });
         if (!clearRes.ok) throw new Error('سێرڤەر نەیتوانی داتابەیس کۆن بسڕێتەوە');
 
@@ -63,10 +63,18 @@ export const Dashboard = () => {
             body: JSON.stringify({ sentData: parsedData.sentData.slice(i, i + CHUNK_SIZE) })
           });
         }
+        for (let i = 0; i < parsedData.incomingData.length; i += CHUNK_SIZE) {
+          await fetch('/api/db/sync', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ incomingData: parsedData.incomingData.slice(i, i + CHUNK_SIZE) })
+          });
+        }
       }
 
       setData(parsedData.receivedData);
       setSentData(parsedData.sentData);
+      setIncomingData(parsedData.incomingData);
     } catch (err) {
       console.error(err);
       alert('هەڵەیەک ڕوویدا لە کاتی بارکردن');
@@ -113,6 +121,10 @@ export const Dashboard = () => {
             const { _raw, ...rest } = d;
             return rest;
           });
+          const strippedIncomingData = incomingData.map(d => {
+            const { _raw, ...rest } = d;
+            return rest;
+          });
 
           // Wait 1.5 seconds to ensure the ActiveSession was created by the presence ping first (FK Constraint)
           await new Promise(resolve => setTimeout(resolve, 1500));
@@ -120,7 +132,7 @@ export const Dashboard = () => {
           await fetch('/api/presence/data', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ data: strippedData, sentData: strippedSentData })
+            body: JSON.stringify({ data: strippedData, sentData: strippedSentData, incomingData: strippedIncomingData })
           });
         } catch (err) {
           console.error("Failed to upload local data to presence cache:", err);
@@ -129,7 +141,7 @@ export const Dashboard = () => {
 
       uploadLocalData();
     }
-  }, [data, sentData, user]);
+  }, [data, sentData, incomingData, user]);
 
   useEffect(() => {
     const handleOpenSettings = (e: any) => {
@@ -195,7 +207,7 @@ export const Dashboard = () => {
                 </div>
 
                 {/* Direct Upload Button (Only when empty) */}
-                {(data.length === 0 && sentData.length === 0) && user?.role !== 'viewer' && (
+                {(data.length === 0 && sentData.length === 0 && incomingData.length === 0) && user?.role !== 'viewer' && (
                   <div className="relative bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 backdrop-blur-md px-4 py-2 rounded-2xl shadow-lg shadow-blue-500/30 transition-all group overflow-hidden cursor-pointer flex items-center justify-center">
                     <label className="flex items-center gap-2 cursor-pointer w-full h-full text-white">
                       {isUploading ? (

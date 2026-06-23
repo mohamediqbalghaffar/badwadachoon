@@ -51,7 +51,7 @@ const renderCustomizedLabel = (props: any) => {
   );
 };
 
-// â”€â”€â”€ KPI Cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── KPI Cards ───────────────────────────────────────────────────────────────
 
 const IncomingKPICards = () => {
   const { baseFilteredIncomingData } = useData();
@@ -73,7 +73,7 @@ const IncomingKPICards = () => {
       {/* Total Sent Letters */}
       <div className="glass glass-card glass-interactive p-6 flex items-center justify-between group cursor-pointer relative overflow-hidden">
         <div>
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Ú©Û†ÛŒ Ù†Ø§Ù…Û• Ù†ÛŽØ±Ø¯Ø±Ø§ÙˆÛ•Ú©Ø§Ù†</p>
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">کۆی نامە هاتووەکان</p>
           <h3 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-teal-500 to-cyan-500">
             {totalLetters}
           </h3>
@@ -87,7 +87,7 @@ const IncomingKPICards = () => {
       {/* Departments Count */}
       <div className="glass glass-card glass-interactive p-6 flex items-center justify-between group cursor-pointer relative overflow-hidden">
         <div>
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Ú˜Ù…Ø§Ø±Û•ÛŒ Ù„Ø§ÛŒÛ•Ù†Û• Ù¾Û•ÛŒÙˆÛ•Ù†Ø¯ÛŒØ¯Ø§Ø±Û•Ú©Ø§Ù†</p>
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">ژمارەی لایەنە پەیوەندیدارەکان</p>
           <h3 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-500 to-sky-500">
             {uniqueDepartments}
           </h3>
@@ -101,7 +101,7 @@ const IncomingKPICards = () => {
       {/* Letter Types Count */}
       <div className="glass glass-card glass-interactive p-6 flex items-center justify-between group cursor-pointer relative overflow-hidden">
         <div>
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Ú˜Ù…Ø§Ø±Û•ÛŒ Ø¬Û†Ø±Û•Ú©Ø§Ù†ÛŒ Ù†Ø§Ù…Û•</p>
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">ژمارەی جۆرەکانی نامە</p>
           <h3 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-sky-500 to-violet-500">
             {uniqueLetterTypes}
           </h3>
@@ -115,12 +115,12 @@ const IncomingKPICards = () => {
   );
 };
 
-// â”€â”€â”€ Charts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Charts ──────────────────────────────────────────────────────────────────
 
 const IncomingCharts = () => {
   const { filteredIncomingData, setFilters } = useData();
 
-  // Department Data â€” Top 10
+  // Department Data — Top 10
   const deptData = useMemo(() => {
     const counts: Record<string, number> = {};
     filteredIncomingData.forEach((d) => {
@@ -130,8 +130,8 @@ const IncomingCharts = () => {
     });
     return Object.entries(counts)
       .map(([name, count]) => {
-        const cleanName = name.replace("Ø¨Û•Ø´ÛŒ ", "").replace("Ø³ÛŽÚ©ØªÛ•Ø±ÛŒ ", "");
-        const words = cleanName.split(" ").filter((w) => w.length > 1 && w !== "Ùˆ");
+        const cleanName = name.replace("بەشی ", "").replace("سێکتەری ", "");
+        const words = cleanName.split(" ").filter((w) => w.length > 1 && w !== "و");
         const abbr = words.slice(0, 2).map((w) => w.charAt(0)).join(".");
         return { name, count, abbr: abbr || name.charAt(0) };
       })
@@ -146,14 +146,14 @@ const IncomingCharts = () => {
       counts[d.letterType] = (counts[d.letterType] || 0) + 1;
     });
     return Object.entries(counts).map(([name, value]) => {
-      const cleanName = name.replace("Ø¨Û•Ø´ÛŒ ", "").replace("Ø³ÛŽÚ©ØªÛ•Ø±ÛŒ ", "");
-      const words = cleanName.split(" ").filter((w) => w.length > 1 && w !== "Ùˆ");
+      const cleanName = name.replace("بەشی ", "").replace("سێکتەری ", "");
+      const words = cleanName.split(" ").filter((w) => w.length > 1 && w !== "و");
       const abbr = words.slice(0, 2).map((w) => w.charAt(0)).join(".");
       return { name, value, abbr: abbr || name.charAt(0) };
     });
   }, [filteredIncomingData]);
 
-  // Timeline Data â€” Monthly
+  // Timeline Data — Monthly
   const timelineData = useMemo(() => {
     const counts: Record<string, number> = {};
     filteredIncomingData.forEach((d) => {
@@ -179,7 +179,7 @@ const IncomingCharts = () => {
       {/* Department Bar Chart */}
       <div className="glass glass-card glass-interactive p-6 flex flex-col min-h-96 h-auto relative overflow-hidden group">
         <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-teal-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-        <h3 className="text-lg font-semibold mb-6">Ù‚Û•Ø¨Ø§Ø±Û•ÛŒ Ù†Ø§Ù…Û• Ù†ÛŽØ±Ø¯Ø±Ø§ÙˆÛ•Ú©Ø§Ù† Ø¨Û•Ù¾ÛŽÛŒ Ù„Ø§ÛŒÛ•Ù†</h3>
+        <h3 className="text-lg font-semibold mb-6">قەبارەی نامە نێردراوەکان بەپێی لایەن</h3>
         <div className="flex-1 min-h-[300px]" dir="ltr">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={deptData} margin={{ top: 25, right: 10, left: -20, bottom: 0 }}>
@@ -231,7 +231,7 @@ const IncomingCharts = () => {
       {/* Letter Type Doughnut Chart */}
       <div className="glass glass-card glass-interactive p-6 flex flex-col min-h-96 h-auto relative overflow-hidden group">
         <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-cyan-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-        <h3 className="text-lg font-semibold mb-6">Ù¾Û†Ù„ÛŽÙ†Ú©Ø±Ø¯Ù†ÛŒ Ø¬Û†Ø±ÛŒ Ù†Ø§Ù…Û• Ù†ÛŽØ±Ø¯Ø±Ø§ÙˆÛ•Ú©Ø§Ù†</h3>
+        <h3 className="text-lg font-semibold mb-6">پۆلێنکردنی جۆری نامە نێردراوەکان</h3>
         <div className="flex-1 min-h-[300px]" dir="ltr">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
@@ -283,7 +283,7 @@ const IncomingCharts = () => {
       {/* Timeline Area Chart */}
       <div className="glass glass-card glass-interactive p-6 flex flex-col min-h-96 h-auto relative overflow-hidden group">
         <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-sky-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-        <h3 className="text-lg font-semibold mb-6">Ù‡Û•ÚµÚ©Ø´Ø§Ù† Ùˆ Ø¯Ø§Ú©Ø´Ø§Ù†ÛŒ Ù†Ø§Ù…Û• Ù†ÛŽØ±Ø¯Ø±Ø§ÙˆÛ•Ú©Ø§Ù† Ø¨Û•Ù¾ÛŽÛŒ Ú©Ø§Øª</h3>
+        <h3 className="text-lg font-semibold mb-6">هەڵکشان و داکشانی نامە نێردراوەکان بەپێی کات</h3>
         <div className="flex-1 min-h-[300px]" dir="ltr">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={timelineData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -317,11 +317,11 @@ const IncomingCharts = () => {
   );
 };
 
-// ————————————————————————————————————————————————————————————————
+// ─── Data Table ──────────────────────────────────────────────────────────────
 
-  const IncomingDataTable = () => {
-    const { filteredIncomingData, setIncomingData, incomingData } = useData();
-    const { user } = useAuth();
+const IncomingDataTable = () => {
+  const { filteredIncomingData, setSentData, incomingData } = useData();
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState<{ key: keyof IncomingLetterData; direction: "asc" | "desc" } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -400,29 +400,29 @@ const IncomingCharts = () => {
       });
       
       if (response.ok) {
-        const updated = await response.json();
-        setIncomingData(incomingData.map(d => d.id === id ? { ...d, ...updated } : d));
+        const updatedRecord = await response.json();
+        setSentData(incomingData.map(d => d.id === id ? { ...d, ...updatedRecord } : d));
         setEditingId(null);
       } else {
-        alert("سێرڤەر نەیتوانی داتاکە نوێ بکاتەوە");
+        alert("هەڵەیەک ڕوویدا لە کاتی پاشەکەوتکردن");
       }
     } catch (err) {
       console.error(err);
-      alert("هەڵەیەک ڕوویدا لە کاتی نوێکردنەوە");
+      alert("هەڵەیەک ڕوویدا لە کاتی پاشەکەوتکردن");
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleDelete = async (id: string | number) => {
-    if (!confirm("دڵنیایت لە سڕینەوەی ئەم داتایە؟ ئەم کارە هەڵناوەشێتەوە!")) return;
+    if (!confirm("دڵنیایت لە سڕینەوەی ئەم تۆمارە؟")) return;
     setIsSaving(true);
     try {
       const response = await fetch(`/api/db/incoming?id=${id}`, {
         method: "DELETE",
       });
       if (response.ok) {
-        setIncomingData(incomingData.filter(d => d.id !== id));
+        setSentData(incomingData.filter(d => d.id !== id));
       } else {
         alert("هەڵەیەک ڕوویدا لە کاتی سڕینەوە");
       }
@@ -445,11 +445,11 @@ const IncomingCharts = () => {
 
       {/* Table Header Controls */}
       <div className="p-4 border-b border-slate-200/50 dark:border-slate-800/50 flex flex-col sm:flex-row justify-between items-center gap-4">
-        <h3 className="text-lg font-semibold">Ø¯Ø§ØªØ§ÛŒ ÙˆØ±Ø¯ÛŒ Ù†Ø§Ù…Û• Ù†ÛŽØ±Ø¯Ø±Ø§ÙˆÛ•Ú©Ø§Ù†</h3>
+        <h3 className="text-lg font-semibold">داتای وردی نامە نێردراوەکان</h3>
         <div className="relative w-full sm:w-72">
           <input
             type="text"
-            placeholder="Ú¯Û•Ú•Ø§Ù† Ø¨Û•Ø¯ÙˆØ§ÛŒ Ø¨Ø§Ø¨Û•Øª ÛŒØ§Ù† Ú©Û†Ø¯..."
+            placeholder="گەڕان بەدوای بابەت یان کۆد..."
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -469,9 +469,9 @@ const IncomingCharts = () => {
               {[
                 { key: "id", label: "#" },
                 { key: "subject", label: "بابەت" },
-                { key: "sender", label: "هاتووە لە" },
+                  { key: "sender", label: "هاتووە لە" },
                 { key: "department", label: "لایەنی پەیوەندیدار" },
-                { key: "refCode", label: "جۆر" },
+                { key: "refCode", label: "کۆد" },
                 { key: "letterType", label: "جۆری نامە" },
                 { key: "sentDate", label: "ڕۆژی ناردن" },
               ].map((col) => (
@@ -487,7 +487,7 @@ const IncomingCharts = () => {
                 </th>
               ))}
               {(user?.role === 'admin' || user?.role === 'user') && (
-                <th className="px-4 py-3 whitespace-nowrap text-center">Ú©Ø±Ø¯Ø§Ø±Û•Ú©Ø§Ù†</th>
+                <th className="px-4 py-3 whitespace-nowrap text-center">کردارەکان</th>
               )}
             </tr>
           </thead>
@@ -509,20 +509,8 @@ const IncomingCharts = () => {
                       />
                     ) : (row.subject)}
                   </td>
-                  <td className="px-4 py-3">
-                    {editingId === row.id ? (
-                      <input
-                        type="text"
-                        value={editForm?.sender || ""}
-                        onChange={(e) => setEditForm({ ...editForm, sender: e.target.value })}
-                        className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded px-2 py-1"
-                      />
-                    ) : (
-                      row.sender || "-"
-                    )}
-                  </td>
                   <td className="px-4 py-3 whitespace-nowrap">
-                    {row.departments?.join("ØŒ ") || row.dept1}
+                    {row.departments?.join("، ") || row.dept1}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap font-mono text-xs">
                     {editingId === row.id ? (
@@ -554,19 +542,19 @@ const IncomingCharts = () => {
                     <td className="px-4 py-3 whitespace-nowrap text-center">
                       {editingId === row.id ? (
                         <div className="flex items-center justify-center gap-2">
-                          <button onClick={() => handleSave(row.id)} disabled={isSaving} className="p-1.5 bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors" title="Ù¾Ø§Ø´Û•Ú©Û•ÙˆØªÚ©Ø±Ø¯Ù†">
+                          <button onClick={() => handleSave(row.id)} disabled={isSaving} className="p-1.5 bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors" title="پاشەکەوتکردن">
                             <Check size={16} />
                           </button>
-                          <button onClick={handleCancelEdit} disabled={isSaving} className="p-1.5 bg-slate-100 text-slate-700 rounded hover:bg-slate-200 transition-colors" title="Ù¾Ø§Ø´Ú¯Û•Ø²Ø¨ÙˆÙˆÙ†Û•ÙˆÛ•">
+                          <button onClick={handleCancelEdit} disabled={isSaving} className="p-1.5 bg-slate-100 text-slate-700 rounded hover:bg-slate-200 transition-colors" title="پاشگەزبوونەوە">
                             <X size={16} />
                           </button>
                         </div>
                       ) : (
                         <div className="flex items-center justify-center gap-2">
-                          <button onClick={() => handleEdit(row)} className="p-1.5 bg-blue-50 text-blue-600 rounded hover:bg-blue-100 transition-colors" title="Ø¯Û•Ø³ØªÚ©Ø§Ø±ÛŒ">
+                          <button onClick={() => handleEdit(row)} className="p-1.5 bg-blue-50 text-blue-600 rounded hover:bg-blue-100 transition-colors" title="دەستکاری">
                             <Edit2 size={16} />
                           </button>
-                          <button onClick={() => handleDelete(row.id)} className="p-1.5 bg-red-50 text-red-600 rounded hover:bg-red-100 transition-colors" title="Ø³Ú•ÛŒÙ†Û•ÙˆÛ•">
+                          <button onClick={() => handleDelete(row.id)} className="p-1.5 bg-red-50 text-red-600 rounded hover:bg-red-100 transition-colors" title="سڕینەوە">
                             <Trash2 size={16} />
                           </button>
                         </div>
@@ -578,7 +566,7 @@ const IncomingCharts = () => {
             ) : (
               <tr>
                 <td colSpan={6} className="px-4 py-8 text-center text-slate-500 dark:text-slate-400">
-                  Ù‡ÛŒÚ† Ø¯Ø§ØªØ§ÛŒÛ•Ú© Ù†Û•Ø¯Û†Ø²Ø±Ø§ÛŒÛ•ÙˆÛ•.
+                  هیچ داتایەک نەدۆزرایەوە.
                 </td>
               </tr>
             )}
@@ -590,7 +578,7 @@ const IncomingCharts = () => {
       {totalPages > 1 && (
         <div className="p-4 border-t border-slate-200/50 dark:border-slate-800/50 flex items-center justify-between">
           <span className="text-sm text-slate-500 dark:text-slate-400">
-            Ù¾Û•Ú•Û•ÛŒ {currentPage} Ù„Û• {totalPages}
+            پەڕەی {currentPage} لە {totalPages}
           </span>
           <div className="flex gap-2" dir="rtl">
             <button
@@ -614,7 +602,7 @@ const IncomingCharts = () => {
   );
 };
 
-// â”€â”€â”€ Main Exported Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Main Exported Component ─────────────────────────────────────────────────
 
 export const IncomingView = () => {
   return (
