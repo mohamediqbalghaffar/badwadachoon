@@ -34,6 +34,53 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose,
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const profileImageInputRef = useRef<HTMLInputElement>(null);
 
+  // Odoo Settings State
+  const [odooUrl, setOdooUrl] = useState('https://erp.halabjagroup.com');
+  const [odooDb, setOdooDb] = useState('');
+  const [odooUsername, setOdooUsername] = useState('');
+  const [odooApiKey, setOdooApiKey] = useState('');
+  const [hasOdooApiKey, setHasOdooApiKey] = useState(false);
+  const [isSavingOdoo, setIsSavingOdoo] = useState(false);
+
+  React.useEffect(() => {
+    if (activeTab === 'profile') {
+      fetch('/api/user/odoo-settings')
+        .then(res => res.json())
+        .then(data => {
+          if (!data.error) {
+            if (data.odooUrl) setOdooUrl(data.odooUrl);
+            if (data.odooDb) setOdooDb(data.odooDb);
+            if (data.odooUsername) setOdooUsername(data.odooUsername);
+            setHasOdooApiKey(data.hasApiKey);
+          }
+        })
+        .catch(console.error);
+    }
+  }, [activeTab]);
+
+  const handleSaveOdoo = async () => {
+    setIsSavingOdoo(true);
+    try {
+      const res = await fetch('/api/user/odoo-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ odooUrl, odooDb, odooUsername, odooApiKey })
+      });
+      if (res.ok) {
+        alert('زانیارییەکانی Odoo بە سەرکەوتوویی پاشەکەوت کران');
+        setHasOdooApiKey(true);
+        setOdooApiKey(''); // clear field after save
+      } else {
+        alert('هەڵەیەک ڕوویدا لە پاشەکەوتکردن');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('هەڵەیەک ڕوویدا لە پەیوەندی بە سێرڤەر');
+    } finally {
+      setIsSavingOdoo(false);
+    }
+  };
+
   const handleExport = () => {
     window.open('/api/db/export', '_blank');
   };
@@ -482,6 +529,73 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose,
                     className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-medium transition-colors disabled:opacity-50"
                   >
                     {isSavingProfile ? 'پاشەکەوتکردن...' : 'پاشەکەوتکردنی گۆڕانکارییەکان'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Odoo Integration */}
+              <div className="bg-slate-50/80 dark:bg-slate-800/80 backdrop-blur-md rounded-2xl border border-slate-200 dark:border-slate-700 p-6 space-y-5">
+                <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-4 flex items-center gap-2">
+                  <Database size={18} className="text-blue-500" />
+                  بەستنەوە بە Odoo API
+                </h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
+                  بۆ ئەوەی بتوانیت ڕاستەوخۆ بە کرتەکردن لەسەر کۆدی نامە (وەک GL/04513) بچیتە ناو پەڕەی نامەکە لە Odoo، پێویستە زانیارییەکانی هەژمارەکەت لێرە پاشەکەوت بکەیت.
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">بەستەری Odoo (URL)</label>
+                    <input 
+                      type="text" 
+                      value={odooUrl}
+                      onChange={(e) => setOdooUrl(e.target.value)}
+                      placeholder="https://erp.halabjagroup.com"
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none text-left"
+                      dir="ltr"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">ناوی داتابەیس (Database)</label>
+                    <input 
+                      type="text" 
+                      value={odooDb}
+                      onChange={(e) => setOdooDb(e.target.value)}
+                      placeholder="halabja_db"
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none text-left"
+                      dir="ltr"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">ئیمەیڵ / ناوی بەکارهێنەر (Odoo)</label>
+                    <input 
+                      type="text" 
+                      value={odooUsername}
+                      onChange={(e) => setOdooUsername(e.target.value)}
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none text-left"
+                      dir="ltr"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">وشەی تێپەڕ / API Key</label>
+                    <input 
+                      type="password" 
+                      value={odooApiKey}
+                      onChange={(e) => setOdooApiKey(e.target.value)}
+                      placeholder={hasOdooApiKey ? "تۆمارکراوە (بۆ گۆڕین لێرە بنووسە)" : "API Key بپێچە..."}
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none text-left"
+                      dir="ltr"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-2 flex justify-end">
+                  <button 
+                    onClick={handleSaveOdoo}
+                    disabled={isSavingOdoo}
+                    className="w-full sm:w-auto bg-slate-800 hover:bg-slate-900 dark:bg-slate-100 dark:hover:bg-white dark:text-slate-900 text-white px-6 py-2.5 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
+                  >
+                    {isSavingOdoo ? 'پاشەکەوتکردن...' : 'پاشەکەوتکردنی Odoo API'}
                   </button>
                 </div>
               </div>

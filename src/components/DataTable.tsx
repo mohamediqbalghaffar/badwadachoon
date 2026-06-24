@@ -19,6 +19,44 @@ export const DataTable = () => {
   const [editForm, setEditForm] = useState<Partial<DashboardData>>({});
   const [isSaving, setIsSaving] = useState(false);
 
+  const [loadingOdooCode, setLoadingOdooCode] = useState<string | null>(null);
+
+  const handleCodeClick = async (refCode: string) => {
+    // Always copy to clipboard as fallback/convenience
+    navigator.clipboard.writeText(refCode);
+
+    setLoadingOdooCode(refCode);
+    try {
+      const res = await fetch('/api/odoo/find-letter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refCode })
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.id) {
+        // Direct link to the record!
+        window.open(`https://erp.halabjagroup.com/odoo/action-817/${data.id}`, '_blank');
+      } else {
+        // Fallback or not configured
+        if (data.error === 'Odoo credentials not configured in profile') {
+          // Open fallback, they can paste it
+          window.open(`https://erp.halabjagroup.com/odoo/action-817?search=${encodeURIComponent(refCode)}`, '_blank');
+          alert('بەستنەوە بە Odoo نەکراوە. تکایە لە ڕێکخستنەکانی هەژمارەکەت زانیارییەکانی Odoo تۆمار بکە بۆ کردنەوەی ڕاستەوخۆ.');
+        } else {
+          window.open(`https://erp.halabjagroup.com/odoo/action-817?search=${encodeURIComponent(refCode)}`, '_blank');
+          console.error(data.error);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      window.open(`https://erp.halabjagroup.com/odoo/action-817?search=${encodeURIComponent(refCode)}`, '_blank');
+    } finally {
+      setLoadingOdooCode(null);
+    }
+  };
+
   // Search logic
   const searchedData = useMemo(() => {
     if (!searchTerm) return filteredData;
@@ -226,15 +264,17 @@ export const DataTable = () => {
                       />
                     ) : (
                       <button
-                        onClick={() => {
-                          navigator.clipboard.writeText(row.refCode);
-                          window.open(`https://erp.halabjagroup.com/odoo/action-817?search=${encodeURIComponent(row.refCode)}`, '_blank');
-                        }}
-                        className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline cursor-pointer transition-colors text-left inline-flex items-center gap-1.5 px-2 py-1 -ml-2 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                        onClick={() => handleCodeClick(row.refCode)}
+                        disabled={loadingOdooCode === row.refCode}
+                        className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline cursor-pointer transition-colors text-left inline-flex items-center gap-1.5 px-2 py-1 -ml-2 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 disabled:opacity-50 disabled:cursor-wait"
                         title="بینین لە سیستەمی Odoo (کۆدەکە بە شێوەیەکی ئۆتۆماتیکی لەبەردەگیرێتەوە)"
                       >
                         {row.refCode}
-                        <ExternalLink size={12} className="opacity-70" />
+                        {loadingOdooCode === row.refCode ? (
+                          <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin ml-1 opacity-70" />
+                        ) : (
+                          <ExternalLink size={12} className="opacity-70" />
+                        )}
                       </button>
                     )}
                   </td>

@@ -74,6 +74,10 @@ model UserAccount {
   role      String   @default("user")
   status    String   @default("pending") // pending, approved, active
   authCode  String?
+  odooUrl      String?
+  odooDb       String?
+  odooUsername String?
+  odooApiKey   String?
   createdAt DateTime @default(now())
 }
 
