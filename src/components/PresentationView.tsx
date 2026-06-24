@@ -311,7 +311,17 @@ export const PresentationView = () => {
   const sentTypeDataPres = useMemo(() => {
     const counts: Record<string, number> = {};
     baseFilteredSentData.forEach((d) => counts[d.letterType] = (counts[d.letterType] || 0) + 1);
-    return Object.entries(counts).map(([name, value]) => ({ name, value }));
+    const sorted = Object.entries(counts)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+      
+    if (sorted.length > 7) {
+      const top = sorted.slice(0, 6);
+      const others = sorted.slice(6).reduce((acc, curr) => acc + curr.value, 0);
+      top.push({ name: 'ئەوانی تر', value: others });
+      return top;
+    }
+    return sorted;
   }, [baseFilteredSentData]);
 
   const totalIncoming = baseFilteredIncomingData.length;
@@ -348,7 +358,17 @@ export const PresentationView = () => {
   const incomingTypeDataPres = useMemo(() => {
     const counts: Record<string, number> = {};
     baseFilteredIncomingData.forEach((d) => counts[d.letterType] = (counts[d.letterType] || 0) + 1);
-    return Object.entries(counts).map(([name, value]) => ({ name, value }));
+    const sorted = Object.entries(counts)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+      
+    if (sorted.length > 7) {
+      const top = sorted.slice(0, 6);
+      const others = sorted.slice(6).reduce((acc, curr) => acc + curr.value, 0);
+      top.push({ name: 'ئەوانی تر', value: others });
+      return top;
+    }
+    return sorted;
   }, [baseFilteredIncomingData]);
 
   const timelineDataComparison = useMemo(() => {
