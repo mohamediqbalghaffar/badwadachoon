@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { X, UploadCloud, Download, Database, AlertCircle, CheckCircle2, Trash2, FileSpreadsheet, ShieldCheck, User } from "lucide-react";
+import { X, UploadCloud, Download, Database, AlertCircle, CheckCircle2, Trash2, FileSpreadsheet, ShieldCheck, User, Users, Save } from "lucide-react";
 import * as XLSX from "xlsx";
 import { useData } from "../context/DataContext";
 import { useAuth } from "../context/AuthContext";
@@ -9,6 +9,7 @@ import { useTheme } from "next-themes";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { parseFile } from "../utils/parser";
+import { UserManagement } from "./UserManagement";
 
 type Tab = 'database' | 'approvals' | 'profile';
 
@@ -309,14 +310,19 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose,
       <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden border border-slate-200 dark:border-slate-800 flex flex-col max-h-[90vh]">
         
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-900/50">
-          <div className="flex items-center gap-3 text-slate-800 dark:text-white">
-            <div className="p-2 bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-xl">
-              {activeTab === 'database' ? <Database size={20} /> : activeTab === 'approvals' ? <ShieldCheck size={20} /> : <User size={20} />}
+        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-900/80">
+          <div className="flex items-center gap-4 text-slate-800 dark:text-white">
+            <div className={`p-2.5 rounded-xl ${activeTab === 'database' ? 'bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400' : activeTab === 'approvals' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400' : 'bg-violet-100 text-violet-600 dark:bg-violet-500/20 dark:text-violet-400'}`}>
+              {activeTab === 'database' ? <Database size={22} /> : activeTab === 'approvals' ? <Users size={22} /> : <User size={22} />}
             </div>
-            <h2 className="text-xl font-bold">
-              {activeTab === 'database' ? 'ڕێکخستنەکانی داتابەیس' : activeTab === 'approvals' ? 'پەسەندکردنی بەکارهێنەران' : 'ڕێکخستنەکانی هەژمار'}
-            </h2>
+            <div>
+              <h2 className="text-xl font-bold tracking-tight">
+                {activeTab === 'database' ? 'ڕێکخستنەکانی داتابەیس' : activeTab === 'approvals' ? 'بەڕێوەبردنی بەکارهێنەران' : 'ڕێکخستنەکانی هەژمار'}
+              </h2>
+              <p className="text-xs text-slate-500 font-medium mt-0.5">
+                {activeTab === 'database' ? 'بەڕێوەبردنی زانیارییەکان' : activeTab === 'approvals' ? 'کۆنترۆڵکردنی هەژمارەکان' : 'زانیارییە کەسییەکانت'}
+              </p>
+            </div>
           </div>
           <button 
             onClick={onClose}
@@ -338,9 +344,9 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose,
               </button>
               <button 
                 onClick={() => setActiveTab('approvals')}
-                className={`pb-3 px-2 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'approvals' ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
+                className={`pb-3 px-3 text-sm font-semibold border-b-2 transition-all whitespace-nowrap ${activeTab === 'approvals' ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
               >
-                پەسەندکردنی بەکارهێنەر
+                بەڕێوەبردنی بەکارهێنەران
               </button>
             </>
           )}
@@ -456,19 +462,20 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose,
 
           {activeTab === 'approvals' && user?.role === 'admin' && (
             <div className="animate-in fade-in">
-              <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-                <PendingUsersList />
-              </div>
+              <UserManagement />
             </div>
           )}
 
           {activeTab === 'profile' && (
-            <div className="animate-in fade-in space-y-8">
+            <div className="animate-in fade-in space-y-6">
               
-              {/* Profile Header */}
-              <div className="flex flex-col items-center justify-center py-4">
-                <div className="relative group">
-                  <div className="w-28 h-28 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white mb-4 shadow-xl overflow-hidden border-4 border-white dark:border-slate-800">
+              {/* Profile Header Card */}
+              <div className="bg-gradient-to-br from-violet-50 to-fuchsia-50 dark:from-violet-500/10 dark:to-fuchsia-500/10 rounded-[2rem] p-8 border border-violet-100 dark:border-violet-500/20 flex flex-col sm:flex-row items-center gap-8 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-violet-500/10 dark:bg-violet-500/20 rounded-full blur-3xl -mr-20 -mt-20"></div>
+                <div className="absolute bottom-0 left-0 w-64 h-64 bg-fuchsia-500/10 dark:bg-fuchsia-500/20 rounded-full blur-3xl -ml-20 -mb-20"></div>
+                
+                <div className="relative group z-10">
+                  <div className="w-32 h-32 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white shadow-2xl overflow-hidden border-4 border-white dark:border-slate-800 transition-transform duration-300 group-hover:scale-105">
                     {profileImagePreview || (user as any)?.image ? (
                       <Image 
                         src={profileImagePreview || (user as any)?.image} 
@@ -477,13 +484,13 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose,
                         className="object-cover"
                       />
                     ) : (
-                      <User size={48} />
+                      <User size={56} />
                     )}
                     <div 
                       onClick={() => profileImageInputRef.current?.click()}
-                      className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                      className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer backdrop-blur-sm"
                     >
-                      <UploadCloud size={24} className="text-white" />
+                      <UploadCloud size={28} className="text-white" />
                     </div>
                   </div>
                   <input 
@@ -493,211 +500,130 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose,
                     onChange={handleProfileImageChange}
                     className="hidden"
                   />
+                  <div className="absolute -bottom-2 -right-2 bg-emerald-500 w-8 h-8 rounded-full border-4 border-white dark:border-slate-800 shadow-md"></div>
                 </div>
                 
-                <div className="mt-2 px-4 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                  {user?.role === 'admin' ? 'بەڕێوەبەر' : user?.role === 'user' ? 'بەکارهێنەر' : 'بینەر'}
+                <div className="flex-1 text-center sm:text-right z-10 w-full">
+                  <div className="inline-block px-4 py-1.5 rounded-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-md text-xs font-bold text-violet-600 dark:text-violet-400 shadow-sm border border-violet-200/50 dark:border-violet-500/30 mb-4">
+                    {user?.role === 'admin' ? 'بەڕێوەبەر (Admin)' : user?.role === 'user' ? 'بەکارهێنەر (User)' : 'بینەر (Viewer)'}
+                  </div>
+                  <div className="space-y-4 max-w-md">
+                    <div>
+                      <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 block ml-1">ناوی بەکارهێنەر</label>
+                      <input 
+                        type="text" 
+                        value={profileName}
+                        onChange={(e) => setProfileName(e.target.value)}
+                        className="w-full bg-white/60 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 rounded-xl py-2.5 px-4 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all font-semibold"
+                        placeholder="ناوەکەت بنووسە"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 block ml-1">ئیمەیڵ (گۆڕین ڕێگەپێنەدراوە)</label>
+                      <input 
+                        type="email" 
+                        value={user?.email || ''}
+                        disabled
+                        className="w-full bg-slate-100/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl py-2.5 px-4 text-slate-500 dark:text-slate-400 cursor-not-allowed font-mono text-left text-sm"
+                        dir="ltr"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* Profile Form (Glassmorphism) */}
-              <div className="bg-slate-50/80 dark:bg-slate-800/80 backdrop-blur-md rounded-2xl border border-slate-200 dark:border-slate-700 p-6 space-y-5">
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">ناوی بەکارهێنەر</label>
-                  <input 
-                    type="text" 
-                    value={profileName}
-                    onChange={(e) => setProfileName(e.target.value)}
-                    className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">ئیمەیڵ</label>
-                  <input 
-                    type="text" 
-                    value={user?.email || ''}
-                    disabled
-                    className="w-full bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-500 dark:text-slate-400 cursor-not-allowed"
-                  />
-                </div>
-
-                <div className="pt-2">
-                  <button 
-                    onClick={handleSaveProfile}
-                    disabled={isSavingProfile}
-                    className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-medium transition-colors disabled:opacity-50"
-                  >
-                    {isSavingProfile ? 'پاشەکەوتکردن...' : 'پاشەکەوتکردنی گۆڕانکارییەکان'}
-                  </button>
-                </div>
+              {/* Action Button */}
+              <div className="flex justify-end pt-2">
+                <button 
+                  onClick={handleSaveProfile}
+                  disabled={isSavingProfile || (!profileImage && profileName === user?.username)}
+                  className="px-8 py-3 bg-violet-600 hover:bg-violet-700 disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400 dark:disabled:text-slate-600 text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-violet-500/25 disabled:shadow-none flex items-center justify-center gap-2"
+                >
+                  <Save size={18} />
+                  {isSavingProfile ? 'پاشەکەوت دەکرێت...' : 'پاشەکەوتکردنی گۆڕانکارییەکان'}
+                </button>
               </div>
 
-              {/* Odoo Integration */}
-              <div className="bg-slate-50/80 dark:bg-slate-800/80 backdrop-blur-md rounded-2xl border border-slate-200 dark:border-slate-700 p-6 space-y-5">
-                <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-4 flex items-center gap-2">
-                  <Database size={18} className="text-blue-500" />
-                  بەستنەوە بە Odoo API
-                </h4>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
-                  بۆ ئەوەی بتوانیت ڕاستەوخۆ بە کرتەکردن لەسەر کۆدی نامە (وەک GL/04513) بچیتە ناو پەڕەی نامەکە لە Odoo، پێویستە زانیارییەکانی هەژمارەکەت لێرە پاشەکەوت بکەیت.
-                </p>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">بەستەری Odoo (URL)</label>
-                    <input 
-                      type="text" 
-                      value={odooUrl}
-                      onChange={(e) => setOdooUrl(e.target.value)}
-                      placeholder="https://erp.halabjagroup.com"
-                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none text-left"
-                      dir="ltr"
-                    />
+              {/* Odoo API Settings Card */}
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 mt-10 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-2xl -mr-10 -mt-10"></div>
+                <div className="flex items-center gap-3 mb-6 relative z-10">
+                  <div className="p-2.5 bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-xl">
+                    <Database size={24} />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">ناوی داتابەیس (Database)</label>
+                    <h3 className="text-lg font-bold text-slate-800 dark:text-white">بەستنەوە بە Odoo API</h3>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">بۆ ئەوەی بتوانیت ڕاستەوخۆ بە کرتەکردن لەسەر کۆدی نامە بگەیتە ناو پەڕەی نامەکە لە Odoo.</p>
+                  </div>
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-5 relative z-10">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300 ml-1">بەستەری Odoo (URL)</label>
+                    <input 
+                      type="url" 
+                      value={odooUrl}
+                      onChange={(e) => setOdooUrl(e.target.value)}
+                      className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl py-3 px-4 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-left font-mono text-sm"
+                      dir="ltr"
+                      placeholder="https://erp.halabjagroup.com"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300 ml-1">ناوی داتابەیس (Database)</label>
                     <input 
                       type="text" 
                       value={odooDb}
                       onChange={(e) => setOdooDb(e.target.value)}
-                      placeholder="halabja_db"
-                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none text-left"
+                      className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl py-3 px-4 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-left font-mono text-sm"
                       dir="ltr"
+                      placeholder="halabja_db"
                     />
                   </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">ئیمەیڵ / ناوی بەکارهێنەر (Odoo)</label>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300 ml-1">ئیمەیڵ / ناوی بەکارهێنەر (Odoo)</label>
                     <input 
                       type="text" 
                       value={odooUsername}
                       onChange={(e) => setOdooUsername(e.target.value)}
-                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none text-left"
+                      className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl py-3 px-4 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-left font-mono text-sm"
                       dir="ltr"
+                      placeholder="admin@example.com"
                     />
                   </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">وشەی تێپەڕ / API Key</label>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300 ml-1">
+                      وشەی تێپەڕ / API Key
+                      {hasOdooApiKey && <span className="text-emerald-500 mr-2">(پێشتر داخڵ کراوە ✓)</span>}
+                    </label>
                     <input 
                       type="password" 
                       value={odooApiKey}
                       onChange={(e) => setOdooApiKey(e.target.value)}
-                      placeholder={hasOdooApiKey ? "تۆمارکراوە (بۆ گۆڕین لێرە بنووسە)" : "API Key بپێچە..."}
-                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none text-left"
+                      className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl py-3 px-4 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-left font-mono text-sm tracking-widest"
                       dir="ltr"
+                      placeholder={hasOdooApiKey ? "••••••••••••••••" : "وشەی نهێنی بنووسە"}
                     />
                   </div>
                 </div>
-
-                <div className="pt-2 flex justify-end">
+                <div className="mt-6 flex justify-end">
                   <button 
                     onClick={handleSaveOdoo}
                     disabled={isSavingOdoo}
-                    className="w-full sm:w-auto bg-slate-800 hover:bg-slate-900 dark:bg-slate-100 dark:hover:bg-white dark:text-slate-900 text-white px-6 py-2.5 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
+                    className="px-8 py-3 bg-slate-800 hover:bg-slate-900 dark:bg-slate-100 dark:hover:bg-white text-white dark:text-slate-900 font-bold rounded-xl transition-all shadow-lg flex items-center justify-center gap-2"
                   >
-                    {isSavingOdoo ? 'پاشەکەوتکردن...' : 'پاشەکەوتکردنی Odoo API'}
-                  </button>
-                </div>
-              </div>
-              
-              {/* Appearance Settings */}
-              <div className="bg-slate-50/80 dark:bg-slate-800/80 backdrop-blur-md rounded-2xl border border-slate-200 dark:border-slate-700 p-6">
-                <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">شێوازی ڕووکار (Appearance)</h4>
-                
-                <div className="flex bg-slate-200/50 dark:bg-slate-900/50 p-1.5 rounded-xl gap-1">
-                  <button 
-                    onClick={() => setTheme('light')}
-                    className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${theme === 'light' ? 'bg-white dark:bg-slate-700 shadow-sm text-blue-600 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800'}`}
-                  >
-                    ڕووناک
-                  </button>
-                  <button 
-                    onClick={() => setTheme('dark')}
-                    className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${theme === 'dark' ? 'bg-white dark:bg-slate-700 shadow-sm text-blue-600 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800'}`}
-                  >
-                    تاریک
-                  </button>
-                  <button 
-                    onClick={() => setTheme('system')}
-                    className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${theme === 'system' ? 'bg-white dark:bg-slate-700 shadow-sm text-blue-600 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800'}`}
-                  >
-                    سیستەم
+                    <Database size={18} />
+                    {isSavingOdoo ? 'پاشەکەوت دەکرێت...' : 'بەستنەوە'}
                   </button>
                 </div>
               </div>
 
             </div>
           )}
-
         </div>
       </div>
     </div>
   );
 };
 
-const PendingUsersList = () => {
-  const [users, setUsers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  const fetchUsers = async () => {
-    try {
-      const res = await fetch('/api/admin/users');
-      const data = await res.json();
-      if (data.users) {
-        setUsers(data.users.filter((u: any) => u.status === 'pending'));
-      }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  React.useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  const handleAction = async (id: string, action: 'approve' | 'reject') => {
-    try {
-      await fetch('/api/admin/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, action })
-      });
-      fetchUsers();
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  if (loading) return <div className="p-6 text-center text-slate-500">خوێندنەوە...</div>;
-  if (users.length === 0) return <div className="p-6 text-center text-slate-500">هیچ داواکارییەکی نوێ نییە بۆ پەسەندکردن.</div>;
-
-  return (
-    <div className="divide-y divide-slate-200 dark:divide-slate-700">
-      {users.map((user) => (
-        <div key={user.id} className="p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 hover:bg-slate-100/50 dark:hover:bg-slate-800/80 transition-colors">
-          <div>
-            <h4 className="font-bold text-slate-800 dark:text-slate-200">{user.name}</h4>
-            <p className="text-sm text-slate-500 dark:text-slate-400 font-mono mt-1">{user.email}</p>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={() => handleAction(user.id, 'reject')}
-              className="px-4 py-2 rounded-xl text-sm font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 transition-colors"
-            >
-              ڕەتکردنەوە
-            </button>
-            <button 
-              onClick={() => handleAction(user.id, 'approve')}
-              className="px-4 py-2 rounded-xl text-sm font-semibold text-white bg-emerald-500 hover:bg-emerald-600 shadow-sm shadow-emerald-500/20 transition-colors"
-            >
-              پەسەندکردن
-            </button>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-};

@@ -4,11 +4,12 @@ import React, { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useAuth } from "../context/AuthContext";
 import { HTSLogo } from "./HTSLogoBackground";
-import { KeyRound, ArrowRight, ShieldCheck, User } from "lucide-react";
+import { KeyRound, ArrowRight, ShieldCheck, User, Mail } from "lucide-react";
 
 export const LoginPage = () => {
-  const [activeTab, setActiveTab] = useState<"staff" | "viewer">("staff");
+  const [activeTab, setActiveTab] = useState<"staff" | "email" | "viewer">("staff");
   const [viewerCode, setViewerCode] = useState("");
+  const [loginEmail, setLoginEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [shake, setShake] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -27,6 +28,31 @@ export const LoginPage = () => {
 
       if (res?.error) {
         setError("کۆدی بینین هەڵەیە. تکایە دووبارە هەوڵ بدەرەوە.");
+        setShake(true);
+        setTimeout(() => setShake(false), 500);
+      } else if (res?.ok) {
+        await updateSession();
+      }
+    } catch (err) {
+      setError("هەڵەیەک ڕوویدا لە کاتی چوونەژوورەوە.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setIsSubmitting(true);
+
+    try {
+      const res = await signIn("email-login", {
+        email: loginEmail,
+        redirect: false,
+      });
+
+      if (res?.error) {
+        setError(res.error);
         setShake(true);
         setTimeout(() => setShake(false), 500);
       } else if (res?.ok) {
@@ -67,10 +93,10 @@ export const LoginPage = () => {
         </div>
 
         {/* Tabs */}
-        <div className="flex p-1 mb-8 bg-black/5 dark:bg-white/5 rounded-2xl backdrop-blur-md">
+        <div className="flex p-1 mb-8 bg-black/5 dark:bg-white/5 rounded-2xl backdrop-blur-md overflow-x-auto">
           <button
             onClick={() => { setActiveTab("staff"); setError(null); }}
-            className={`flex-1 py-2.5 text-sm font-semibold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 ${
+            className={`flex-1 py-2.5 px-2 text-sm font-semibold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 whitespace-nowrap ${
               activeTab === "staff"
                 ? "bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm"
                 : "text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
@@ -80,8 +106,19 @@ export const LoginPage = () => {
             ستاف
           </button>
           <button
+            onClick={() => { setActiveTab("email"); setError(null); }}
+            className={`flex-1 py-2.5 px-2 text-sm font-semibold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 whitespace-nowrap ${
+              activeTab === "email"
+                ? "bg-white dark:bg-slate-800 text-purple-600 dark:text-purple-400 shadow-sm"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+            }`}
+          >
+            <Mail size={16} />
+            ئیمەیڵ
+          </button>
+          <button
             onClick={() => { setActiveTab("viewer"); setError(null); }}
-            className={`flex-1 py-2.5 text-sm font-semibold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 ${
+            className={`flex-1 py-2.5 px-2 text-sm font-semibold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 whitespace-nowrap ${
               activeTab === "viewer"
                 ? "bg-white dark:bg-slate-800 text-teal-600 dark:text-teal-400 shadow-sm"
                 : "text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
@@ -125,6 +162,43 @@ export const LoginPage = () => {
                  ڕێگەپێدراوە بۆ ئیمەیڵی کار (Outlook) و ئیمەیڵی کەسی (Google)
                </p>
             </div>
+          </div>
+        ) : activeTab === "email" ? (
+          <div className="space-y-5">
+            <form onSubmit={handleEmailSubmit} className="space-y-5">
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-slate-600 dark:text-slate-300 ml-1">ئیمەیڵی تۆمارکراو</label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-400 group-focus-within:text-purple-500 transition-colors">
+                    <Mail size={18} />
+                  </div>
+                  <input
+                    type="email"
+                    dir="ltr"
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
+                    className="w-full bg-white/50 dark:bg-black/20 border border-slate-200 dark:border-slate-700/50 rounded-2xl py-3 pl-4 pr-12 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all backdrop-blur-sm text-left text-lg font-medium"
+                    placeholder="name@example.com"
+                    required
+                  />
+                </div>
+              </div>
+
+              {error && (
+                <div className="text-rose-500 dark:text-rose-400 text-sm font-medium text-center bg-rose-50 dark:bg-rose-950/30 py-2 rounded-lg border border-rose-100 dark:border-rose-900/50">
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={isSubmitting || !loginEmail}
+                className={`w-full mt-6 flex items-center justify-center gap-2 py-3.5 rounded-2xl text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 shadow-purple-500/25 disabled:opacity-50`}
+              >
+                <span>چوونەژوورەوە</span>
+                <ArrowRight size={18} className="rotate-180" />
+              </button>
+            </form>
           </div>
         ) : (
           <div className="space-y-5">

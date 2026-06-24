@@ -33,7 +33,39 @@ export const authOptions: NextAuthOptions = {
       name: "Guest",
       credentials: {},
       async authorize() {
-        return { id: "guest", name: "Guest User", email: "guest@badwadachoon.local", role: "user" };
+        return { id: "guest", name: "Guest User", email: "guest@badwadachoon.local", role: "guest" };
+      },
+    }),
+    CredentialsProvider({
+      id: "email-login",
+      name: "Email Login",
+      credentials: {
+        email: { label: "Email", type: "email" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email) return null;
+        
+        const email = credentials.email.toLowerCase();
+        
+        // Find user by email
+        const user = await prisma.userAccount.findUnique({
+          where: { email }
+        });
+
+        if (!user) {
+          throw new Error("ئەم ئیمەیڵە تۆمار نەکراوە.");
+        }
+
+        if (user.status !== "active" && user.role !== "admin") {
+          throw new Error("هەژمارەکەت چالاک نەکراوە یان ڕاگیراوە.");
+        }
+
+        return { 
+          id: user.id, 
+          name: user.name || "User", 
+          email: user.email, 
+          role: user.role 
+        };
       },
     }),
   ],
@@ -45,7 +77,7 @@ export const authOptions: NextAuthOptions = {
           token.username = "Viewer";
           token.status = "active";
         } else if (user.id === "guest") {
-          token.role = "user";
+          token.role = "guest";
           token.username = "Guest User";
           token.status = "active";
         } else if (user.email) {
