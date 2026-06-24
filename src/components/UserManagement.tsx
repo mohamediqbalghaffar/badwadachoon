@@ -26,7 +26,7 @@ export const UserManagement = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch('/api/admin/users');
+      const res = await fetch('/api/admin/users', { cache: 'no-store' });
       const data = await res.json();
       if (data.users) {
         setUsers(data.users);
