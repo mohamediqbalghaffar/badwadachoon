@@ -46,12 +46,14 @@ export const DataTable = () => {
           alert('بەستنەوە بە Odoo نەکراوە. تکایە لە ڕێکخستنەکانی هەژمارەکەت زانیارییەکانی Odoo تۆمار بکە بۆ کردنەوەی ڕاستەوخۆ.');
         } else {
           window.open(`https://erp.halabjagroup.com/odoo/action-817?search=${encodeURIComponent(refCode)}`, '_blank');
+          alert(`هەڵەیەک لە پەیوەندی Odoo ڕوویدا: ${data.error || 'نەزانراو'}\n\nتکایە دڵنیابە کە ناوی داتابەیسەکەی Odoo (نەک Supabase) بە ڕاستی داخڵکراوە.`);
           console.error(data.error);
         }
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
       window.open(`https://erp.halabjagroup.com/odoo/action-817?search=${encodeURIComponent(refCode)}`, '_blank');
+      alert(`هەڵەیەک ڕوویدا لە کاتی پەیوەندی بە سێرڤەر: ${err.message || err}`);
     } finally {
       setLoadingOdooCode(null);
     }
