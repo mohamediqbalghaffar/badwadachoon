@@ -509,8 +509,18 @@ const IncomingDataTable = () => {
                       />
                     ) : (row.subject)}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    {row.departments?.join("، ") || row.dept1}
+                  <td className="px-4 py-3 max-w-[200px] truncate" title={row.sender}>
+                    {editingId === row.id ? (
+                      <input 
+                        type="text" 
+                        value={editForm.sender || ''} 
+                        onChange={e => setEditForm({...editForm, sender: e.target.value})}
+                        className="w-full bg-white dark:bg-slate-900 border border-blue-300 rounded px-2 py-1 text-right outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    ) : (row.sender || "-")}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap max-w-[200px] truncate" title={row.departments?.join("، ") || row.dept1}>
+                    {row.departments?.join("، ") || row.dept1 || "-"}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap font-mono text-xs">
                     {editingId === row.id ? (
