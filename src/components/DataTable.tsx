@@ -19,42 +19,14 @@ export const DataTable = () => {
   const [editForm, setEditForm] = useState<Partial<DashboardData>>({});
   const [isSaving, setIsSaving] = useState(false);
 
-  const [loadingOdooCode, setLoadingOdooCode] = useState<string | null>(null);
+  const [showOdooModal, setShowOdooModal] = useState(false);
+  const [currentOdooCode, setCurrentOdooCode] = useState("");
 
-  const handleCodeClick = async (refCode: string) => {
-    // Always copy to clipboard as fallback/convenience
+  const handleCodeClick = (refCode: string) => {
+    // Copy to clipboard
     navigator.clipboard.writeText(refCode);
-
-    setLoadingOdooCode(refCode);
-    try {
-      const res = await fetch('/api/odoo/find-letter', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refCode })
-      });
-
-      const data = await res.json();
-
-      if (res.ok && data.id) {
-        // Direct link to the record using the reliable Odoo 18 format
-        window.open(`https://erp.halabjagroup.com/odoo/approval.request/${data.id}`, '_blank');
-      } else {
-        // Fallback or not configured
-        if (data.error === 'Odoo credentials not configured in profile') {
-          window.open(`https://erp.halabjagroup.com/odoo/action-817?search=${encodeURIComponent(refCode)}`, '_blank');
-          alert('بەستنەوە بە Odoo نەکراوە. تکایە لە ڕێکخستنەکانی هەژمارەکەت زانیارییەکانی Odoo تۆمار بکە بۆ کردنەوەی ڕاستەوخۆ.');
-        } else {
-          window.open(`https://erp.halabjagroup.com/odoo/action-817?search=${encodeURIComponent(refCode)}`, '_blank');
-          alert(`هەڵە لە Odoo: ${data.error}`);
-        }
-      }
-    } catch (err: any) {
-      console.error(err);
-      window.open(`https://erp.halabjagroup.com/odoo/action-817?search=${encodeURIComponent(refCode)}`, '_blank');
-      alert(`هەڵە ڕوویدا: ${err.message}`);
-    } finally {
-      setLoadingOdooCode(null);
-    }
+    setCurrentOdooCode(refCode);
+    setShowOdooModal(true);
   };
 
   // Search logic
@@ -265,16 +237,11 @@ export const DataTable = () => {
                     ) : (
                       <button
                         onClick={() => handleCodeClick(row.refCode)}
-                        disabled={loadingOdooCode === row.refCode}
-                        className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline cursor-pointer transition-colors text-left inline-flex items-center gap-1.5 px-2 py-1 -ml-2 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 disabled:opacity-50 disabled:cursor-wait"
-                        title="بینین لە سیستەمی Odoo (کۆدەکە بە شێوەیەکی ئۆتۆماتیکی لەبەردەگیرێتەوە)"
+                        className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline cursor-pointer transition-colors text-left inline-flex items-center gap-1.5 px-2 py-1 -ml-2 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                        title="کرتە بکە بۆ کردنەوەی Odoo لەناو پەنجەرەیەکی نوێ"
                       >
                         {row.refCode}
-                        {loadingOdooCode === row.refCode ? (
-                          <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin ml-1 opacity-70" />
-                        ) : (
-                          <ExternalLink size={12} className="opacity-70" />
-                        )}
+                        <ExternalLink size={12} className="opacity-70" />
                       </button>
                     )}
                   </td>
@@ -343,6 +310,49 @@ export const DataTable = () => {
             >
               <ChevronLeft size={20} />
             </button>
+          </div>
+        </div>
+      )}
+
+      {showOdooModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-6xl h-[85vh] overflow-hidden border border-slate-200 dark:border-slate-800 flex flex-col">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-blue-50 dark:bg-slate-900/50">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-500 text-white rounded-xl shadow-sm">
+                  <Search size={20} />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-slate-800 dark:text-white">دۆزینەوەی نامە لە Odoo</h2>
+                  <p className="text-sm font-medium text-blue-700 dark:text-blue-400 mt-0.5">
+                    کۆدەکە لەبەردەگیراوە (<strong>{currentOdooCode}</strong>)، تەنها کلیک لە گەڕان بکە و <strong>Ctrl+V</strong> دابگرە بۆ دۆزینەوەی نامەکە.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => window.open(`https://erp.halabjagroup.com/odoo/action-817`, '_blank')}
+                  className="px-4 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-medium rounded-xl transition-colors flex items-center gap-2"
+                >
+                  <ExternalLink size={16} />
+                  کردنەوە لە پەنجەرەی نوێ
+                </button>
+                <button 
+                  onClick={() => setShowOdooModal(false)}
+                  className="p-2 text-slate-400 hover:bg-slate-200 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-300 rounded-full transition-colors"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+            </div>
+            <div className="flex-1 bg-slate-100 dark:bg-slate-950 relative">
+              <iframe 
+                src="https://erp.halabjagroup.com/odoo/action-817" 
+                className="w-full h-full border-none"
+                title="Odoo Approvals"
+                sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+              />
+            </div>
           </div>
         </div>
       )}
