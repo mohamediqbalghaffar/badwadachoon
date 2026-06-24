@@ -19,14 +19,26 @@ export const DataTable = () => {
   const [editForm, setEditForm] = useState<Partial<DashboardData>>({});
   const [isSaving, setIsSaving] = useState(false);
 
-  const [showOdooModal, setShowOdooModal] = useState(false);
-  const [currentOdooCode, setCurrentOdooCode] = useState("");
+  const [showToast, setShowToast] = useState(false);
 
   const handleCodeClick = (refCode: string) => {
     // Copy to clipboard
     navigator.clipboard.writeText(refCode);
-    setCurrentOdooCode(refCode);
-    setShowOdooModal(true);
+    
+    // Open Odoo in a popup window
+    const width = 1200;
+    const height = 800;
+    const left = window.innerWidth / 2 - width / 2;
+    const top = window.innerHeight / 2 - height / 2;
+    window.open(
+      'https://erp.halabjagroup.com/odoo/action-817', 
+      'OdooPopup', 
+      `width=${width},height=${height},top=${top},left=${left},popup=yes`
+    );
+
+    // Show toast
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 5000);
   };
 
   // Search logic
@@ -314,44 +326,18 @@ export const DataTable = () => {
         </div>
       )}
 
-      {showOdooModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-6xl h-[85vh] overflow-hidden border border-slate-200 dark:border-slate-800 flex flex-col">
-            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-blue-50 dark:bg-slate-900/50">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-500 text-white rounded-xl shadow-sm">
-                  <Search size={20} />
-                </div>
-                <div>
-                  <h2 className="text-lg font-bold text-slate-800 dark:text-white">دۆزینەوەی نامە لە Odoo</h2>
-                  <p className="text-sm font-medium text-blue-700 dark:text-blue-400 mt-0.5">
-                    کۆدەکە لەبەردەگیراوە (<strong>{currentOdooCode}</strong>)، تەنها کلیک لە گەڕان بکە و <strong>Ctrl+V</strong> دابگرە بۆ دۆزینەوەی نامەکە.
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <button 
-                  onClick={() => window.open(`https://erp.halabjagroup.com/odoo/action-817`, '_blank')}
-                  className="px-4 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-medium rounded-xl transition-colors flex items-center gap-2"
-                >
-                  <ExternalLink size={16} />
-                  کردنەوە لە پەنجەرەی نوێ
-                </button>
-                <button 
-                  onClick={() => setShowOdooModal(false)}
-                  className="p-2 text-slate-400 hover:bg-slate-200 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-300 rounded-full transition-colors"
-                >
-                  <X size={24} />
-                </button>
-              </div>
+      )}
+
+      {/* Toast Notification for Clipboard Copy */}
+      {showToast && (
+        <div className="fixed bottom-6 right-1/2 translate-x-1/2 z-[100] animate-in slide-in-from-bottom-5 fade-in duration-300">
+          <div className="bg-slate-800 text-white px-6 py-4 rounded-2xl shadow-xl flex items-center gap-3 border border-slate-700">
+            <div className="p-2 bg-green-500/20 text-green-400 rounded-xl">
+              <Search size={20} />
             </div>
-            <div className="flex-1 bg-slate-100 dark:bg-slate-950 relative">
-              <iframe 
-                src="https://erp.halabjagroup.com/odoo/action-817" 
-                className="w-full h-full border-none"
-                title="Odoo Approvals"
-                sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-              />
+            <div>
+              <h3 className="font-bold text-sm">پەنجەرەی Odoo کرایەوە!</h3>
+              <p className="text-sm text-slate-300 mt-0.5">کۆدەکە لەبەردەگیراوە، تەنها <strong>Ctrl+V</strong> دابگرە لە گەڕانی Odoo</p>
             </div>
           </div>
         </div>
