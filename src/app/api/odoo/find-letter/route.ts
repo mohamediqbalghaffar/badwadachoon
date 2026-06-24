@@ -28,17 +28,20 @@ export async function POST(request: Request) {
       }, { status: 400 });
     }
 
-    // Clean URL
-    const odooUrl = user.odooUrl.replace(/\/$/, '');
+    // Clean URL and credentials
+    const odooUrl = user.odooUrl.trim().replace(/\/$/, '');
+    const odooDb = user.odooDb.trim();
+    const odooUsername = user.odooUsername.trim();
+    const odooApiKey = user.odooApiKey.trim();
 
     // 1. Authenticate with Odoo JSON-RPC
     const authPayload = {
       jsonrpc: '2.0',
       method: 'call',
       params: {
-        db: user.odooDb,
-        login: user.odooUsername,
-        password: user.odooApiKey,
+        db: odooDb,
+        login: odooUsername,
+        password: odooApiKey,
       },
       id: Math.floor(Math.random() * 1000000000),
     };
