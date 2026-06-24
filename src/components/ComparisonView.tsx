@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useData } from "../context/DataContext";
 import {
   BarChart,
@@ -19,12 +19,9 @@ import {
   Legend,
 } from "recharts";
 import { format, parseISO, isValid, startOfMonth } from "date-fns";
-import { Inbox, Send, ArrowLeftRight, BarChart3, PieChart as PieChartIcon, TrendingUp } from "lucide-react";
+import { Inbox, Send, ArrowLeftRight, BarChart3, PieChart as PieChartIcon, TrendingUp, ArrowDownToLine } from "lucide-react";
 
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4"];
-
-const RECEIVED_COLOR = "#3b82f6";
-const SENT_COLOR = "#06b6d4";
 
 // Custom tooltip styles matching existing dashboard
 const tooltipStyle = {
@@ -34,103 +31,170 @@ const tooltipStyle = {
   backdropFilter: 'blur(10px)',
 };
 
-export const ComparisonView = () => {
-  const { baseFilteredData, baseFilteredSentData } = useData();
+type DataSourceType = 'received' | 'sent' | 'incoming';
 
-  const receivedCount = baseFilteredData.length;
-  const sentCount = baseFilteredSentData.length;
-  const total = Math.max(sentCount, receivedCount);
-  const receivedPercent = total > 0 ? Math.round((receivedCount / total) * 100) : 0;
-  const sentPercent = total > 0 ? 100 - receivedPercent : 0;
+export const ComparisonView = () => {
+  const { baseFilteredData, baseFilteredSentData, baseFilteredIncomingData } = useData();
+
+  const [sourceA, setSourceA] = useState<DataSourceType>('received');
+  const [sourceB, setSourceB] = useState<DataSourceType>('sent');
+
+  const getSourceConfig = (type: DataSourceType) => {
+    switch (type) {
+      case 'received':
+        return { 
+          id: 'received',
+          data: baseFilteredData, 
+          name: 'پێویست بە وەڵام', 
+          color: '#3b82f6',
+          gradientText: 'from-blue-600 to-blue-400',
+          gradientBg: 'from-blue-500 to-blue-400',
+          lightBg: 'bg-blue-100 dark:bg-blue-900/30',
+          iconColor: 'text-blue-600 dark:text-blue-400',
+          glow: 'bg-blue-500/10 group-hover:bg-blue-500/20',
+          borderOverlay: 'from-blue-500 to-transparent',
+          icon: Inbox 
+        };
+      case 'sent':
+        return { 
+          id: 'sent',
+          data: baseFilteredSentData, 
+          name: 'سەرجەم ڕەوانەکراوەکان', 
+          color: '#06b6d4',
+          gradientText: 'from-cyan-500 to-teal-400',
+          gradientBg: 'from-cyan-400 to-cyan-500',
+          lightBg: 'bg-cyan-100 dark:bg-cyan-900/30',
+          iconColor: 'text-cyan-600 dark:text-cyan-400',
+          glow: 'bg-cyan-500/10 group-hover:bg-cyan-500/20',
+          borderOverlay: 'from-cyan-500 to-transparent',
+          icon: Send 
+        };
+      case 'incoming':
+        return { 
+          id: 'incoming',
+          data: baseFilteredIncomingData, 
+          name: 'سەرجەم هاتووەکان', 
+          color: '#8b5cf6',
+          gradientText: 'from-purple-600 to-purple-400',
+          gradientBg: 'from-purple-500 to-purple-400',
+          lightBg: 'bg-purple-100 dark:bg-purple-900/30',
+          iconColor: 'text-purple-600 dark:text-purple-400',
+          glow: 'bg-purple-500/10 group-hover:bg-purple-500/20',
+          borderOverlay: 'from-purple-500 to-transparent',
+          icon: ArrowDownToLine 
+        };
+    }
+  };
+
+  const configA = getSourceConfig(sourceA);
+  const configB = getSourceConfig(sourceB);
+
+  const countA = configA.data.length;
+  const countB = configB.data.length;
+  
+  // Ratios for the progress bar
+  const sumCount = countA + countB;
+  const percentA = sumCount > 0 ? Math.round((countA / sumCount) * 100) : 0;
+  const percentB = sumCount > 0 ? 100 - percentA : 0;
 
   // === Department Comparison Data ===
   const deptComparisonData = useMemo(() => {
-    const receivedCounts: Record<string, number> = {};
-    const sentCounts: Record<string, number> = {};
+    const countsA: Record<string, number> = {};
+    const countsB: Record<string, number> = {};
 
-    baseFilteredData.forEach((d) => {
-      d.departments.forEach((dept) => {
-        receivedCounts[dept] = (receivedCounts[dept] || 0) + 1;
-      });
+    configA.data.forEach((d: any) => {
+      if (Array.isArray(d.departments) && d.departments.length > 0) {
+        d.departments.forEach((dept: string) => {
+          countsA[dept] = (countsA[dept] || 0) + 1;
+        });
+      } else if (d.sender) {
+        countsA[d.sender] = (countsA[d.sender] || 0) + 1;
+      }
     });
 
-    baseFilteredSentData.forEach((d) => {
-      d.departments.forEach((dept) => {
-        sentCounts[dept] = (sentCounts[dept] || 0) + 1;
-      });
+    configB.data.forEach((d: any) => {
+      if (Array.isArray(d.departments) && d.departments.length > 0) {
+        d.departments.forEach((dept: string) => {
+          countsB[dept] = (countsB[dept] || 0) + 1;
+        });
+      } else if (d.sender) {
+        countsB[d.sender] = (countsB[d.sender] || 0) + 1;
+      }
     });
 
-    const allDepts = new Set([...Object.keys(receivedCounts), ...Object.keys(sentCounts)]);
+    const allDepts = new Set([...Object.keys(countsA), ...Object.keys(countsB)]);
 
     return Array.from(allDepts)
       .map((dept) => {
-        const received = receivedCounts[dept] || 0;
-        const sent = sentCounts[dept] || 0;
+        const valA = countsA[dept] || 0;
+        const valB = countsB[dept] || 0;
         const cleanName = dept.replace('بەشی ', '').replace('سێکتەری ', '');
         const words = cleanName.split(' ').filter(w => w.length > 1 && w !== 'و');
         const abbr = words.slice(0, 2).map(w => w.charAt(0)).join('.');
-        return { name: dept, abbr: abbr || dept.charAt(0), received, sent, total: Math.max(received, sent) };
+        return { name: dept, abbr: abbr || dept.charAt(0), valA, valB, total: valA + valB };
       })
       .sort((a, b) => b.total - a.total)
       .slice(0, 10);
-  }, [baseFilteredData, baseFilteredSentData]);
+  }, [configA.data, configB.data]);
 
-  // === Letter Type Data (Received) ===
-  const receivedTypeData = useMemo(() => {
+  // === Letter Type Data (Source A) ===
+  const typeDataA = useMemo(() => {
     const counts: Record<string, number> = {};
-    baseFilteredData.forEach((d) => {
-      counts[d.letterType] = (counts[d.letterType] || 0) + 1;
+    configA.data.forEach((d: any) => {
+      const type = d.letterType || "نەزانراو";
+      counts[type] = (counts[type] || 0) + 1;
     });
     return Object.entries(counts).map(([name, value]) => ({ name, value }));
-  }, [baseFilteredData]);
+  }, [configA.data]);
 
-  // === Letter Type Data (Sent) ===
-  const sentTypeData = useMemo(() => {
+  // === Letter Type Data (Source B) ===
+  const typeDataB = useMemo(() => {
     const counts: Record<string, number> = {};
-    baseFilteredSentData.forEach((d) => {
-      counts[d.letterType] = (counts[d.letterType] || 0) + 1;
+    configB.data.forEach((d: any) => {
+      const type = d.letterType || "نەزانراو";
+      counts[type] = (counts[type] || 0) + 1;
     });
     return Object.entries(counts).map(([name, value]) => ({ name, value }));
-  }, [baseFilteredSentData]);
+  }, [configB.data]);
 
   // === Timeline Data (Both overlaid) ===
   const timelineData = useMemo(() => {
-    const receivedByMonth: Record<string, number> = {};
-    const sentByMonth: Record<string, number> = {};
+    const byMonthA: Record<string, number> = {};
+    const byMonthB: Record<string, number> = {};
 
-    baseFilteredData.forEach((d) => {
+    configA.data.forEach((d: any) => {
       if (d.sentDate) {
         const date = parseISO(d.sentDate);
         if (isValid(date)) {
           const monthStr = format(startOfMonth(date), 'yyyy-MM');
-          receivedByMonth[monthStr] = (receivedByMonth[monthStr] || 0) + 1;
+          byMonthA[monthStr] = (byMonthA[monthStr] || 0) + 1;
         }
       }
     });
 
-    baseFilteredSentData.forEach((d) => {
+    configB.data.forEach((d: any) => {
       if (d.sentDate) {
         const date = parseISO(d.sentDate);
         if (isValid(date)) {
           const monthStr = format(startOfMonth(date), 'yyyy-MM');
-          sentByMonth[monthStr] = (sentByMonth[monthStr] || 0) + 1;
+          byMonthB[monthStr] = (byMonthB[monthStr] || 0) + 1;
         }
       }
     });
 
-    const allMonths = new Set([...Object.keys(receivedByMonth), ...Object.keys(sentByMonth)]);
+    const allMonths = new Set([...Object.keys(byMonthA), ...Object.keys(byMonthB)]);
 
     return Array.from(allMonths)
       .sort((a, b) => a.localeCompare(b))
       .map((month) => ({
         date: month,
-        received: receivedByMonth[month] || 0,
-        sent: sentByMonth[month] || 0,
+        valA: byMonthA[month] || 0,
+        valB: byMonthB[month] || 0,
       }));
-  }, [baseFilteredData, baseFilteredSentData]);
+  }, [configA.data, configB.data]);
 
-  // === Empty Sent Data Guard ===
-  if (baseFilteredSentData.length === 0 && baseFilteredData.length === 0) {
+  // === Empty Data Guard ===
+  if (baseFilteredData.length === 0 && baseFilteredSentData.length === 0 && baseFilteredIncomingData.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center" dir="rtl">
         <ArrowLeftRight size={64} className="text-slate-400 dark:text-slate-600 mb-4" />
@@ -138,11 +202,14 @@ export const ComparisonView = () => {
           داتای بەراوردکردن بەردەست نییە
         </h2>
         <p className="text-slate-500 dark:text-slate-500">
-          تکایە فایلێک بار بکە کە هەردوو شیتی نووسراوەکانی تێدابێت
+          تکایە فایلێک بار بکە کە داتای تێدابێت
         </p>
       </div>
     );
   }
+
+  const IconA = configA.icon;
+  const IconB = configB.icon;
 
   return (
     <div className="space-y-6" dir="rtl">
@@ -154,91 +221,124 @@ export const ComparisonView = () => {
         <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">بەراوردکردنی نامەکان</h2>
       </div>
 
-      {/* Sent data warning */}
-      {baseFilteredSentData.length === 0 && (
+      {/* Configuration Controls */}
+      <div className="glass glass-card p-4 flex flex-col md:flex-row gap-4 items-center justify-between z-20 relative">
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <span className="text-sm font-semibold text-slate-600 dark:text-slate-300 w-24">داتای یەکەم:</span>
+          <select 
+            className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 font-medium"
+            value={sourceA}
+            onChange={(e) => setSourceA(e.target.value as DataSourceType)}
+          >
+            <option value="received" disabled={sourceB === 'received'}>پێویست بە وەڵام</option>
+            <option value="sent" disabled={sourceB === 'sent'}>سەرجەم ڕەوانەکراوەکان</option>
+            <option value="incoming" disabled={sourceB === 'incoming'}>سەرجەم هاتووەکان</option>
+          </select>
+        </div>
+
+        <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
+          <ArrowLeftRight size={16} className="text-slate-400" />
+        </div>
+
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <span className="text-sm font-semibold text-slate-600 dark:text-slate-300 w-24">داتای دووەم:</span>
+          <select 
+            className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 font-medium"
+            value={sourceB}
+            onChange={(e) => setSourceB(e.target.value as DataSourceType)}
+          >
+            <option value="received" disabled={sourceA === 'received'}>پێویست بە وەڵام</option>
+            <option value="sent" disabled={sourceA === 'sent'}>سەرجەم ڕەوانەکراوەکان</option>
+            <option value="incoming" disabled={sourceA === 'incoming'}>سەرجەم هاتووەکان</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Warning if data is empty */}
+      {(countA === 0 || countB === 0) && (
         <div className="glass glass-card p-4 border border-amber-300 dark:border-amber-700 bg-amber-50/50 dark:bg-amber-900/20 flex items-center gap-3">
-          <Send size={20} className="text-amber-500 shrink-0" />
+          <div className="text-amber-500 shrink-0"><BarChart3 size={20} /></div>
           <p className="text-amber-700 dark:text-amber-400 text-sm font-medium">
-            داتای نووسراوە ڕەوانەکراوەکان بەردەست نییە
+            داتای یەکێک لە بەشە دیاریکراوەکان بەردەست نییە. بۆ بینینی بەراوردەکە، تکایە دڵنیابە لە هەبوونی داتا بۆ هەردوو بەشەکە.
           </p>
         </div>
       )}
 
       {/* === 1. Summary KPI Row === */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Received Card */}
+        {/* Source A Card */}
         <div className="glass glass-card glass-interactive p-6 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-blue-500 to-transparent opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
-          <div className="absolute -left-4 -top-4 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-all duration-500" />
+          <div className={`absolute top-0 right-0 w-full h-1 bg-gradient-to-l ${configA.borderOverlay} opacity-60 group-hover:opacity-100 transition-opacity duration-500`} />
+          <div className={`absolute -left-4 -top-4 w-24 h-24 rounded-full blur-2xl transition-all duration-500 ${configA.glow}`} />
           <div className="flex items-center justify-between relative z-10">
             <div>
               <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
-                نامەی پێویست بە وەڵام
+                {configA.name}
               </p>
-              <h3 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-blue-400">
-                {receivedCount.toLocaleString()}
+              <h3 className={`text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r ${configA.gradientText}`}>
+                {countA.toLocaleString()}
               </h3>
             </div>
-            <div className="w-14 h-14 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 group-hover:animate-pulse-ring transition-colors">
-              <Inbox size={28} className="group-hover:scale-110 transition-transform duration-300" />
+            <div className={`w-14 h-14 rounded-full flex items-center justify-center group-hover:animate-pulse-ring transition-colors ${configA.lightBg} ${configA.iconColor}`}>
+              <IconA size={28} className="group-hover:scale-110 transition-transform duration-300" />
             </div>
           </div>
         </div>
 
-        {/* Sent Card */}
+        {/* Source B Card */}
         <div className="glass glass-card glass-interactive p-6 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-cyan-500 to-transparent opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
-          <div className="absolute -left-4 -top-4 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl group-hover:bg-cyan-500/20 transition-all duration-500" />
+          <div className={`absolute top-0 right-0 w-full h-1 bg-gradient-to-l ${configB.borderOverlay} opacity-60 group-hover:opacity-100 transition-opacity duration-500`} />
+          <div className={`absolute -left-4 -top-4 w-24 h-24 rounded-full blur-2xl transition-all duration-500 ${configB.glow}`} />
           <div className="flex items-center justify-between relative z-10">
             <div>
               <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
-                سەرجەم نووسراوە ڕەوانەکراوەکان
+                {configB.name}
               </p>
-              <h3 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-500 to-teal-400">
-                {sentCount.toLocaleString()}
+              <h3 className={`text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r ${configB.gradientText}`}>
+                {countB.toLocaleString()}
               </h3>
             </div>
-            <div className="w-14 h-14 rounded-full bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 group-hover:animate-pulse-ring transition-colors">
-              <Send size={28} className="group-hover:scale-110 transition-transform duration-300" />
+            <div className={`w-14 h-14 rounded-full flex items-center justify-center group-hover:animate-pulse-ring transition-colors ${configB.lightBg} ${configB.iconColor}`}>
+              <IconB size={28} className="group-hover:scale-110 transition-transform duration-300" />
             </div>
           </div>
         </div>
       </div>
 
       {/* Ratio Bar */}
-      {total > 0 && (
+      {sumCount > 0 && (
         <div className="glass glass-card p-4">
           <div className="flex items-center justify-between text-sm font-medium mb-2">
-            <span className="text-blue-600 dark:text-blue-400 flex items-center gap-1">
-              <Inbox size={14} />
-              پێویست بە وەڵام {receivedPercent}%
+            <span className={`flex items-center gap-1 ${configA.iconColor}`}>
+              <IconA size={14} />
+              {configA.name} {percentA}%
             </span>
-            <span className="text-cyan-600 dark:text-cyan-400 flex items-center gap-1">
-              ڕەوانەکراو {sentPercent}%
-              <Send size={14} />
+            <span className={`flex items-center gap-1 ${configB.iconColor}`}>
+              {percentB}% {configB.name}
+              <IconB size={14} />
             </span>
           </div>
           <div className="w-full h-4 rounded-full overflow-hidden bg-slate-200 dark:bg-slate-700 flex" dir="ltr">
             <div
-              className="h-full bg-gradient-to-r from-blue-500 to-blue-400 transition-all duration-700 ease-out rounded-l-full"
-              style={{ width: `${receivedPercent}%` }}
+              className={`h-full bg-gradient-to-r ${configA.gradientBg} transition-all duration-700 ease-out rounded-l-full`}
+              style={{ width: `${percentA}%` }}
             />
             <div
-              className="h-full bg-gradient-to-r from-cyan-400 to-cyan-500 transition-all duration-700 ease-out rounded-r-full"
-              style={{ width: `${sentPercent}%` }}
+              className={`h-full bg-gradient-to-r ${configB.gradientBg} transition-all duration-700 ease-out rounded-r-full`}
+              style={{ width: `${percentB}%` }}
             />
           </div>
           <p className="text-center text-xs text-slate-500 dark:text-slate-400 mt-2">
-            کۆی گشتی: {total.toLocaleString()} نامە
+            کۆی گشتی: {sumCount.toLocaleString()} نامە
           </p>
         </div>
       )}
 
       {/* === 2. Department Comparison — Grouped Bar Chart === */}
       <div className="glass glass-card glass-interactive p-6 flex flex-col min-h-96 relative overflow-hidden group">
-        <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-blue-500 via-cyan-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        <div className={`absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-transparent via-slate-400 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
         <div className="flex items-center gap-2 mb-6">
-          <BarChart3 size={20} className="text-blue-500" />
+          <BarChart3 size={20} className="text-slate-500" />
           <h3 className="text-lg font-semibold">بەراوردکردنی لایەنەکان</h3>
         </div>
 
@@ -259,7 +359,7 @@ export const ComparisonView = () => {
                     cursor={{ fill: 'rgba(241, 245, 249, 0.2)' }}
                     contentStyle={tooltipStyle}
                     formatter={(value: any, name: any) => {
-                      const label = name === 'received' ? 'پێویست بە وەڵام' : 'ڕەوانەکراو';
+                      const label = name === 'valA' ? configA.name : configB.name;
                       return [value, label];
                     }}
                     labelFormatter={(abbr) => {
@@ -267,11 +367,11 @@ export const ComparisonView = () => {
                       return entry ? entry.name : abbr;
                     }}
                   />
-                  <Bar dataKey="received" fill={RECEIVED_COLOR} radius={[6, 6, 0, 0]} maxBarSize={35} name="received">
-                    <LabelList dataKey="received" position="top" fill={RECEIVED_COLOR} fontSize={11} fontWeight="bold" />
+                  <Bar dataKey="valA" fill={configA.color} radius={[6, 6, 0, 0]} maxBarSize={35} name="valA">
+                    <LabelList dataKey="valA" position="top" fill={configA.color} fontSize={11} fontWeight="bold" />
                   </Bar>
-                  <Bar dataKey="sent" fill={SENT_COLOR} radius={[6, 6, 0, 0]} maxBarSize={35} name="sent">
-                    <LabelList dataKey="sent" position="top" fill={SENT_COLOR} fontSize={11} fontWeight="bold" />
+                  <Bar dataKey="valB" fill={configB.color} radius={[6, 6, 0, 0]} maxBarSize={35} name="valB">
+                    <LabelList dataKey="valB" position="top" fill={configB.color} fontSize={11} fontWeight="bold" />
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
@@ -291,12 +391,12 @@ export const ComparisonView = () => {
             {/* Bar Legend */}
             <div className="mt-3 flex gap-x-6 justify-center" dir="rtl">
               <div className="flex items-center gap-2 text-xs">
-                <span className="w-3 h-3 rounded-sm shrink-0" style={{ backgroundColor: RECEIVED_COLOR }} />
-                <span className="font-medium text-slate-600 dark:text-slate-300">پێویست بە وەڵام</span>
+                <span className="w-3 h-3 rounded-sm shrink-0" style={{ backgroundColor: configA.color }} />
+                <span className="font-medium text-slate-600 dark:text-slate-300">{configA.name}</span>
               </div>
               <div className="flex items-center gap-2 text-xs">
-                <span className="w-3 h-3 rounded-sm shrink-0" style={{ backgroundColor: SENT_COLOR }} />
-                <span className="font-medium text-slate-600 dark:text-slate-300">ڕەوانەکراو</span>
+                <span className="w-3 h-3 rounded-sm shrink-0" style={{ backgroundColor: configB.color }} />
+                <span className="font-medium text-slate-600 dark:text-slate-300">{configB.name}</span>
               </div>
             </div>
           </>
@@ -309,20 +409,20 @@ export const ComparisonView = () => {
 
       {/* === 3. Letter Type Comparison — Two Doughnut Charts === */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Received Types Doughnut */}
+        {/* Source A Types Doughnut */}
         <div className="glass glass-card glass-interactive p-6 flex flex-col min-h-96 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-blue-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className={`absolute top-0 right-0 w-full h-1 bg-gradient-to-l ${configA.borderOverlay} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
           <div className="flex items-center gap-2 mb-6">
-            <PieChartIcon size={18} className="text-blue-500" />
-            <h3 className="text-lg font-semibold">جۆری نامەکانی پێویست بە وەڵام</h3>
+            <PieChartIcon size={18} className={configA.iconColor.split(' ')[0]} />
+            <h3 className="text-lg font-semibold">جۆری نامەکانی {configA.name}</h3>
           </div>
-          {receivedTypeData.length > 0 ? (
+          {typeDataA.length > 0 ? (
             <>
               <div className="h-[280px] w-full" dir="ltr">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
-                      data={receivedTypeData}
+                      data={typeDataA}
                       cx="50%"
                       cy="50%"
                       innerRadius={65}
@@ -331,8 +431,8 @@ export const ComparisonView = () => {
                       dataKey="value"
                       stroke="none"
                     >
-                      {receivedTypeData.map((_, index) => (
-                        <Cell key={`cell-r-${index}`} fill={COLORS[index % COLORS.length]} />
+                      {typeDataA.map((_, index) => (
+                        <Cell key={`cell-a-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
                     <Tooltip
@@ -343,7 +443,7 @@ export const ComparisonView = () => {
                 </ResponsiveContainer>
               </div>
               <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 justify-center border-t border-slate-200 dark:border-slate-800 pt-4" dir="rtl">
-                {receivedTypeData.map((entry, index) => (
+                {typeDataA.map((entry, index) => (
                   <div key={index} className="flex items-center gap-2 text-xs">
                     <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
                     <span className="text-slate-700 dark:text-slate-300 font-medium">{entry.name}</span>
@@ -359,20 +459,20 @@ export const ComparisonView = () => {
           )}
         </div>
 
-        {/* Sent Types Doughnut */}
+        {/* Source B Types Doughnut */}
         <div className="glass glass-card glass-interactive p-6 flex flex-col min-h-96 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-cyan-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className={`absolute top-0 right-0 w-full h-1 bg-gradient-to-l ${configB.borderOverlay} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
           <div className="flex items-center gap-2 mb-6">
-            <PieChartIcon size={18} className="text-cyan-500" />
-            <h3 className="text-lg font-semibold">جۆری نامە ڕەوانەکراوەکان</h3>
+            <PieChartIcon size={18} className={configB.iconColor.split(' ')[0]} />
+            <h3 className="text-lg font-semibold">جۆری نامەکانی {configB.name}</h3>
           </div>
-          {sentTypeData.length > 0 ? (
+          {typeDataB.length > 0 ? (
             <>
               <div className="h-[280px] w-full" dir="ltr">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
-                      data={sentTypeData}
+                      data={typeDataB}
                       cx="50%"
                       cy="50%"
                       innerRadius={65}
@@ -381,8 +481,8 @@ export const ComparisonView = () => {
                       dataKey="value"
                       stroke="none"
                     >
-                      {sentTypeData.map((_, index) => (
-                        <Cell key={`cell-s-${index}`} fill={COLORS[index % COLORS.length]} />
+                      {typeDataB.map((_, index) => (
+                        <Cell key={`cell-b-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
                     <Tooltip
@@ -393,7 +493,7 @@ export const ComparisonView = () => {
                 </ResponsiveContainer>
               </div>
               <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 justify-center border-t border-slate-200 dark:border-slate-800 pt-4" dir="rtl">
-                {sentTypeData.map((entry, index) => (
+                {typeDataB.map((entry, index) => (
                   <div key={index} className="flex items-center gap-2 text-xs">
                     <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
                     <span className="text-slate-700 dark:text-slate-300 font-medium">{entry.name}</span>
@@ -404,7 +504,7 @@ export const ComparisonView = () => {
             </>
           ) : (
             <div className="flex-1 flex items-center justify-center text-slate-400 dark:text-slate-600 text-sm">
-              داتای نووسراوە ڕەوانەکراوەکان بەردەست نییە
+              داتا بەردەست نییە
             </div>
           )}
         </div>
@@ -412,9 +512,9 @@ export const ComparisonView = () => {
 
       {/* === 4. Timeline Overlay — Area Chart === */}
       <div className="glass glass-card glass-interactive p-6 flex flex-col h-96 relative overflow-hidden group">
-        <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-purple-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-slate-400 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         <div className="flex items-center gap-2 mb-6">
-          <TrendingUp size={20} className="text-purple-500" />
+          <TrendingUp size={20} className="text-slate-500" />
           <h3 className="text-lg font-semibold">بەراوردکردنی هەڵکشان و داکشان بەپێی کات</h3>
         </div>
 
@@ -423,13 +523,13 @@ export const ComparisonView = () => {
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={timelineData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
-                  <linearGradient id="colorReceived" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={RECEIVED_COLOR} stopOpacity={0.4} />
-                    <stop offset="95%" stopColor={RECEIVED_COLOR} stopOpacity={0} />
+                  <linearGradient id="colorA" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={configA.color} stopOpacity={0.4} />
+                    <stop offset="95%" stopColor={configA.color} stopOpacity={0} />
                   </linearGradient>
-                  <linearGradient id="colorSent" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={SENT_COLOR} stopOpacity={0.4} />
-                    <stop offset="95%" stopColor={SENT_COLOR} stopOpacity={0} />
+                  <linearGradient id="colorB" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={configB.color} stopOpacity={0.4} />
+                    <stop offset="95%" stopColor={configB.color} stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#cbd5e1" opacity={0.3} />
@@ -438,36 +538,36 @@ export const ComparisonView = () => {
                 <Tooltip
                   contentStyle={tooltipStyle}
                   formatter={(value: any, name: any) => {
-                    const label = name === 'received' ? 'پێویست بە وەڵام' : 'ڕەوانەکراو';
+                    const label = name === 'valA' ? configA.name : configB.name;
                     return [value, label];
                   }}
                   labelFormatter={(label) => `مانگ: ${label}`}
                 />
                 <Area
                   type="monotone"
-                  dataKey="received"
-                  stroke={RECEIVED_COLOR}
+                  dataKey="valA"
+                  stroke={configA.color}
                   strokeWidth={3}
                   fillOpacity={1}
-                  fill="url(#colorReceived)"
-                  dot={{ r: 4, stroke: RECEIVED_COLOR, strokeWidth: 2, fill: '#fff' }}
-                  activeDot={{ r: 6, stroke: RECEIVED_COLOR, strokeWidth: 2, fill: '#fff' }}
-                  name="received"
+                  fill="url(#colorA)"
+                  dot={{ r: 4, stroke: configA.color, strokeWidth: 2, fill: '#fff' }}
+                  activeDot={{ r: 6, stroke: configA.color, strokeWidth: 2, fill: '#fff' }}
+                  name="valA"
                 >
-                  <LabelList dataKey="received" position="top" offset={10} fill={RECEIVED_COLOR} fontSize={11} fontWeight="bold" />
+                  <LabelList dataKey="valA" position="top" offset={10} fill={configA.color} fontSize={11} fontWeight="bold" />
                 </Area>
                 <Area
                   type="monotone"
-                  dataKey="sent"
-                  stroke={SENT_COLOR}
+                  dataKey="valB"
+                  stroke={configB.color}
                   strokeWidth={3}
                   fillOpacity={1}
-                  fill="url(#colorSent)"
-                  dot={{ r: 4, stroke: SENT_COLOR, strokeWidth: 2, fill: '#fff' }}
-                  activeDot={{ r: 6, stroke: SENT_COLOR, strokeWidth: 2, fill: '#fff' }}
-                  name="sent"
+                  fill="url(#colorB)"
+                  dot={{ r: 4, stroke: configB.color, strokeWidth: 2, fill: '#fff' }}
+                  activeDot={{ r: 6, stroke: configB.color, strokeWidth: 2, fill: '#fff' }}
+                  name="valB"
                 >
-                  <LabelList dataKey="sent" position="bottom" offset={10} fill={SENT_COLOR} fontSize={11} fontWeight="bold" />
+                  <LabelList dataKey="valB" position="bottom" offset={10} fill={configB.color} fontSize={11} fontWeight="bold" />
                 </Area>
               </AreaChart>
             </ResponsiveContainer>
@@ -482,12 +582,12 @@ export const ComparisonView = () => {
         {timelineData.length > 0 && (
           <div className="mt-4 flex gap-x-6 justify-center border-t border-slate-200 dark:border-slate-800 pt-3" dir="rtl">
             <div className="flex items-center gap-2 text-xs">
-              <span className="w-4 h-1 rounded-full shrink-0" style={{ backgroundColor: RECEIVED_COLOR }} />
-              <span className="font-medium text-slate-600 dark:text-slate-300">پێویست بە وەڵام</span>
+              <span className="w-4 h-1 rounded-full shrink-0" style={{ backgroundColor: configA.color }} />
+              <span className="font-medium text-slate-600 dark:text-slate-300">{configA.name}</span>
             </div>
             <div className="flex items-center gap-2 text-xs">
-              <span className="w-4 h-1 rounded-full shrink-0" style={{ backgroundColor: SENT_COLOR }} />
-              <span className="font-medium text-slate-600 dark:text-slate-300">سەرجەم ڕەوانەکراوەکان</span>
+              <span className="w-4 h-1 rounded-full shrink-0" style={{ backgroundColor: configB.color }} />
+              <span className="font-medium text-slate-600 dark:text-slate-300">{configB.name}</span>
             </div>
           </div>
         )}
