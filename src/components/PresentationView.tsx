@@ -299,201 +299,6 @@ export const PresentationView = () => {
     const counts: Record<string, number> = {};
     baseFilteredSentData.forEach((d) => {
       d.departments.forEach((dept) => counts[dept] = (counts[dept] || 0) + 1);
-  // Prepare Timeline Data
-  const timelineData = useMemo(() => {
-    const counts: Record<string, number> = {};
-    baseFilteredData.forEach((d) => {
-      if (d.sentDate) {
-        const date = parseISO(d.sentDate);
-        if (isValid(date)) {
-          const monthStr = format(startOfMonth(date), 'yyyy-MM');
-          counts[monthStr] = (counts[monthStr] || 0) + 1;
-        }
-      }
-    });
-    return Object.entries(counts)
-      .map(([date, count]) => ({ date, count }))
-      .sort((a, b) => a.date.localeCompare(b.date));
-  }, [baseFilteredData]);
-
-  // Prepare Month Data when exactly one department is selected (web app last update)
-  const monthDataForDept = useMemo(() => {
-    if (filters.departments.length !== 1) return [];
-    
-    const counts: Record<string, number> = {};
-    filteredData.forEach((d) => {
-      if (d.sentDate) {
-        const date = parseISO(d.sentDate);
-        if (isValid(date)) {
-          const monthStr = format(startOfMonth(date), 'yyyy-MM');
-          counts[monthStr] = (counts[monthStr] || 0) + 1;
-        }
-      }
-    });
-
-    return Object.entries(counts)
-      .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([date, count]) => {
-        const dateObj = parse(date, 'yyyy-MM', new Date());
-        const monthIndex = dateObj.getMonth();
-        const kurdishMonths = [
-          "کانوونی دووەم", "شوبات", "ئازار", "نیسان", "ئایار", "حوزەیران",
-          "تەممووز", "ئاب", "ئەیلوول", "تشرینی یەکەم", "تشرینی دووەم", "کانوونی یەکەم"
-        ];
-        const monthName = `${kurdishMonths[monthIndex]} ${dateObj.getFullYear()}`;
-        const abbr = format(dateObj, 'yyyy-MM');
-        return { name: monthName, count, abbr };
-      });
-  }, [filteredData, filters.departments]);
-
-  // Prepare Enhanced SLA Data
-  const slaEnhancedData = useMemo(() => {
-    const groups: Record<string, { 
-      name: string, 
-      originalCategory: string, 
-      onTime: number, 
-      late: number, 
-      exactOnTimeName: string, 
-      exactLateName: string,
-      processingTimeSum: number,
-      processingTimeCount: number
-    }> = {};
-
-    let totalOnTime = 0;
-    let totalLate = 0;
-
-    baseFilteredData.forEach((d) => {
-      const sla = d.slaTime || '-';
-      const category = d.letterType || 'نەزانراو';
-
-      if (!groups[category]) {
-        const cleanName = category.replace('بەشی ', '').replace('سێکتەری ', '');
-        groups[category] = { 
-          name: cleanName, 
-          originalCategory: category, 
-          onTime: 0, 
-          late: 0, 
-          exactOnTimeName: '', 
-          exactLateName: '',
-          processingTimeSum: 0,
-          processingTimeCount: 0
-        };
-      }
-
-      if (d.processingTime != null && !isNaN(d.processingTime)) {
-        groups[category].processingTimeSum += d.processingTime;
-        groups[category].processingTimeCount += 1;
-      }
-
-      const isLate = sla.includes('زیاتر');
-
-      if (isLate) {
-        groups[category].late += 1;
-        groups[category].exactLateName = sla;
-        totalLate += 1;
-      } else {
-        groups[category].onTime += 1;
-        groups[category].exactOnTimeName = sla;
-        if (sla !== '-') totalOnTime += 1;
-      }
-    });
-
-    const data = Object.values(groups)
-      .filter(g => g.onTime > 0 || g.late > 0)
-      .map(g => ({
-        ...g,
-        complianceRate: Math.round((g.onTime / (g.onTime + g.late)) * 100) || 0,
-        avgProcessingTime: g.processingTimeCount > 0 ? parseFloat((g.processingTimeSum / g.processingTimeCount).toFixed(1)) : 0
-      }))
-      .sort((a, b) => (b.onTime + b.late) - (a.onTime + a.late));
-
-    return { data, totalOnTime, totalLate };
-  }, [baseFilteredData]);
-
-  const isSingleDeptSelected = filters.departments.length === 1;
-  const chartData = isSingleDeptSelected ? monthDataForDept : deptData;
-  const chartTitle = isSingleDeptSelected ? "قەبارەی نامەکان بەپێی مانگ" : "نامەکان بەپێی بەش و لایەنەکان";
-  // Actual fastest replied letters (subjects and actual times)
-  const fastestLetters = useMemo(() => {
-    return baseFilteredData
-      .filter((item) => item.processingTime !== null)
-      .sort((a, b) => (a.processingTime ?? 0) - (b.processingTime ?? 0))
-      .slice(0, 3);
-  }, [baseFilteredData]);
-
-  // Actual slowest replied letters (subjects and actual times)
-  const slowestLetters = useMemo(() => {
-    return baseFilteredData
-      .filter((item) => item.processingTime !== null)
-      .sort((a, b) => (b.processingTime ?? 0) - (a.processingTime ?? 0))
-      .slice(0, 3);
-  }, [baseFilteredData]);
-
-  // Department pending counts
-  const mostPendingDepts = useMemo(() => {
-    const deptPending: Record<string, number> = {};
-    baseFilteredData.forEach((item) => {
-      if (!item.responseDate) {
-        item.departments.forEach((dept) => {
-          deptPending[dept] = (deptPending[dept] || 0) + 1;
-        });
-      }
-    });
-    return Object.entries(deptPending)
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 3);
-  }, [baseFilteredData]);
-
-  // Oldest pending letters (calculated from baseFilteredData to respect active dashboard filters)
-  const oldestPending = useMemo(() => {
-    return baseFilteredData
-      .filter((item) => !item.responseDate && item.sentDate)
-      .map(item => {
-        const sent = parseISO(item.sentDate!);
-        const diffTime = Math.abs(new Date().getTime() - sent.getTime());
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return {
-          ...item,
-          daysPending: diffDays
-        };
-      })
-      .sort((a, b) => b.daysPending - a.daysPending)
-      .slice(0, 5);
-  }, [baseFilteredData]);
-
-  // --- Sent Data Calculations ---
-  const hasSentData = sentData.length > 0;
-  const hasIncomingData = incomingData.length > 0;
-  const { activeView, setActiveView } = useData();
-
-  const slideCount = useMemo(() => {
-    if (activeView === 'incoming') return 4;
-    if (activeView === 'sent') return 4;
-    if (activeView === 'comparison') return 3;
-    return 7;
-  }, [activeView]);
-  
-  const totalSent = baseFilteredSentData.length;
-
-  const sentTimelineData = useMemo(() => {
-    const counts: Record<string, number> = {};
-    baseFilteredSentData.forEach((d) => {
-      if (d.sentDate) {
-        const date = parseISO(d.sentDate);
-        if (isValid(date)) {
-          const monthStr = format(startOfMonth(date), 'yyyy-MM');
-          counts[monthStr] = (counts[monthStr] || 0) + 1;
-        }
-      }
-    });
-    return Object.entries(counts).map(([date, count]) => ({ date, count })).sort((a, b) => a.date.localeCompare(b.date));
-  }, [baseFilteredSentData]);
-
-  const sentDeptData = useMemo(() => {
-    const counts: Record<string, number> = {};
-    baseFilteredSentData.forEach((d) => {
-      d.departments.forEach((dept) => counts[dept] = (counts[dept] || 0) + 1);
     });
     return Object.entries(counts).map(([name, count]) => {
          const cleanName = name.replace('بەشی ', '').replace('سێکتەری ', '');
@@ -678,6 +483,551 @@ export const PresentationView = () => {
             بەراوردکردن
           </button>
         </div>
+        <div className="flex gap-1.5">
+          {Array.from({ length: slideCount }).map((_, i) => (
+            <div 
+              key={i} 
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                i === activeSlide ? "w-8 bg-blue-500" : "w-2 bg-slate-300 dark:bg-slate-700"
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Navigation Arrows */}
+      <button 
+        onClick={handlePrev}
+        className="absolute right-4 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-white/30 dark:bg-slate-800/40 hover:bg-white/60 dark:hover:bg-slate-800/80 text-slate-800 dark:text-white transition-all hover:scale-110 backdrop-blur-md"
+      >
+        <ChevronRight size={32} />
+      </button>
+      
+      <button 
+        onClick={handleNext}
+        className="absolute left-4 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-white/30 dark:bg-slate-800/40 hover:bg-white/60 dark:hover:bg-slate-800/80 text-slate-800 dark:text-white transition-all hover:scale-110 backdrop-blur-md"
+      >
+        <ChevronLeft size={32} />
+      </button>
+
+      {/* Slide Contents */}
+      <div className="relative w-full flex-1 flex items-center justify-center min-h-[500px]">
+        <AnimatePresence mode="wait">
+        
+        {/* SLIDE 1: KPI Dashboard Summary */}
+        {activeView === 'received' && activeSlide === 0 && (
+          <motion.div key="rec-slide-0" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col items-center">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-blue-500/10 -z-10" />
+            <motion.h2 variants={itemVariants} className="text-3xl sm:text-4xl font-bold text-center mb-10 text-slate-800 dark:text-slate-200">
+              کورتەی ئەدای سیستەم و ئامارە بنەڕەتییەکان
+            </motion.h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
+              {/* Card 1 */}
+              <motion.div variants={itemVariants} className="glass p-8 rounded-3xl flex flex-col items-center text-center border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] relative overflow-hidden group hover:scale-[1.03] transition-transform backdrop-blur-3xl">
+                <div className="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-4">
+                  <Layers size={32} />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-500 dark:text-slate-400 mb-2">کۆی گشتی نامەکان</h3>
+                <span className="text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-500">{totalLetters}</span>
+              </motion.div>
+              {/* Card 2 */}
+              <motion.div variants={itemVariants} className="glass p-8 rounded-3xl flex flex-col items-center text-center border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] relative overflow-hidden group hover:scale-[1.03] transition-transform backdrop-blur-3xl">
+                <div className="w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400 mb-4">
+                  <AlertTriangle size={32} />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-500 dark:text-slate-400 mb-2">هەڵپەسێردراو</h3>
+                <span className="text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-amber-500 to-orange-500">{pendingLetters}</span>
+              </motion.div>
+              {/* Card 3 */}
+              <motion.div variants={itemVariants} className="glass p-8 rounded-3xl flex flex-col items-center text-center border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] relative overflow-hidden group hover:scale-[1.03] transition-transform backdrop-blur-3xl">
+                <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-4">
+                  <Clock size={32} />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-500 dark:text-slate-400 mb-2">تێکڕای کاتی وەڵامدانەوە</h3>
+                <span className="text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-emerald-500 to-teal-500">{avgProcessingTime.toFixed(1)} <span className="text-lg font-medium text-slate-400">ڕۆژ</span></span>
+              </motion.div>
+            </div>
+            {showInsights && (
+              <motion.div variants={itemVariants} className="mt-8 p-5 bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-2xl w-full flex items-center gap-4">
+                <Lightbulb className="text-amber-500 shrink-0" size={28} />
+                <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                  <strong className="text-amber-600 dark:text-amber-400">شیکاری هۆشمەند: </strong> 
+                  لە کۆی گشتی <strong className="text-blue-500">{totalLetters}</strong> نامە، تەنها <strong className="text-amber-500">{pendingLetters}</strong> نامە هەڵپەسێردراون، کە دەکاتە <strong className="text-emerald-500">{Math.round(((totalLetters - pendingLetters) / Math.max(totalLetters, 1)) * 100)}%</strong> ڕێژەی تەواوبوون بە تێکڕای کاتی <strong className="text-teal-500">{avgProcessingTime.toFixed(1)}</strong> ڕۆژ.
+                </p>
+              </motion.div>
+            )}
+          </motion.div>
+        )}
+
+        {/* SLIDE 2: Timeline Trend */}
+        {activeView === 'received' && activeSlide === 1 && (
+          <motion.div key="rec-slide-1" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-emerald-500/10 -z-10" />
+            <motion.div variants={itemVariants} className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+                <TrendingUp className="text-emerald-500" size={32} />
+                هەڵکشان و داکشانی نامەکان بەپێی کات
+              </h2>
+              <span className="text-sm text-slate-400">ڕەوتی گەشەکردن بەپێی مانگەکان</span>
+            </motion.div>
+            <motion.div variants={itemVariants} className="w-full h-[380px] glass rounded-3xl p-6 border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] backdrop-blur-3xl" dir="ltr">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={timelineData} margin={{ top: 20, right: 20, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorTimelinePres" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
+                      <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#475569" opacity={0.2} />
+                  <XAxis dataKey="date" tick={{ fontSize: 13, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 13, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <Tooltip contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff' }} />
+                  <Area type="monotone" dataKey="count" stroke="#10b981" strokeWidth={4} fillOpacity={1} fill="url(#colorTimelinePres)" dot={{ r: 6, stroke: '#10b981', strokeWidth: 3, fill: '#fff' }}>
+                    <LabelList dataKey="count" position="top" offset={12} fill="#10b981" fontSize={14} fontWeight="bold" />
+                  </Area>
+                </AreaChart>
+              </ResponsiveContainer>
+            </motion.div>
+            {showInsights && timelineData.length >= 2 && (
+              <motion.div variants={itemVariants} className="mt-6 p-5 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-2xl w-full flex items-center gap-4">
+                <Lightbulb className="text-emerald-500 shrink-0" size={28} />
+                <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                  <strong className="text-emerald-600 dark:text-emerald-400">شیکاری هۆشمەند: </strong> 
+                  زۆرترین نامە لە مانگی <strong className="text-emerald-500">{[...timelineData].sort((a,b)=>b.count-a.count)[0].date}</strong> دا تۆمارکراوە بە بڕی <strong className="text-emerald-500">{[...timelineData].sort((a,b)=>b.count-a.count)[0].count}</strong> نامە. ڕەوتی گشتی کارەکان بەپێی کات گۆڕانکاری بەسەردا هاتووە.
+                </p>
+              </motion.div>
+            )}
+          </motion.div>
+        )}
+
+        {/* SLIDE 3: Department Volumes */}
+        {activeView === 'received' && activeSlide === 2 && (
+          <motion.div key="rec-slide-2" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-blue-500/10 -z-10" />
+            <motion.div variants={itemVariants} className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+                <Building2 className="text-blue-500" size={32} />
+                {chartTitle}
+              </h2>
+              <span className="text-sm text-slate-400">
+                {isSingleDeptSelected ? "ڕەوتی قەبارەی کار بەپێی مانگەکان" : "لایەنە سەرەکییەکان بەپێی قەبارەی کار"}
+              </span>
+            </motion.div>
+            <motion.div variants={itemVariants} className="w-full h-[380px] glass rounded-3xl p-6 border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] backdrop-blur-3xl" dir="ltr">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData} margin={{ top: 25, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#475569" opacity={0.2} />
+                  <XAxis dataKey="abbr" tick={{ fontSize: 13, fill: '#94a3b8', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 13, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <Tooltip
+                    contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff' }}
+                    formatter={(value: any, name: any, props: any) => [value, props.payload.name]}
+                    labelFormatter={(abbr) => {
+                      const entry = chartData.find(d => d.abbr === abbr);
+                      return entry ? entry.name : abbr;
+                    }}
+                  />
+                  <Bar dataKey="count" radius={[8, 8, 0, 0]} maxBarSize={45}>
+                    <LabelList dataKey="count" position="top" offset={8} fill="#94a3b8" fontSize={12} fontWeight="bold" />
+                    {chartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </motion.div>
+            <motion.div variants={itemVariants} className="mt-4 flex flex-wrap gap-x-4 gap-y-2 justify-center" dir="rtl">
+              {chartData.map((entry, index) => (
+                <div key={index} className="flex items-center gap-1.5 text-xs">
+                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }}></span>
+                  <span className="font-bold text-slate-700 dark:text-slate-300">{entry.abbr}</span>
+                  <span className="text-slate-500 dark:text-slate-400">= {entry.name}</span>
+                </div>
+              ))}
+            </motion.div>
+            {showInsights && chartData.length > 0 && (
+              <motion.div variants={itemVariants} className="mt-4 p-5 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border border-blue-500/20 rounded-2xl w-full flex items-center gap-4">
+                <Lightbulb className="text-blue-500 shrink-0" size={28} />
+                <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                  <strong className="text-blue-600 dark:text-blue-400">شیکاری هۆشمەند: </strong> 
+                  زۆرترین پاڵەپەستۆی کار لەسەر <strong className="text-blue-500">{(chartData[0] as any).name || (chartData[0] as any).date}</strong>ە بە قەبارەی <strong className="text-blue-500">{(chartData[0] as any).count}</strong> نامە، کە دەکاتە نزیکەی <strong className="text-emerald-500">{Math.round(((chartData[0] as any).count / Math.max(totalLetters, 1)) * 100)}%</strong>ی کۆی گشتی کارەکان.
+                </p>
+              </motion.div>
+            )}
+          </motion.div>
+        )}
+
+        {/* SLIDE 4: Letter Types */}
+        {activeView === 'received' && activeSlide === 3 && (
+          <motion.div key="rec-slide-3" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-purple-500/10 -z-10" />
+            <motion.div variants={itemVariants} className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+                <PieIcon className="text-purple-500" size={32} />
+                پۆلێنکردنی جۆرەکانی نامە
+              </h2>
+              <span className="text-sm text-slate-400">دابەشبوونی کارەکان بەپێی بابەت</span>
+            </motion.div>
+            <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center glass rounded-3xl p-6 border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] backdrop-blur-3xl">
+              <div className="h-[300px]" dir="ltr">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={typeData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={70}
+                      outerRadius={100}
+                      paddingAngle={5}
+                      dataKey="value"
+                      stroke="none"
+                    >
+                      {typeData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff' }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="flex flex-col gap-4" dir="rtl">
+                {typeData.map((entry, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 rounded-xl bg-slate-800/10 dark:bg-slate-850/50 border border-white/5 hover:bg-slate-800/20 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <span className="w-4 h-4 rounded-full shadow-sm" style={{ backgroundColor: COLORS[index % COLORS.length] }}></span>
+                      <span className="font-semibold text-slate-800 dark:text-slate-200">{entry.name}</span>
+                    </div>
+                    <span className="text-lg font-bold text-slate-600 dark:text-slate-400">{entry.value} نامە</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {/* SLIDE 5: SLA Status */}
+        {activeView === 'received' && activeSlide === 4 && (
+          <motion.div key="rec-slide-4" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-amber-500/10 -z-10" />
+            <motion.div variants={itemVariants} className="flex justify-between items-start mb-6">
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+                  <BarChart2 className="text-amber-500" size={32} />
+                  کاتی تێچوو (SLA)
+                </h2>
+                <span className="text-sm text-slate-400 mt-2 block">ڕێژەی پابەندبوون و ئامارەکانی کاتی وەڵامدانەوە</span>
+              </div>
+              {slaEnhancedData.totalOnTime + slaEnhancedData.totalLate > 0 && (
+                <div className="flex flex-col items-end glass p-4 rounded-2xl border-t border-t-white/30 border-l border-l-white/20 shadow-lg">
+                  <span className="text-4xl font-black text-emerald-600 dark:text-emerald-400">
+                    {Math.round((slaEnhancedData.totalOnTime / (slaEnhancedData.totalOnTime + slaEnhancedData.totalLate)) * 100)}%
+                  </span>
+                  <span className="text-sm text-slate-500 font-medium">پابەندبوون بە کاتی دیاریکراو</span>
+                </div>
+              )}
+            </motion.div>
+            
+            <motion.div variants={itemVariants} className="w-full h-[350px] glass rounded-3xl p-6 border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] backdrop-blur-3xl" dir="ltr">
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart data={slaEnhancedData.data} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#475569" opacity={0.2} />
+                  <XAxis dataKey="name" tick={{ fontSize: 13, fill: '#94a3b8', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
+                  <YAxis yAxisId="left" tick={{ fontSize: 13, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 13, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <Tooltip
+                    cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
+                    contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.5)' }}
+                    content={(props: any) => {
+                      const { active, payload, label } = props;
+                      if (active && payload && payload.length) {
+                        const data = payload[0].payload;
+                        return (
+                          <div className="bg-slate-900/95 p-4 rounded-2xl shadow-xl border border-slate-700" dir="rtl">
+                            <p className="font-bold text-white mb-3 pb-2 border-b border-slate-700 text-base">{label}</p>
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between gap-6">
+                                <div className="flex items-center gap-2">
+                                  <span className="w-3 h-3 rounded-full bg-[#10b981]"></span>
+                                  <span className="text-sm font-medium text-slate-300">لە کاتی خۆی (کەمتر)</span>
+                                </div>
+                                <span className="text-sm font-bold text-white">{data.onTime}</span>
+                              </div>
+                              <div className="flex items-center justify-between gap-6">
+                                <div className="flex items-center gap-2">
+                                  <span className="w-3 h-3 rounded-full bg-[#ef4444]"></span>
+                                  <span className="text-sm font-medium text-slate-300">دواکەوتوو (زیاتر)</span>
+                                </div>
+                                <span className="text-sm font-bold text-white">{data.late}</span>
+                              </div>
+                              <div className="h-px bg-slate-700 my-2"></div>
+                              <div className="flex items-center justify-between gap-6">
+                                <span className="text-sm font-medium text-slate-300">ڕێژەی پابەندبوون</span>
+                                <span className="text-sm font-bold text-[#10b981]">{data.complianceRate}%</span>
+                              </div>
+                              <div className="flex items-center justify-between gap-6">
+                                <div className="flex items-center gap-2">
+                                  <span className="w-3 h-1 rounded-full bg-[#f59e0b]"></span>
+                                  <span className="text-sm font-medium text-slate-300">تێکڕای کاتی تێچوو</span>
+                                </div>
+                                <span className="text-sm font-bold text-[#f59e0b]">{data.avgProcessingTime} ڕۆژ</span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Bar yAxisId="left" dataKey="onTime" stackId="a" fill="#10b981" maxBarSize={55}>
+                    <LabelList dataKey="onTime" position="center" fill="#fff" fontSize={14} fontWeight="bold" />
+                  </Bar>
+                  <Bar yAxisId="left" dataKey="late" stackId="a" fill="#ef4444" radius={[8, 8, 0, 0]} maxBarSize={55}>
+                    <LabelList dataKey="late" position="center" fill="#fff" fontSize={14} fontWeight="bold" />
+                  </Bar>
+                  <Line 
+                    yAxisId="right"
+                    type="monotone" 
+                    dataKey="avgProcessingTime" 
+                    stroke="#f59e0b" 
+                    strokeWidth={3} 
+                    dot={{ r: 4, strokeWidth: 2, fill: '#fff' }}
+                    activeDot={{ r: 6, fill: '#f59e0b', stroke: '#fff', strokeWidth: 2 }}
+                  />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </motion.div>
+            <motion.div variants={itemVariants} className="mt-6 flex flex-wrap gap-x-8 gap-y-2 justify-center" dir="rtl">
+              <div className="flex items-center gap-2 text-sm">
+                <span className="w-4 h-4 rounded-full bg-[#10b981]"></span>
+                <span className="font-bold text-slate-700 dark:text-slate-300">لە کاتی خۆی (کەمتر)</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <span className="w-4 h-4 rounded-full bg-[#ef4444]"></span>
+                <span className="font-bold text-slate-700 dark:text-slate-300">دواکەوتوو (زیاتر)</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm ml-4">
+                <span className="w-5 h-1.5 rounded-full bg-[#f59e0b]"></span>
+                <span className="font-bold text-slate-700 dark:text-slate-300">تێکڕای کاتی تێچوو (ڕۆژ)</span>
+              </div>
+            </motion.div>
+            {showInsights && slaEnhancedData.data.length > 0 && (
+              <motion.div variants={itemVariants} className="mt-6 p-5 bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-2xl w-full flex items-center gap-4">
+                <Lightbulb className="text-amber-500 shrink-0" size={28} />
+                <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                  <strong className="text-amber-600 dark:text-amber-400">شیکاری هۆشمەند: </strong> 
+                  ڕێژەی گشتی پابەندبوون بە کات <strong className="text-emerald-500">{Math.round((slaEnhancedData.totalOnTime / (slaEnhancedData.totalOnTime + slaEnhancedData.totalLate)) * 100)}%</strong>ە. ئەو جۆرە نامانەی زۆرترین ڕێژەی دواکەوتنیان هەیە بریتین لە جۆری <strong className="text-red-500">{[...slaEnhancedData.data].sort((a,b)=>b.late-a.late)[0]?.name || '-'}</strong>. تەرکیز کردن لەسەر خێراکردنی ئەم جۆرە، ڕێژەی پابەندبوونی گشتی بەرز دەکاتەوە.
+                </p>
+              </motion.div>
+            )}
+          </motion.div>
+        )}
+
+        {/* SLIDE 6: Department Insights */}
+        {activeView === 'received' && activeSlide === 5 && (
+          <motion.div key="rec-slide-5" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-orange-500/10 -z-10" />
+            <motion.h2 variants={itemVariants} className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 mb-8 flex items-center gap-3">
+              <Activity className="text-orange-500" size={32} />
+              شیکاری کارایی لایەن و بەشەکان
+            </motion.h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+              
+              {/* Fastest */}
+              <motion.div variants={itemVariants} className="glass p-6 rounded-3xl border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex flex-col gap-4 backdrop-blur-3xl group hover:scale-[1.02] transition-transform">
+                <div className="flex items-center gap-2.5 pb-3 border-b border-white/10 text-emerald-500">
+                  <Award size={24} />
+                  <h3 className="font-bold text-lg">خێراترین وەڵامدانەوەکان</h3>
+                </div>
+                <div className="flex flex-col gap-3 flex-1">
+                  {fastestLetters.length > 0 ? (
+                    fastestLetters.map((d, i) => (
+                      <div key={i} className="flex justify-between items-center py-1 border-b border-white/5 last:border-b-0">
+                        <div className="w-2/3">
+                          <span className="text-sm font-semibold text-slate-700 dark:text-slate-200 line-clamp-1" title={d.subject}>{d.subject}</span>
+                          <span className="text-[11px] text-slate-400 block mt-0.5 line-clamp-1">{d.department}</span>
+                        </div>
+                        <span className="text-sm font-bold text-emerald-500 shrink-0">{d.processingTime} ڕۆژ</span>
+                      </div>
+                    ))
+                  ) : (
+                    <span className="text-slate-400 text-sm">داتا نییە</span>
+                  )}
+                </div>
+              </motion.div>
+
+              {/* Slowest */}
+              <motion.div variants={itemVariants} className="glass p-6 rounded-3xl border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex flex-col gap-4 backdrop-blur-3xl group hover:scale-[1.02] transition-transform">
+                <div className="flex items-center gap-2.5 pb-3 border-b border-white/10 text-red-500">
+                  <AlertOctagon size={24} />
+                  <h3 className="font-bold text-lg">خاوترین وەڵامدانەوەکان</h3>
+                </div>
+                <div className="flex flex-col gap-3 flex-1">
+                  {slowestLetters.length > 0 ? (
+                    slowestLetters.map((d, i) => (
+                      <div key={i} className="flex justify-between items-center py-1 border-b border-white/5 last:border-b-0">
+                        <div className="w-2/3">
+                          <span className="text-sm font-semibold text-slate-700 dark:text-slate-200 line-clamp-1" title={d.subject}>{d.subject}</span>
+                          <span className="text-[11px] text-slate-400 block mt-0.5 line-clamp-1">{d.department}</span>
+                        </div>
+                        <span className="text-sm font-bold text-red-500 shrink-0">{d.processingTime} ڕۆژ</span>
+                      </div>
+                    ))
+                  ) : (
+                    <span className="text-slate-400 text-sm">داتا نییە</span>
+                  )}
+                </div>
+              </motion.div>
+
+              {/* Most Pending */}
+              <motion.div variants={itemVariants} className="glass p-6 rounded-3xl border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex flex-col gap-4 backdrop-blur-3xl group hover:scale-[1.02] transition-transform">
+                <div className="flex items-center gap-2.5 pb-3 border-b border-white/10 text-amber-500">
+                  <Zap size={24} />
+                  <h3 className="font-bold text-lg">زۆرترین کار و نامەی بەجێماو</h3>
+                </div>
+                <div className="flex flex-col gap-3 flex-1">
+                  {mostPendingDepts.length > 0 ? (
+                    mostPendingDepts.map((d, i) => (
+                      <div key={i} className="flex justify-between items-center py-2.5 border-b border-white/5 last:border-b-0">
+                        <span className="text-sm text-slate-750 dark:text-slate-300 line-clamp-1 w-2/3">{d.name}</span>
+                        <span className="text-sm font-bold text-amber-500 shrink-0">{d.count} نامە</span>
+                      </div>
+                    ))
+                  ) : (
+                    <span className="text-slate-400 text-sm">داتا نییە</span>
+                  )}
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* SLIDE 7: Urgent Actions */}
+        {activeView === 'received' && activeSlide === 6 && (
+          <motion.div key="rec-slide-6" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-red-500/10 -z-10" />
+            <motion.div variants={itemVariants} className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+                <AlertOctagon className="text-red-500" size={32} />
+                کۆنترین کار و نامە هەڵپەسێردراوەکان
+              </h2>
+              <span className="text-sm text-red-400 font-semibold bg-red-500/10 px-3 py-1 rounded-full">پێویستی بە وەڵامدانەوەی خێرایە</span>
+            </motion.div>
+            
+            <motion.div variants={itemVariants} className="w-full overflow-hidden rounded-3xl glass border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] backdrop-blur-3xl">
+              <table className="w-full text-right border-collapse">
+                <thead>
+                  <tr className="bg-slate-800/30 dark:bg-slate-950/40 text-slate-400 text-sm border-b border-white/5">
+                    <th className="p-4">ژمارەی نامە</th>
+                    <th className="p-4">بابەت</th>
+                    <th className="p-4">لایەنی پەیوەندیدار</th>
+                    <th className="p-4">رێکەوتی ناردن</th>
+                    <th className="p-4 text-left">ماوەی مانەوە</th>
+                  </tr>
+                </thead>
+                <tbody className="text-sm text-slate-700 dark:text-slate-300">
+                  {oldestPending.length > 0 ? (
+                    oldestPending.map((item, index) => (
+                      <tr key={index} className="border-b border-white/5 hover:bg-slate-800/10 transition-colors">
+                        <td className="p-4 font-mono">{item.refCode}</td>
+                        <td className="p-4 font-semibold line-clamp-1 max-w-[200px]">{item.subject}</td>
+                        <td className="p-4">{item.department}</td>
+                        <td className="p-4">{item.sentDate}</td>
+                        <td className="p-4 text-left font-bold text-red-500">{item.daysPending} ڕۆژ</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={5} className="p-8 text-center text-slate-400">هیچ نامەیەکی هەڵپەسێردراو بوونی نییە!</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </motion.div>
+            {showInsights && oldestPending.length > 0 && (
+              <motion.div variants={itemVariants} className="mt-6 p-5 bg-gradient-to-r from-red-500/10 to-orange-500/10 border border-red-500/20 rounded-2xl w-full flex items-center gap-4">
+                <Lightbulb className="text-red-500 shrink-0" size={28} />
+                <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                  <strong className="text-red-600 dark:text-red-400">شیکاری هۆشمەند: </strong> 
+                  کۆنترین نامەی هەڵپەسێردراو تەمەنی گەیشتووەتە <strong className="text-red-500">{oldestPending[0].daysPending}</strong> ڕۆژ. پێویستە دەستبەجێ بەدواداچوون بۆ ئەم {oldestPending.length} کارە بکرێت بۆ ئەوەی ڕێژەی پابەندبوون دانەبەزێت.
+                </p>
+              </motion.div>
+            )}
+          </motion.div>
+        )}
+
+        
+        {/* ===================== SENT SLIDES ===================== */}
+        {/* SENT SLIDE 0: Summary */}
+        {activeView === 'sent' && activeSlide === 0 && (
+          <motion.div key="sent-slide-0" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-teal-500/10 -z-10" />
+            <motion.div variants={itemVariants} className="flex justify-between items-start mb-6">
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+                  <Send className="text-teal-500" size={32} />
+                  سەرجەم نووسراوە ڕەوانەکراوەکان
+                </h2>
+                <span className="text-sm text-slate-400 mt-2 block">ئاماری گشتی نامە ڕەوانەکراوەکان</span>
+              </div>
+            </motion.div>
+            
+            <motion.div variants={itemVariants} className="grid grid-cols-1 gap-6 mt-4">
+              <div className="glass p-12 rounded-3xl flex flex-col items-center justify-center text-center border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] backdrop-blur-3xl relative overflow-hidden group hover:scale-[1.02] transition-transform">
+                <div className="absolute inset-0 bg-teal-500/5 group-hover:bg-teal-500/10 transition-colors" />
+                <Send className="text-teal-500 mb-6 relative z-10" size={56} />
+                <span className="text-7xl font-black bg-clip-text text-transparent bg-gradient-to-r from-teal-500 to-cyan-500 mb-4 relative z-10">{totalSent}</span>
+                <span className="text-xl text-slate-500 font-bold relative z-10">سەرجەم ڕەوانەکراوەکان</span>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {/* SENT SLIDE 1: Timeline Trend */}
+        {activeView === 'sent' && activeSlide === 1 && (
+          <motion.div key="sent-slide-1" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-teal-500/10 -z-10" />
+            <motion.div variants={itemVariants} className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+                <TrendingUp className="text-teal-500" size={32} />
+                هەڵکشان و داکشانی نامە ڕەوانەکراوەکان
+              </h2>
+            </motion.div>
+            <motion.div variants={itemVariants} className="w-full h-[380px] glass rounded-3xl p-6 border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] backdrop-blur-3xl" dir="ltr">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={sentTimelineData} margin={{ top: 20, right: 20, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorTimelineSent" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.4} />
+                      <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#475569" opacity={0.2} />
+                  <XAxis dataKey="date" tick={{ fontSize: 13, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 13, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <Tooltip contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff' }} />
+                  <Area type="monotone" dataKey="count" stroke="#06b6d4" strokeWidth={4} fillOpacity={1} fill="url(#colorTimelineSent)" dot={{ r: 6, stroke: '#06b6d4', strokeWidth: 3, fill: '#fff' }}>
+                    <LabelList dataKey="count" position="top" offset={12} fill="#06b6d4" fontSize={14} fontWeight="bold" />
+                  </Area>
+                </AreaChart>
+              </ResponsiveContainer>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {/* SENT SLIDE 2: Depts */}
+        {activeView === 'sent' && activeSlide === 2 && (
+          <motion.div key="sent-slide-2" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-teal-500/10 -z-10" />
+            <motion.div variants={itemVariants} className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+                <Building2 className="text-teal-500" size={32} />
+                لایەنە سەرەکییەکان بەپێی نامەی ڕەوانەکراو
+              </h2>
+            </motion.div>
+            <motion.div variants={itemVariants} className="w-full h-[380px] glass rounded-3xl p-6 border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] backdrop-blur-3xl" dir="ltr">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={sentDeptData} margin={{ top: 25, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#475569" opacity={0.2} />
@@ -749,8 +1099,8 @@ export const PresentationView = () => {
               <div className="glass p-12 rounded-3xl flex flex-col items-center justify-center text-center border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] backdrop-blur-3xl relative overflow-hidden group hover:scale-[1.02] transition-transform">
                 <div className="absolute inset-0 bg-teal-500/5 group-hover:bg-teal-500/10 transition-colors" />
                 <Send className="text-teal-500 mb-6 relative z-10" size={56} />
-                <span className="text-7xl font-black bg-clip-text text-transparent bg-gradient-to-r from-teal-500 to-cyan-500 mb-4 relative z-10">{totalSent}</span>
-                <span className="text-xl text-slate-500 font-bold relative z-10">سەرجەم ڕەوانەکراوەکان</span>
+                <span className="text-7xl font-black bg-clip-text text-transparent bg-gradient-to-r from-teal-500 to-cyan-500 mb-4 relative z-10">{totalIncoming}</span>
+                <span className="text-xl text-slate-500 font-bold relative z-10">سەرجەم هاتووەکان</span>
               </div>
             </motion.div>
           </motion.div>
@@ -800,14 +1150,14 @@ export const PresentationView = () => {
             </motion.div>
             <motion.div variants={itemVariants} className="w-full h-[380px] glass rounded-3xl p-6 border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] backdrop-blur-3xl" dir="ltr">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={sentDeptData} margin={{ top: 25, right: 10, left: -20, bottom: 0 }}>
+                <BarChart data={incomingDeptData} margin={{ top: 25, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#475569" opacity={0.2} />
                   <XAxis dataKey="abbr" tick={{ fontSize: 13, fill: '#94a3b8', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 13, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                  <Tooltip contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff' }} formatter={(value, name, props) => [value, props.payload.name]} labelFormatter={(abbr) => { const entry = sentDeptData.find(d => d.abbr === abbr); return entry ? entry.name : abbr; }} />
+                  <Tooltip contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff' }} formatter={(value, name, props) => [value, props.payload.name]} labelFormatter={(abbr) => { const entry = incomingDeptData.find(d => d.abbr === abbr); return entry ? entry.name : abbr; }} />
                   <Bar dataKey="count" radius={[8, 8, 0, 0]} maxBarSize={45}>
                     <LabelList dataKey="count" position="top" offset={8} fill="#94a3b8" fontSize={12} fontWeight="bold" />
-                    {sentDeptData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
+                    {incomingDeptData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
@@ -829,15 +1179,15 @@ export const PresentationView = () => {
               <div className="h-[300px]" dir="ltr">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Pie data={sentTypeDataPres} cx="50%" cy="50%" innerRadius={70} outerRadius={100} paddingAngle={5} dataKey="value" stroke="none">
-                      {sentTypeDataPres.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
+                    <Pie data={incomingTypeDataPres} cx="50%" cy="50%" innerRadius={70} outerRadius={100} paddingAngle={5} dataKey="value" stroke="none">
+                      {incomingTypeDataPres.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                     </Pie>
                     <Tooltip contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff' }} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
               <div className="flex flex-col gap-4" dir="rtl">
-                {sentTypeDataPres.map((entry, index) => (
+                {incomingTypeDataPres.map((entry, index) => (
                   <div key={index} className="flex items-center justify-between p-3 rounded-xl bg-slate-800/10 dark:bg-slate-850/50 border border-white/5 hover:bg-slate-800/20 transition-colors">
                     <div className="flex items-center gap-3">
                       <span className="w-4 h-4 rounded-full shadow-sm" style={{ backgroundColor: COLORS[index % COLORS.length] }}></span>
