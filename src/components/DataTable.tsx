@@ -7,7 +7,7 @@ import { Search, ChevronLeft, ChevronRight, ArrowUpDown, Edit2, Trash2, Check, X
 import { useAuth } from "../context/AuthContext";
 
 export const DataTable = () => {
-  const { filteredData, setData, data } = useData();
+  const { filteredData, setData, data , filters, setFilters } = useData();
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState<{ key: keyof DashboardData; direction: "asc" | "desc" } | null>(null);
@@ -134,7 +134,18 @@ export const DataTable = () => {
       {/* Table Header Controls */}
       <div className="p-4 border-b border-slate-200/50 dark:border-slate-800/50 flex flex-col sm:flex-row justify-between items-center gap-4">
         <h3 className="text-lg font-semibold">داتای وردی پێویست بە وەڵامەکان</h3>
-        <div className="relative w-full sm:w-72">
+        <div className="flex items-center gap-4 w-full sm:w-auto">
+          {(filters?.departments?.length > 0 || filters?.letterType?.length > 0 || filters?.slaStatus?.length > 0) && (
+            <button
+              onClick={() => setFilters(prev => ({ ...prev, departments: [], letterType: [], slaStatus: [] }))}
+              className="flex items-center gap-2 text-xs font-bold text-red-500 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 px-3 py-2 rounded-full transition-colors whitespace-nowrap"
+              title="سڕینەوەی فلتەرەکان"
+            >
+              <X size={14} />
+              سڕینەوەی فلتەر
+            </button>
+          )}
+          <div className="relative w-full sm:w-72">
           <input
             type="text"
             placeholder="گەڕان بەدوای بابەت یان کۆد..."
@@ -146,6 +157,7 @@ export const DataTable = () => {
             className="w-full bg-white/50 dark:bg-black/20 border border-slate-200/50 dark:border-slate-700/50 rounded-full pl-10 pr-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
           />
           <Search className="absolute left-3 top-2.5 text-slate-400" size={16} />
+        </div>
         </div>
       </div>
 

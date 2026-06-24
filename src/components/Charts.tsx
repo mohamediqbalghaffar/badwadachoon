@@ -235,7 +235,10 @@ export const DashboardCharts = () => {
                 onClick={(data: any) => {
                   if (isSingleDeptSelected) return;
                   if (data && data.name) {
-                    setFilters(prev => ({ ...prev, departments: [data.name as string] }));
+                    setFilters((prev) => {
+                      const isSelected = prev.departments?.includes(data.name as string);
+                      return { ...prev, departments: isSelected ? [] : [data.name as string] };
+                    });
                     document.getElementById('data-table-section')?.scrollIntoView({ behavior: 'smooth' });
                   }
                 }} 
@@ -282,7 +285,10 @@ export const DashboardCharts = () => {
                 label={renderCustomizedLabel}
                 onClick={(data: any) => {
                   if (data && data.name) {
-                    setFilters(prev => ({ ...prev, letterType: [data.name as string] }));
+                    setFilters((prev) => {
+                      const isSelected = prev.letterType?.includes(data.name as string);
+                      return { ...prev, letterType: isSelected ? [] : [data.name as string] };
+                    });
                     document.getElementById('data-table-section')?.scrollIntoView({ behavior: 'smooth' });
                   }
                 }}

@@ -201,7 +201,10 @@ const IncomingCharts = () => {
                 maxBarSize={50}
                 onClick={(data: any) => {
                   if (data && data.name) {
-                    setFilters((prev) => ({ ...prev, departments: [data.name as string] }));
+                    setFilters((prev) => {
+                      const isSelected = prev.departments?.includes(data.name as string);
+                      return { ...prev, departments: isSelected ? [] : [data.name as string] };
+                    });
                     scrollToTable();
                   }
                 }}
@@ -248,7 +251,10 @@ const IncomingCharts = () => {
                 label={renderCustomizedLabel}
                 onClick={(data: any) => {
                   if (data && data.name) {
-                    setFilters((prev) => ({ ...prev, letterType: [data.name as string] }));
+                    setFilters((prev) => {
+                      const isSelected = prev.letterType?.includes(data.name as string);
+                      return { ...prev, letterType: isSelected ? [] : [data.name as string] };
+                    });
                     scrollToTable();
                   }
                 }}
@@ -320,7 +326,7 @@ const IncomingCharts = () => {
 // ─── Data Table ──────────────────────────────────────────────────────────────
 
 const IncomingDataTable = () => {
-  const { filteredIncomingData, setSentData, incomingData } = useData();
+  const { filteredIncomingData, setSentData, incomingData , filters, setFilters } = useData();
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState<{ key: keyof IncomingLetterData; direction: "asc" | "desc" } | null>(null);
@@ -446,7 +452,18 @@ const IncomingDataTable = () => {
       {/* Table Header Controls */}
       <div className="p-4 border-b border-slate-200/50 dark:border-slate-800/50 flex flex-col sm:flex-row justify-between items-center gap-4">
         <h3 className="text-lg font-semibold">داتای وردی سەرجەم هاتووەکان</h3>
-        <div className="relative w-full sm:w-72">
+        <div className="flex items-center gap-4 w-full sm:w-auto">
+          {(filters?.departments?.length > 0 || filters?.letterType?.length > 0 || filters?.slaStatus?.length > 0) && (
+            <button
+              onClick={() => setFilters(prev => ({ ...prev, departments: [], letterType: [], slaStatus: [] }))}
+              className="flex items-center gap-2 text-xs font-bold text-red-500 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 px-3 py-2 rounded-full transition-colors whitespace-nowrap"
+              title="سڕینەوەی فلتەرەکان"
+            >
+              <X size={14} />
+              سڕینەوەی فلتەر
+            </button>
+          )}
+          <div className="relative w-full sm:w-72">
           <input
             type="text"
             placeholder="گەڕان بەدوای بابەت یان کۆد..."
@@ -458,6 +475,7 @@ const IncomingDataTable = () => {
             className="w-full bg-white/50 dark:bg-black/20 border border-slate-200/50 dark:border-slate-700/50 rounded-full pl-10 pr-4 py-2 text-sm outline-none focus:ring-2 focus:ring-teal-500/50 transition-all"
           />
           <Search className="absolute left-3 top-2.5 text-slate-400" size={16} />
+        </div>
         </div>
       </div>
 
