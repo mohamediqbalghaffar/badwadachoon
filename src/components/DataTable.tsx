@@ -36,24 +36,22 @@ export const DataTable = () => {
       const data = await res.json();
 
       if (res.ok && data.id) {
-        // Direct link to the record!
-        window.open(`https://erp.halabjagroup.com/odoo/action-817/${data.id}`, '_blank');
+        // Direct link to the record using the reliable Odoo 18 format
+        window.open(`https://erp.halabjagroup.com/odoo/approval.request/${data.id}`, '_blank');
       } else {
         // Fallback or not configured
         if (data.error === 'Odoo credentials not configured in profile') {
-          // Open fallback, they can paste it
           window.open(`https://erp.halabjagroup.com/odoo/action-817?search=${encodeURIComponent(refCode)}`, '_blank');
           alert('بەستنەوە بە Odoo نەکراوە. تکایە لە ڕێکخستنەکانی هەژمارەکەت زانیارییەکانی Odoo تۆمار بکە بۆ کردنەوەی ڕاستەوخۆ.');
         } else {
           window.open(`https://erp.halabjagroup.com/odoo/action-817?search=${encodeURIComponent(refCode)}`, '_blank');
-          alert(`هەڵەیەک لە پەیوەندی Odoo ڕوویدا: ${data.error || 'نەزانراو'}\n\nتکایە دڵنیابە کە ناوی داتابەیسەکەی Odoo (نەک Supabase) بە ڕاستی داخڵکراوە.`);
-          console.error(data.error);
+          alert(`هەڵە لە Odoo: ${data.error}`);
         }
       }
     } catch (err: any) {
       console.error(err);
       window.open(`https://erp.halabjagroup.com/odoo/action-817?search=${encodeURIComponent(refCode)}`, '_blank');
-      alert(`هەڵەیەک ڕوویدا لە کاتی پەیوەندی بە سێرڤەر: ${err.message || err}`);
+      alert(`هەڵە ڕوویدا: ${err.message}`);
     } finally {
       setLoadingOdooCode(null);
     }
