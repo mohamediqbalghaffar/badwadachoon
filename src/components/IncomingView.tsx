@@ -59,7 +59,7 @@ const IncomingKPICards = () => {
   const totalLetters = baseFilteredIncomingData.length;
 
   const uniqueDepartments = useMemo(() => {
-    const set = new Set(baseFilteredIncomingData.flatMap((d) => d.departments));
+    const set = new Set(baseFilteredIncomingData.map((d) => d.sender).filter(Boolean));
     return set.size;
   }, [baseFilteredIncomingData]);
 
@@ -124,9 +124,9 @@ const IncomingCharts = () => {
   const deptData = useMemo(() => {
     const counts: Record<string, number> = {};
     filteredIncomingData.forEach((d) => {
-      d.departments.forEach((dept) => {
-        counts[dept] = (counts[dept] || 0) + 1;
-      });
+      if (d.sender) {
+        counts[d.sender] = (counts[d.sender] || 0) + 1;
+      }
     });
     return Object.entries(counts)
       .map(([name, count]) => {

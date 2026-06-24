@@ -219,7 +219,8 @@ export const DataProvider = ({ children, mode }: { children: React.ReactNode, mo
     }
     if (filters.departments.length > 0) {
       filtered = filtered.filter(item => 
-        item.departments.some(d => filters.departments.includes(d))
+        item.departments.some(d => filters.departments.includes(d)) || 
+        (item.sender && filters.departments.includes(item.sender))
       );
     }
     if (filters.letterType.length > 0) {
