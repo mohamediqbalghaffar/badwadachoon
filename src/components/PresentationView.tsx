@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useData } from "../context/DataContext";
@@ -756,6 +756,15 @@ export const PresentationView = () => {
                 ))}
               </div>
             </motion.div>
+            {showInsights && typeData.length > 0 && (
+              <motion.div variants={itemVariants} className="mt-6 p-5 bg-gradient-to-r from-blue-500/10 to-blue-400/10 border border-blue-500/20 rounded-2xl w-full flex items-center gap-4">
+                <Lightbulb className="text-blue-500 shrink-0" size={28} />
+                <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                  <strong className="text-blue-600 dark:text-blue-400">شیکاری هۆشمەند: </strong> 
+                  زۆرترین جۆری نامە پێکهاتووە لە <strong className="text-blue-500">{[...typeData].sort((a,b)=>b.value-a.value)[0].name}</strong> بە ڕێژەی بەرچاو.
+                </p>
+              </motion.div>
+            )}
           </motion.div>
         )}
 
@@ -952,6 +961,15 @@ export const PresentationView = () => {
                 </div>
               </motion.div>
             </div>
+            {showInsights && mostPendingDepts.length > 0 && (
+              <motion.div variants={itemVariants} className="mt-6 p-5 bg-gradient-to-r from-emerald-500/10 to-emerald-400/10 border border-emerald-500/20 rounded-2xl w-full flex items-center gap-4">
+                <Lightbulb className="text-emerald-500 shrink-0" size={28} />
+                <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                  <strong className="text-emerald-600 dark:text-emerald-400">شیکاری هۆشمەند: </strong> 
+                  بەشی <strong className="text-emerald-500">{[...mostPendingDepts].sort((a,b)=>b.count-a.count)[0].name}</strong> زۆرترین نامەی هەڵپەسێردراوی هەیە.
+                </p>
+              </motion.div>
+            )}
           </motion.div>
         )}
 
@@ -1033,6 +1051,15 @@ export const PresentationView = () => {
                 <span className="text-xl text-slate-500 font-bold relative z-10">سەرجەم ڕەوانەکراوەکان</span>
               </div>
             </motion.div>
+            {showInsights && true && (
+              <motion.div variants={itemVariants} className="mt-6 p-5 bg-gradient-to-r from-teal-500/10 to-teal-400/10 border border-teal-500/20 rounded-2xl w-full flex items-center gap-4">
+                <Lightbulb className="text-teal-500 shrink-0" size={28} />
+                <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                  <strong className="text-teal-600 dark:text-teal-400">شیکاری هۆشمەند: </strong> 
+                  سەرجەم نامە ڕەوانەکراوەکان گەیشتوونەتە <strong className="text-teal-500">{totalSent}</strong> نامە، کە ئەمەش پیشاندەری ئاستی کارایی و خێرایی بەشەکانە.
+                </p>
+              </motion.div>
+            )}
           </motion.div>
         )}
 
@@ -1065,6 +1092,15 @@ export const PresentationView = () => {
                 </AreaChart>
               </ResponsiveContainer>
             </motion.div>
+            {showInsights && sentTimelineData.length >= 2 && (
+              <motion.div variants={itemVariants} className="mt-6 p-5 bg-gradient-to-r from-teal-500/10 to-teal-400/10 border border-teal-500/20 rounded-2xl w-full flex items-center gap-4">
+                <Lightbulb className="text-teal-500 shrink-0" size={28} />
+                <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                  <strong className="text-teal-600 dark:text-teal-400">شیکاری هۆشمەند: </strong> 
+                  لووتکەی نامە ڕەوانەکراوەکان لە مانگی <strong className="text-teal-500">{[...sentTimelineData].sort((a,b)=>b.count-a.count)[0].date}</strong> دا بووە بە بڕی <strong className="text-teal-500">{[...sentTimelineData].sort((a,b)=>b.count-a.count)[0].count}</strong> نامە.
+                </p>
+              </motion.div>
+            )}
           </motion.div>
         )}
 
@@ -1092,6 +1128,15 @@ export const PresentationView = () => {
                 </BarChart>
               </ResponsiveContainer>
             </motion.div>
+            {showInsights && sentDeptData.length > 0 && (
+              <motion.div variants={itemVariants} className="mt-6 p-5 bg-gradient-to-r from-cyan-500/10 to-cyan-400/10 border border-cyan-500/20 rounded-2xl w-full flex items-center gap-4">
+                <Lightbulb className="text-cyan-500 shrink-0" size={28} />
+                <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                  <strong className="text-cyan-600 dark:text-cyan-400">شیکاری هۆشمەند: </strong> 
+                  بەشی <strong className="text-cyan-500">{[...sentDeptData].sort((a,b)=>b.count-a.count)[0].name}</strong> زۆرترین ڕێژەی نامەی ڕەوانەکراوی هەیە بە <strong className="text-cyan-500">{[...sentDeptData].sort((a,b)=>b.count-a.count)[0].count}</strong> نامە.
+                </p>
+              </motion.div>
+            )}
           </motion.div>
         )}
 
@@ -1128,6 +1173,15 @@ export const PresentationView = () => {
                 ))}
               </div>
             </motion.div>
+            {showInsights && sentTypeDataPres.length > 0 && (
+              <motion.div variants={itemVariants} className="mt-6 p-5 bg-gradient-to-r from-cyan-500/10 to-cyan-400/10 border border-cyan-500/20 rounded-2xl w-full flex items-center gap-4">
+                <Lightbulb className="text-cyan-500 shrink-0" size={28} />
+                <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                  <strong className="text-cyan-600 dark:text-cyan-400">شیکاری هۆشمەند: </strong> 
+                  جۆری <strong className="text-cyan-500">{[...sentTypeDataPres].sort((a,b)=>b.value-a.value)[0].name}</strong> بەربڵاوترین جۆری نامەی ڕەوانەکراوە بە <strong className="text-cyan-500">{[...sentTypeDataPres].sort((a,b)=>b.value-a.value)[0].value}</strong> نامە.
+                </p>
+              </motion.div>
+            )}
           </motion.div>
         )}
 
@@ -1154,6 +1208,15 @@ export const PresentationView = () => {
                 <span className="text-xl text-slate-500 font-bold relative z-10">سەرجەم هاتووەکان</span>
               </div>
             </motion.div>
+            {showInsights && true && (
+              <motion.div variants={itemVariants} className="mt-6 p-5 bg-gradient-to-r from-purple-500/10 to-purple-400/10 border border-purple-500/20 rounded-2xl w-full flex items-center gap-4">
+                <Lightbulb className="text-purple-500 shrink-0" size={28} />
+                <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                  <strong className="text-purple-600 dark:text-purple-400">شیکاری هۆشمەند: </strong> 
+                  ژمارەی نامە هاتووەکان گەیشتووەتە <strong className="text-purple-500">{totalIncoming}</strong> نامە، کە پێویستیان بە ڕێکخستن و وەڵامدانەوەیە.
+                </p>
+              </motion.div>
+            )}
           </motion.div>
         )}
 
@@ -1186,6 +1249,15 @@ export const PresentationView = () => {
                 </AreaChart>
               </ResponsiveContainer>
             </motion.div>
+            {showInsights && incomingTimelineData.length >= 2 && (
+              <motion.div variants={itemVariants} className="mt-6 p-5 bg-gradient-to-r from-fuchsia-500/10 to-fuchsia-400/10 border border-fuchsia-500/20 rounded-2xl w-full flex items-center gap-4">
+                <Lightbulb className="text-fuchsia-500 shrink-0" size={28} />
+                <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                  <strong className="text-fuchsia-600 dark:text-fuchsia-400">شیکاری هۆشمەند: </strong> 
+                  زۆرترین نامەی هاتوو لە مانگی <strong className="text-fuchsia-500">{[...incomingTimelineData].sort((a,b)=>b.count-a.count)[0].date}</strong> دا تۆمارکراوە بە بڕی <strong className="text-fuchsia-500">{[...incomingTimelineData].sort((a,b)=>b.count-a.count)[0].count}</strong> نامە.
+                </p>
+              </motion.div>
+            )}
           </motion.div>
         )}
 
@@ -1213,6 +1285,15 @@ export const PresentationView = () => {
                 </BarChart>
               </ResponsiveContainer>
             </motion.div>
+            {showInsights && incomingDeptData.length > 0 && (
+              <motion.div variants={itemVariants} className="mt-6 p-5 bg-gradient-to-r from-purple-500/10 to-purple-400/10 border border-purple-500/20 rounded-2xl w-full flex items-center gap-4">
+                <Lightbulb className="text-purple-500 shrink-0" size={28} />
+                <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                  <strong className="text-purple-600 dark:text-purple-400">شیکاری هۆشمەند: </strong> 
+                  بەشی <strong className="text-purple-500">{[...incomingDeptData].sort((a,b)=>b.count-a.count)[0].name}</strong> زۆرترین نامەی ئاراستە کراوە بە <strong className="text-purple-500">{[...incomingDeptData].sort((a,b)=>b.count-a.count)[0].count}</strong> نامە.
+                </p>
+              </motion.div>
+            )}
           </motion.div>
         )}
 
@@ -1249,6 +1330,15 @@ export const PresentationView = () => {
                 ))}
               </div>
             </motion.div>
+            {showInsights && incomingTypeDataPres.length > 0 && (
+              <motion.div variants={itemVariants} className="mt-6 p-5 bg-gradient-to-r from-purple-500/10 to-purple-400/10 border border-purple-500/20 rounded-2xl w-full flex items-center gap-4">
+                <Lightbulb className="text-purple-500 shrink-0" size={28} />
+                <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                  <strong className="text-purple-600 dark:text-purple-400">شیکاری هۆشمەند: </strong> 
+                  سەرەکیترین جۆری نامەی هاتوو بریتییە لە <strong className="text-purple-500">{[...incomingTypeDataPres].sort((a,b)=>b.value-a.value)[0].name}</strong> بە بڕی <strong className="text-purple-500">{[...incomingTypeDataPres].sort((a,b)=>b.value-a.value)[0].value}</strong> نامە.
+                </p>
+              </motion.div>
+            )}
           </motion.div>
         )}
 
@@ -1310,6 +1400,15 @@ export const PresentationView = () => {
                 <span className="text-sm font-bold mt-2" style={{ color: compConfigB.color }}>{compCountA + compCountB > 0 ? Math.round((compCountB / (compCountA + compCountB)) * 100) : 0}%</span>
               </div>
             </motion.div>
+            {showInsights && compCountA > 0 || compCountB > 0 && (
+              <motion.div variants={itemVariants} className="mt-6 p-5 bg-gradient-to-r from-indigo-500/10 to-indigo-400/10 border border-indigo-500/20 rounded-2xl w-full flex items-center gap-4">
+                <Lightbulb className="text-indigo-500 shrink-0" size={28} />
+                <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                  <strong className="text-indigo-600 dark:text-indigo-400">شیکاری هۆشمەند: </strong> 
+                  ڕێژەی <strong className="text-indigo-500">{compCountA + compCountB > 0 ? Math.round((compCountA / (compCountA + compCountB)) * 100) : 0}%</strong>ی کارەکان پەیوەستە بە <strong className="text-indigo-500">{compConfigA.name}</strong> بەرامبەر بە <strong className="text-indigo-500">{compCountA + compCountB > 0 ? Math.round((compCountB / (compCountA + compCountB)) * 100) : 0}%</strong> بۆ <strong className="text-indigo-500">{compConfigB.name}</strong>.
+                </p>
+              </motion.div>
+            )}
           </motion.div>
         )}
 
@@ -1350,6 +1449,15 @@ export const PresentationView = () => {
                 <span className="font-bold text-slate-700 dark:text-slate-300">{compConfigB.name}</span>
               </div>
             </motion.div>
+            {showInsights && deptComparisonData.length > 0 && (
+              <motion.div variants={itemVariants} className="mt-6 p-5 bg-gradient-to-r from-indigo-500/10 to-indigo-400/10 border border-indigo-500/20 rounded-2xl w-full flex items-center gap-4">
+                <Lightbulb className="text-indigo-500 shrink-0" size={28} />
+                <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                  <strong className="text-indigo-600 dark:text-indigo-400">شیکاری هۆشمەند: </strong> 
+                  بەشی <strong className="text-indigo-500">{[...deptComparisonData].sort((a,b)=>b.total-a.total)[0].name}</strong> گەورەترین قەبارەی کاری هەیە لەنێوان هەردوو سەرچاوەی بەراوردکراودا.
+                </p>
+              </motion.div>
+            )}
           </motion.div>
         )}
 
@@ -1398,6 +1506,15 @@ export const PresentationView = () => {
                 <span className="font-bold text-slate-700 dark:text-slate-300">{compConfigB.name}</span>
               </div>
             </motion.div>
+            {showInsights && timelineDataComparison.length >= 2 && (
+              <motion.div variants={itemVariants} className="mt-6 p-5 bg-gradient-to-r from-indigo-500/10 to-indigo-400/10 border border-indigo-500/20 rounded-2xl w-full flex items-center gap-4">
+                <Lightbulb className="text-indigo-500 shrink-0" size={28} />
+                <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                  <strong className="text-indigo-600 dark:text-indigo-400">شیکاری هۆشمەند: </strong> 
+                  ئەم بەراوردکارییە دەریدەخات کە چۆن گۆڕانکارییەکان بەپێی کات کاریگەرییان هەبووە لەسەر قەبارەی کار لە هەردوو سەرچاوەکەدا.
+                </p>
+              </motion.div>
+            )}
           </motion.div>
         )}
 
