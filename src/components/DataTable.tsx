@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from "react";
 import { useData } from "../context/DataContext";
 import { DashboardData } from "../utils/parser";
-import { Search, ChevronLeft, ChevronRight, ArrowUpDown, Edit2, Trash2, Check, X } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, ArrowUpDown, Edit2, Trash2, Check, X, ExternalLink } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 export const DataTable = () => {
@@ -224,7 +224,19 @@ export const DataTable = () => {
                         className="w-28 bg-white dark:bg-slate-900 border border-blue-300 rounded px-2 py-1 text-left outline-none focus:ring-2 focus:ring-blue-500"
                         dir="ltr"
                       />
-                    ) : (row.refCode)}
+                    ) : (
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(row.refCode);
+                          window.open(`https://erp.halabjagroup.com/odoo/action-817?search=${encodeURIComponent(row.refCode)}`, '_blank');
+                        }}
+                        className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline cursor-pointer transition-colors text-left inline-flex items-center gap-1.5 px-2 py-1 -ml-2 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                        title="بینین لە سیستەمی Odoo (کۆدەکە بە شێوەیەکی ئۆتۆماتیکی لەبەردەگیرێتەوە)"
+                      >
+                        {row.refCode}
+                        <ExternalLink size={12} className="opacity-70" />
+                      </button>
+                    )}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-slate-600 dark:text-slate-400">{row.sentDate || "-"}</td>
                   <td className="px-4 py-3 whitespace-nowrap text-slate-600 dark:text-slate-400">{row.responseDate || <span className="text-amber-500 font-medium">لە چاوەڕوانیدایە</span>}</td>
