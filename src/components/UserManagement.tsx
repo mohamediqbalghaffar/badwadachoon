@@ -104,7 +104,8 @@ export const UserManagement = () => {
 
   const openEditModal = (user: UserData) => {
     setSelectedUser(user);
-    setFormData({ name: user.name || '', email: user.email, role: user.role, status: user.status });
+    const normalizedStatus = user.status === 'approved' ? 'active' : user.status;
+    setFormData({ name: user.name || '', email: user.email, role: user.role, status: normalizedStatus });
     setShowEditModal(true);
   };
 
@@ -183,12 +184,12 @@ export const UserManagement = () => {
                   </td>
                   <td className="px-6 py-4">
                     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold ${
-                      u.status === 'active' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400' :
+                      (u.status === 'active' || u.status === 'approved') ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400' :
                       u.status === 'pending' ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400' :
                       'bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400'
                     }`}>
-                      {u.status === 'active' ? <CheckCircle2 size={14} /> : <XCircle size={14} />}
-                      {u.status === 'active' ? 'چالاکە' : u.status === 'pending' ? 'چاوەڕێ' : 'ڕاگیراوە'}
+                      {(u.status === 'active' || u.status === 'approved') ? <CheckCircle2 size={14} /> : <XCircle size={14} />}
+                      {(u.status === 'active' || u.status === 'approved') ? 'چالاکە' : u.status === 'pending' ? 'چاوەڕێ' : 'ڕاگیراوە'}
                     </span>
                   </td>
                   <td className="px-6 py-4">

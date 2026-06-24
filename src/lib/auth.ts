@@ -56,7 +56,7 @@ export const authOptions: NextAuthOptions = {
           throw new Error("ئەم ئیمەیڵە تۆمار نەکراوە.");
         }
 
-        if (user.status !== "active" && user.role !== "admin") {
+        if (user.status !== "active" && user.status !== "approved" && user.role !== "admin") {
           throw new Error("هەژمارەکەت چالاک نەکراوە یان ڕاگیراوە.");
         }
 
