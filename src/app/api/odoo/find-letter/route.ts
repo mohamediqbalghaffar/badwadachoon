@@ -55,7 +55,8 @@ export async function POST(request: Request) {
 
     const authData = await authRes.json();
     if (authData.error) {
-      throw new Error(`Odoo auth error: ${authData.error.message || JSON.stringify(authData.error)}`);
+      const detailedError = authData.error.data?.message || authData.error.data?.name || authData.error.message;
+      throw new Error(`Odoo auth error: ${detailedError}`);
     }
 
     // Extract session_id cookie
@@ -107,7 +108,8 @@ export async function POST(request: Request) {
 
     const searchData = await searchRes.json();
     if (searchData.error) {
-      throw new Error(`Odoo search error: ${searchData.error.message || JSON.stringify(searchData.error)}`);
+      const detailedError = searchData.error.data?.message || searchData.error.data?.name || searchData.error.message;
+      throw new Error(`Odoo search error: ${detailedError}`);
     }
 
     const records = searchData.result;
