@@ -326,8 +326,6 @@ export const DataTable = () => {
         </div>
       )}
 
-      )}
-
       {/* Toast Notification for Clipboard Copy */}
       {showToast && (
         <div className="fixed bottom-6 right-1/2 translate-x-1/2 z-[100] animate-in slide-in-from-bottom-5 fade-in duration-300">
