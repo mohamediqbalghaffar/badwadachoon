@@ -10,6 +10,7 @@ import { useAuth } from "../context/AuthContext";
 import Image from "next/image";
 import { PresentationView } from "./PresentationView";
 import { PreziPresentationView } from "./PreziPresentationView";
+import { LiquidGlassCard } from "@/components/ui/liquid-glass";
 import { SentDashboard } from "./SentDashboard";
 import { ComparisonView } from "./ComparisonView";
 import { IncomingView } from "./IncomingView";
@@ -212,22 +213,28 @@ export const Dashboard = () => {
                   {showPresentationMenu && (
                     <>
                       <div className="fixed inset-0 z-40" onClick={() => setShowPresentationMenu(false)}></div>
-                      <div className="absolute top-full left-0 mt-3 w-72 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200/80 dark:border-slate-700/80 p-2 z-50 animate-in fade-in zoom-in-95">
+                      <LiquidGlassCard
+                        glowIntensity='sm'
+                        shadowIntensity='md'
+                        borderRadius='1rem'
+                        blurIntensity='sm'
+                        className="absolute top-full left-0 mt-3 w-64 p-2 z-50 animate-in fade-in zoom-in-95 border-t border-white/40 dark:border-white/10"
+                      >
                         <button
                           onClick={() => {
                             setPresentationStyle('powerpoint');
                             setIsPresentationMode(true);
                             setShowPresentationMenu(false);
                           }}
-                          className="w-full text-right px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors mb-1 group"
+                          className="w-full text-right px-4 py-3 hover:bg-white/40 dark:hover:bg-slate-800/40 rounded-xl transition-all duration-300 mb-1 group flex justify-end"
                         >
-                          <div className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2 justify-end">
-                            <span className="text-blue-500 group-hover:scale-110 transition-transform">📊</span> Powerpoint Style
+                          <div className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+                            شێوازی ئاسایی (Classic)
+                            <span className="text-blue-500 group-hover:scale-125 transition-transform">📊</span>
                           </div>
-                          <div className="text-xs text-slate-500 mt-1">شێوازی ئاسایی (Current Presentations Style)</div>
                         </button>
                         
-                        <div className="h-px bg-slate-100 dark:bg-slate-800 my-1 mx-2"></div>
+                        <div className="h-px bg-slate-200/50 dark:bg-slate-700/50 my-1 mx-2"></div>
                         
                         <button
                           onClick={() => {
@@ -235,14 +242,14 @@ export const Dashboard = () => {
                             setIsPresentationMode(true);
                             setShowPresentationMenu(false);
                           }}
-                          className="w-full text-right px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors group"
+                          className="w-full text-right px-4 py-3 hover:bg-white/40 dark:hover:bg-slate-800/40 rounded-xl transition-all duration-300 group flex justify-end"
                         >
-                          <div className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2 justify-end">
-                            <span className="text-teal-500 group-hover:scale-110 transition-transform">🌌</span> Prezi Motion Graphic
+                          <div className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+                            شێوازی نوێ (Prezi)
+                            <span className="text-teal-500 group-hover:scale-125 transition-transform">🌌</span>
                           </div>
-                          <div className="text-xs text-slate-500 mt-1">شێوازی نوێ (New Design)</div>
                         </button>
-                      </div>
+                      </LiquidGlassCard>
                     </>
                   )}
                 </div>
