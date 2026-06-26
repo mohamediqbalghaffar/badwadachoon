@@ -147,7 +147,7 @@ export const PreziPresentationView = () => {
 
   const barData = useMemo(() => {
     const counts: Record<string, number> = {};
-    const key = activeNodeData.dataKey || 'departments';
+    const key = (activeNodeData as any).dataKey || 'departments';
     safeData.forEach((d) => {
       if (key === 'departments' && Array.isArray(d.departments)) {
         d.departments.forEach((dept: string) => { counts[dept] = (counts[dept] || 0) + 1; });
