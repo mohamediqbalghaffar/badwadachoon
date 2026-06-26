@@ -237,7 +237,6 @@ export const PreziPresentationView = () => {
   }, [baseFilteredData, baseFilteredSentData, activeView]);
 
   const renderNodeContent = (node: any, isActive: boolean) => {
-    if (!isActive && node.type !== 'map') return null;
 
     if (node.type === 'map') {
       return (
@@ -267,7 +266,7 @@ export const PreziPresentationView = () => {
 
     return (
       <NodeWrapper active={isActive} node={node} onClick={() => setActiveNode(node.id)}>
-        {node.type === 'kpi-received' && (
+        {isActive && node.type === 'kpi-received' && (
           <div className="grid grid-cols-3 gap-8 w-full">
             <div className="bg-blue-50 dark:bg-blue-900/20 p-8 rounded-[2rem] flex flex-col items-center text-center border border-blue-100 dark:border-blue-800/50">
               <div className="w-20 h-20 rounded-full bg-blue-100 dark:bg-blue-800/50 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-6">
@@ -293,7 +292,7 @@ export const PreziPresentationView = () => {
           </div>
         )}
 
-        {node.type === 'kpi-incoming' && (
+        {isActive && node.type === 'kpi-incoming' && (
           <div className="flex justify-center w-full">
             <div className="bg-blue-50 dark:bg-blue-900/20 p-12 rounded-[2rem] flex flex-col items-center text-center border border-blue-100 dark:border-blue-800/50 w-2/3">
               <div className="w-24 h-24 rounded-full bg-blue-100 dark:bg-blue-800/50 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-8">
@@ -305,7 +304,7 @@ export const PreziPresentationView = () => {
           </div>
         )}
 
-        {node.type === 'kpi-sent' && (
+        {isActive && node.type === 'kpi-sent' && (
           <div className="flex justify-center w-full">
             <div className="bg-teal-50 dark:bg-teal-900/20 p-12 rounded-[2rem] flex flex-col items-center text-center border border-teal-100 dark:border-teal-800/50 w-2/3">
               <div className="w-24 h-24 rounded-full bg-teal-100 dark:bg-teal-800/50 flex items-center justify-center text-teal-600 dark:text-teal-400 mb-8">
@@ -317,7 +316,7 @@ export const PreziPresentationView = () => {
           </div>
         )}
 
-        {node.type === 'kpi-comparison' && (
+        {isActive && node.type === 'kpi-comparison' && (
           <div className="grid grid-cols-3 gap-8 w-full">
             <div className="bg-purple-50 dark:bg-purple-900/20 p-8 rounded-[2rem] flex flex-col items-center text-center border border-purple-100 dark:border-purple-800/50">
               <div className="w-20 h-20 rounded-full bg-purple-100 dark:bg-purple-800/50 flex items-center justify-center text-purple-600 dark:text-purple-400 mb-6">
@@ -343,7 +342,7 @@ export const PreziPresentationView = () => {
           </div>
         )}
 
-        {node.type === 'bar' && (
+        {isActive && node.type === 'bar' && (
           <div className="w-full h-[450px]" dir="ltr">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={barData} margin={{ top: 25, right: 10, left: -20, bottom: 0 }}>
@@ -360,7 +359,7 @@ export const PreziPresentationView = () => {
           </div>
         )}
 
-        {node.type === 'comp-bar' && (
+        {isActive && node.type === 'comp-bar' && (
           <div className="w-full h-[450px]" dir="ltr">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={comparisonDeptData} margin={{ top: 25, right: 10, left: -20, bottom: 0 }}>
@@ -376,7 +375,7 @@ export const PreziPresentationView = () => {
           </div>
         )}
 
-        {node.type === 'pie' && (
+        {isActive && node.type === 'pie' && (
           <div className="grid grid-cols-2 gap-8 items-center w-full">
             <div className="h-[450px]" dir="ltr">
               <ResponsiveContainer width="100%" height="100%">
@@ -402,7 +401,7 @@ export const PreziPresentationView = () => {
           </div>
         )}
 
-        {node.type === 'timeline' && (
+        {isActive && node.type === 'timeline' && (
           <div className="w-full h-[450px]" dir="ltr">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={timelineData} margin={{ top: 30, right: 20, left: -20, bottom: 0 }}>
@@ -424,7 +423,7 @@ export const PreziPresentationView = () => {
           </div>
         )}
 
-        {node.type === 'comp-timeline' && (
+        {isActive && node.type === 'comp-timeline' && (
           <div className="w-full h-[450px]" dir="ltr">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={comparisonTimelineData} margin={{ top: 30, right: 20, left: -20, bottom: 0 }}>
