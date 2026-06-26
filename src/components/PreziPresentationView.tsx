@@ -5,7 +5,8 @@ import { useData } from "../context/DataContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Layers, Clock, AlertTriangle, Building2, PieChart as PieIcon, 
-  TrendingUp, Map, ArrowRight, ArrowLeft, MousePointerClick, CheckCircle2
+  TrendingUp, Map, ArrowRight, ArrowLeft, MousePointerClick, CheckCircle2,
+  ArrowDownToLine, Inbox, Send, GitCompareArrows
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -24,15 +25,25 @@ const NODES = [
 ];
 
 export const PreziPresentationView = () => {
-  const { baseFilteredData, filteredData, data, filters } = useData();
+  const { baseFilteredData, baseFilteredSentData, baseFilteredIncomingData, activeView, setActiveView } = useData();
   const [activeNode, setActiveNode] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const currentData = useMemo(() => {
+    switch(activeView) {
+      case 'incoming': return baseFilteredIncomingData;
+      case 'sent': return baseFilteredSentData;
+      case 'received': 
+      case 'comparison': 
+      default: return baseFilteredData;
+    }
+  }, [activeView, baseFilteredData, baseFilteredSentData, baseFilteredIncomingData]);
+
   // --- Calculations ---
-  const totalLetters = baseFilteredData.length;
-  const pendingLetters = baseFilteredData.filter((item) => !item.responseDate).length;
+  const totalLetters = currentData.length;
+  const pendingLetters = currentData.filter((item) => !item.responseDate).length;
   
-  const completedLetters = baseFilteredData.filter((item) => item.processingTime !== null);
+  const completedLetters = currentData.filter((item) => item.processingTime !== null);
   const avgProcessingTime =
     completedLetters.length > 0
       ? completedLetters.reduce((acc, curr) => acc + (curr.processingTime ?? 0), 0) / completedLetters.length
@@ -54,11 +65,11 @@ export const PreziPresentationView = () => {
       })
       .sort((a, b) => b.count - a.count)
       .slice(0, 8);
-  }, [baseFilteredData]);
+  }, [currentData]);
 
   const typeData = useMemo(() => {
     const counts: Record<string, number> = {};
-    baseFilteredData.forEach((d) => {
+    currentData.forEach((d) => {
       counts[d.letterType] = (counts[d.letterType] || 0) + 1;
     });
     return Object.entries(counts).map(([name, value]) => {
@@ -67,11 +78,11 @@ export const PreziPresentationView = () => {
          const abbr = words.slice(0, 2).map(w => w.charAt(0)).join('.');
          return { name, value, abbr: abbr || name.charAt(0) };
     });
-  }, [baseFilteredData]);
+  }, [currentData]);
 
   const timelineData = useMemo(() => {
     const counts: Record<string, number> = {};
-    baseFilteredData.forEach((d) => {
+    currentData.forEach((d) => {
       if (d.sentDate) {
         const date = parseISO(d.sentDate);
         if (isValid(date)) {
@@ -83,7 +94,7 @@ export const PreziPresentationView = () => {
     return Object.entries(counts)
       .map(([date, count]) => ({ date, count }))
       .sort((a, b) => a.date.localeCompare(b.date));
-  }, [baseFilteredData]);
+  }, [currentData]);
 
   // Handle Keyboard Navigation
   useEffect(() => {
@@ -118,26 +129,58 @@ export const PreziPresentationView = () => {
         className="absolute -bottom-[20%] -right-[10%] w-[600px] h-[600px] bg-emerald-500/10 dark:bg-teal-600/20 rounded-full blur-[120px]"
       />
 
+      {/* TOP CENTER: View Toggle */}
+      <div className="absolute top-6 left-1/2 -translate-x-1/2 flex bg-slate-200/50 dark:bg-slate-800/50 p-1.5 rounded-2xl backdrop-blur-md shadow-sm border border-white/20 dark:border-slate-700/50 z-50 pointer-events-auto">
+        <button 
+          onClick={() => { setActiveView('incoming'); setActiveNode(0); }} 
+          className={`px-4 py-2 text-sm font-bold rounded-xl transition-all duration-300 flex items-center gap-2 ${activeView === 'incoming' ? 'bg-white dark:bg-slate-700 text-purple-600 dark:text-purple-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
+        >
+          <ArrowDownToLine size={18} />
+          <span className="hidden sm:inline">سەرجەم هاتووەکان</span>
+        </button>
+        <button 
+          onClick={() => { setActiveView('received'); setActiveNode(0); }} 
+          className={`px-4 py-2 text-sm font-bold rounded-xl transition-all duration-300 flex items-center gap-2 ${activeView === 'received' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
+        >
+          <Inbox size={16} />
+          <span className="hidden sm:inline">پێویست بە وەڵام</span>
+        </button>
+        <button 
+          onClick={() => { setActiveView('sent'); setActiveNode(0); }} 
+          className={`px-4 py-2 text-sm font-bold rounded-xl transition-all duration-300 flex items-center gap-2 ${activeView === 'sent' ? 'bg-white dark:bg-slate-700 text-teal-600 dark:text-teal-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
+        >
+          <Send size={16} />
+          <span className="hidden sm:inline">سەرجەم ڕەوانەکراوەکان</span>
+        </button>
+        <button 
+          onClick={() => { setActiveView('comparison'); setActiveNode(0); }} 
+          className={`px-4 py-2 text-sm font-bold rounded-xl transition-all duration-300 flex items-center gap-2 ${activeView === 'comparison' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
+        >
+          <GitCompareArrows size={16} />
+          <span className="hidden sm:inline">بەراوردکردن</span>
+        </button>
+      </div>
+
       {/* Floating UI Controls */}
-      <div className="absolute top-6 left-6 right-6 flex justify-between items-center z-50 pointer-events-none">
+      <div className="absolute bottom-8 left-8 right-8 flex justify-between items-center z-50 pointer-events-none">
         <div className="flex gap-2 pointer-events-auto">
           <button 
             onClick={() => setActiveNode(0)}
-            className={`px-4 py-2 rounded-xl text-sm font-bold backdrop-blur-md transition-all ${activeNode === 0 ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30' : 'bg-white/50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700'}`}
+            className={`px-5 py-3 rounded-2xl text-lg font-bold backdrop-blur-md transition-all flex items-center gap-2 ${activeNode === 0 ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30' : 'bg-white/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xl'}`}
           >
-            <Map size={16} className="inline mr-2" />
+            <Map size={24} />
             نەخشەی گشتی
           </button>
         </div>
-        <div className="flex gap-3 pointer-events-auto bg-white/50 dark:bg-slate-800/50 p-1.5 rounded-2xl backdrop-blur-md border border-slate-200 dark:border-slate-700 shadow-sm">
-          <button onClick={() => setActiveNode(prev => prev === 0 ? NODES.length - 1 : prev - 1)} className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors text-slate-700 dark:text-slate-300">
-            <ArrowRight size={20} />
+        <div className="flex gap-4 pointer-events-auto bg-white/80 dark:bg-slate-800/80 p-2 rounded-3xl backdrop-blur-md border border-slate-200 dark:border-slate-700 shadow-xl items-center">
+          <button onClick={() => setActiveNode(prev => prev === 0 ? NODES.length - 1 : prev - 1)} className="p-3 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-2xl transition-colors text-slate-700 dark:text-slate-300">
+            <ArrowRight size={24} />
           </button>
-          <div className="px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-400 border-l border-r border-slate-300 dark:border-slate-600">
+          <div className="px-6 py-2 text-lg font-semibold text-slate-600 dark:text-slate-400 border-l border-r border-slate-300 dark:border-slate-600">
             {activeNode === 0 ? 'پێشەکی' : `بەشی ${activeNode} لە ${NODES.length - 1}`}
           </div>
-          <button onClick={() => setActiveNode(prev => prev === NODES.length - 1 ? 0 : prev + 1)} className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors text-slate-700 dark:text-slate-300">
-            <ArrowLeft size={20} />
+          <button onClick={() => setActiveNode(prev => prev === NODES.length - 1 ? 0 : prev + 1)} className="p-3 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-2xl transition-colors text-slate-700 dark:text-slate-300">
+            <ArrowLeft size={24} />
           </button>
         </div>
       </div>
@@ -213,9 +256,11 @@ export const PreziPresentationView = () => {
             onClick={() => { if (activeNode !== 1) setActiveNode(1); }}
           >
             {activeNode !== 1 && (
-              <div className="absolute inset-0 bg-slate-900/5 dark:bg-slate-900/40 backdrop-blur-sm rounded-[3rem] z-50 flex flex-col items-center justify-center border-4 border-slate-200 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-500 transition-colors">
-                <Layers size={120} className="text-blue-500 mb-8" />
-                <h2 className="text-6xl font-black text-slate-800 dark:text-white">{NODES[1].title}</h2>
+              <div className="absolute inset-0 bg-slate-900/5 dark:bg-slate-900/40 backdrop-blur-[2px] rounded-[3rem] z-50 flex flex-col items-center justify-center border-4 border-slate-200/50 dark:border-slate-700/50 hover:border-blue-500 dark:hover:border-blue-500 transition-colors">
+                <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl px-12 py-8 rounded-3xl shadow-2xl flex flex-col items-center border border-slate-200 dark:border-slate-700 transform transition-transform group-hover:scale-105">
+                  <Layers size={80} className="text-blue-500 mb-6" />
+                  <h2 className="text-5xl font-black text-slate-800 dark:text-white whitespace-nowrap">{NODES[1].title}</h2>
+                </div>
               </div>
             )}
             
@@ -264,9 +309,11 @@ export const PreziPresentationView = () => {
             onClick={() => { if (activeNode !== 2) setActiveNode(2); }}
           >
             {activeNode !== 2 && (
-              <div className="absolute inset-0 bg-slate-900/5 dark:bg-slate-900/40 backdrop-blur-sm rounded-[3rem] z-50 flex flex-col items-center justify-center border-4 border-slate-200 dark:border-slate-700 hover:border-emerald-500 dark:hover:border-emerald-500 transition-colors">
-                <Building2 size={120} className="text-emerald-500 mb-8" />
-                <h2 className="text-6xl font-black text-slate-800 dark:text-white">{NODES[2].title}</h2>
+              <div className="absolute inset-0 bg-slate-900/5 dark:bg-slate-900/40 backdrop-blur-[2px] rounded-[3rem] z-50 flex flex-col items-center justify-center border-4 border-slate-200/50 dark:border-slate-700/50 hover:border-emerald-500 dark:hover:border-emerald-500 transition-colors">
+                <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl px-12 py-8 rounded-3xl shadow-2xl flex flex-col items-center border border-slate-200 dark:border-slate-700 transform transition-transform group-hover:scale-105">
+                  <Building2 size={80} className="text-emerald-500 mb-6" />
+                  <h2 className="text-5xl font-black text-slate-800 dark:text-white whitespace-nowrap">{NODES[2].title}</h2>
+                </div>
               </div>
             )}
             
@@ -310,9 +357,11 @@ export const PreziPresentationView = () => {
             onClick={() => { if (activeNode !== 3) setActiveNode(3); }}
           >
             {activeNode !== 3 && (
-              <div className="absolute inset-0 bg-slate-900/5 dark:bg-slate-900/40 backdrop-blur-sm rounded-[3rem] z-50 flex flex-col items-center justify-center border-4 border-slate-200 dark:border-slate-700 hover:border-purple-500 dark:hover:border-purple-500 transition-colors">
-                <PieIcon size={120} className="text-purple-500 mb-8" />
-                <h2 className="text-6xl font-black text-slate-800 dark:text-white">{NODES[3].title}</h2>
+              <div className="absolute inset-0 bg-slate-900/5 dark:bg-slate-900/40 backdrop-blur-[2px] rounded-[3rem] z-50 flex flex-col items-center justify-center border-4 border-slate-200/50 dark:border-slate-700/50 hover:border-purple-500 dark:hover:border-purple-500 transition-colors">
+                <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl px-12 py-8 rounded-3xl shadow-2xl flex flex-col items-center border border-slate-200 dark:border-slate-700 transform transition-transform group-hover:scale-105">
+                  <PieIcon size={80} className="text-purple-500 mb-6" />
+                  <h2 className="text-5xl font-black text-slate-800 dark:text-white whitespace-nowrap">{NODES[3].title}</h2>
+                </div>
               </div>
             )}
             
@@ -372,9 +421,11 @@ export const PreziPresentationView = () => {
             onClick={() => { if (activeNode !== 4) setActiveNode(4); }}
           >
             {activeNode !== 4 && (
-              <div className="absolute inset-0 bg-slate-900/5 dark:bg-slate-900/40 backdrop-blur-sm rounded-[3rem] z-50 flex flex-col items-center justify-center border-4 border-slate-200 dark:border-slate-700 hover:border-orange-500 dark:hover:border-orange-500 transition-colors">
-                <TrendingUp size={120} className="text-orange-500 mb-8" />
-                <h2 className="text-6xl font-black text-slate-800 dark:text-white">{NODES[4].title}</h2>
+              <div className="absolute inset-0 bg-slate-900/5 dark:bg-slate-900/40 backdrop-blur-[2px] rounded-[3rem] z-50 flex flex-col items-center justify-center border-4 border-slate-200/50 dark:border-slate-700/50 hover:border-orange-500 dark:hover:border-orange-500 transition-colors">
+                <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl px-12 py-8 rounded-3xl shadow-2xl flex flex-col items-center border border-slate-200 dark:border-slate-700 transform transition-transform group-hover:scale-105">
+                  <TrendingUp size={80} className="text-orange-500 mb-6" />
+                  <h2 className="text-5xl font-black text-slate-800 dark:text-white whitespace-nowrap">{NODES[4].title}</h2>
+                </div>
               </div>
             )}
             
