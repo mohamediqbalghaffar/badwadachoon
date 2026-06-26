@@ -156,7 +156,7 @@ export const PreziPresentationView = () => {
       }
     });
     return Object.entries(counts).map(([name, count]) => ({ name, count, abbr: getAbbr(name) })).sort((a, b) => b.count - a.count).slice(0, 8);
-  }, [currentData, activeNodeData.dataKey]);
+  }, [currentData, (activeNodeData as any).dataKey]);
 
   const pieData = useMemo(() => {
     const counts: Record<string, number> = {};
