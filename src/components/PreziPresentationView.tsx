@@ -499,7 +499,7 @@ export const PreziPresentationView = () => {
                   </PieChart>
                 </ResponsiveContainer>
               </motion.div>
-              <motion.div className="flex flex-col gap-4" dir="rtl" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: 0.5 }}>
+              <motion.div className="flex flex-col gap-4 overflow-y-auto max-h-[450px] pr-2 custom-scrollbar" dir="rtl" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: 0.5 }}>
                 {pieData.map((entry, index) => (
                   <div key={index} className="flex items-center justify-between p-4 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/30 dark:border-slate-700 transition-all hover:scale-[1.02] hover:shadow-md">
                     <div className="flex items-center gap-3">
@@ -710,7 +710,7 @@ export const PreziPresentationView = () => {
         animate={{
           x: -activeNodeData.x,
           y: -activeNodeData.y,
-          scale: activeNode === 0 ? 0.25 : 1,
+          scale: activeNode === 0 ? 0.25 : 0.75,
         }}
         transition={{ 
           type: "spring", 
