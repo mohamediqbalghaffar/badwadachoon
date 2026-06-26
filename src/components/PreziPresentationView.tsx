@@ -419,7 +419,7 @@ export const PreziPresentationView = () => {
           {/* KPI INCOMING */}
           {node.type === 'kpi-incoming' && (
             <motion.div className="flex justify-center w-full" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.5, delay: 0.2 }}>
-              <div className="bg-blue-50 dark:bg-blue-900/20 p-12 rounded-[2rem] flex flex-col items-center text-center border border-blue-100 dark:border-blue-800/50 w-2/3">
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-8 rounded-[2rem] flex flex-col items-center text-center border border-blue-100 dark:border-blue-800/50 w-2/3">
                 <div className="w-24 h-24 rounded-full bg-blue-100 dark:bg-blue-800/50 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-8">
                   <ArrowDownToLine size={48} />
                 </div>
@@ -432,7 +432,7 @@ export const PreziPresentationView = () => {
           {/* KPI SENT */}
           {node.type === 'kpi-sent' && (
             <motion.div className="flex justify-center w-full" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.5, delay: 0.2 }}>
-              <div className="bg-teal-50 dark:bg-teal-900/20 p-12 rounded-[2rem] flex flex-col items-center text-center border border-teal-100 dark:border-teal-800/50 w-2/3">
+              <div className="bg-teal-50 dark:bg-teal-900/20 p-8 rounded-[2rem] flex flex-col items-center text-center border border-teal-100 dark:border-teal-800/50 w-2/3">
                 <div className="w-24 h-24 rounded-full bg-teal-100 dark:bg-teal-800/50 flex items-center justify-center text-teal-600 dark:text-teal-400 mb-8">
                   <Send size={48} />
                 </div>
@@ -453,7 +453,7 @@ export const PreziPresentationView = () => {
 
           {/* BAR CHART */}
           {node.type === 'bar' && (
-            <motion.div className="w-full h-[450px]" dir="ltr" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6, delay: 0.3 }}>
+            <motion.div className="w-full h-[380px]" dir="ltr" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6, delay: 0.3 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={barData} margin={{ top: 25, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#94a3b8" opacity={0.2} />
@@ -471,7 +471,7 @@ export const PreziPresentationView = () => {
 
           {/* COMPARISON BAR (side by side) */}
           {node.type === 'comp-bar' && (
-            <motion.div className="w-full h-[450px]" dir="ltr" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6, delay: 0.3 }}>
+            <motion.div className="w-full h-[380px]" dir="ltr" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6, delay: 0.3 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={comparisonDeptData} margin={{ top: 25, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#94a3b8" opacity={0.2} />
@@ -489,7 +489,7 @@ export const PreziPresentationView = () => {
           {/* PIE CHART */}
           {node.type === 'pie' && (
             <div className="grid grid-cols-2 gap-8 items-center w-full">
-              <motion.div className="h-[450px]" dir="ltr" initial={{ opacity: 0, rotate: -30 }} animate={{ opacity: 1, rotate: 0 }} transition={{ duration: 0.8, delay: 0.2 }}>
+              <motion.div className="h-[380px]" dir="ltr" initial={{ opacity: 0, rotate: -30 }} animate={{ opacity: 1, rotate: 0 }} transition={{ duration: 0.8, delay: 0.2 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie data={pieData} cx="50%" cy="50%" innerRadius={120} outerRadius={180} paddingAngle={5} dataKey="value" stroke="none" animationDuration={1200} animationEasing="ease-out">
@@ -499,7 +499,7 @@ export const PreziPresentationView = () => {
                   </PieChart>
                 </ResponsiveContainer>
               </motion.div>
-              <motion.div className="flex flex-col gap-4 overflow-y-auto max-h-[450px] pr-2 custom-scrollbar" dir="rtl" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: 0.5 }}>
+              <motion.div className="flex flex-col gap-4 overflow-y-auto max-h-[380px] pr-2 custom-scrollbar" dir="rtl" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: 0.5 }}>
                 {pieData.map((entry, index) => (
                   <div key={index} className="flex items-center justify-between p-4 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/30 dark:border-slate-700 transition-all hover:scale-[1.02] hover:shadow-md">
                     <div className="flex items-center gap-3">
@@ -515,7 +515,7 @@ export const PreziPresentationView = () => {
 
           {/* TIMELINE */}
           {node.type === 'timeline' && (
-            <motion.div className="w-full h-[450px]" dir="ltr" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6, delay: 0.3 }}>
+            <motion.div className="w-full h-[380px]" dir="ltr" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6, delay: 0.3 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={timelineData} margin={{ top: 30, right: 20, left: -20, bottom: 0 }}>
                   <defs>
@@ -538,7 +538,7 @@ export const PreziPresentationView = () => {
 
           {/* COMPARISON TIMELINE */}
           {node.type === 'comp-timeline' && (
-            <motion.div className="w-full h-[450px]" dir="ltr" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6, delay: 0.3 }}>
+            <motion.div className="w-full h-[380px]" dir="ltr" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6, delay: 0.3 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={comparisonTimelineData} margin={{ top: 30, right: 20, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#94a3b8" opacity={0.2} />
@@ -708,9 +708,9 @@ export const PreziPresentationView = () => {
         className="absolute flex items-center justify-center"
         initial={false}
         animate={{
-          x: -activeNodeData.x,
-          y: -activeNodeData.y,
-          scale: activeNode === 0 ? 0.25 : 0.75,
+          x: -activeNodeData.x * (activeNode === 0 ? 0.25 : 0.65),
+          y: -activeNodeData.y * (activeNode === 0 ? 0.25 : 0.65),
+          scale: activeNode === 0 ? 0.25 : 0.65,
         }}
         transition={{ 
           type: "spring", 
@@ -747,3 +747,4 @@ export const PreziPresentationView = () => {
     </div>
   );
 };
+
