@@ -40,10 +40,11 @@ export const PreziPresentationView = () => {
   }, [activeView, baseFilteredData, baseFilteredSentData, baseFilteredIncomingData]);
 
   // --- Calculations ---
-  const totalLetters = currentData.length;
-  const pendingLetters = currentData.filter((item) => !item.responseDate).length;
+  const safeData = currentData as any[];
+  const totalLetters = safeData.length;
+  const pendingLetters = safeData.filter((item) => !item.responseDate).length;
   
-  const completedLetters = currentData.filter((item) => item.processingTime !== null);
+  const completedLetters = safeData.filter((item) => item.processingTime !== null && item.processingTime !== undefined);
   const avgProcessingTime =
     completedLetters.length > 0
       ? completedLetters.reduce((acc, curr) => acc + (curr.processingTime ?? 0), 0) / completedLetters.length
@@ -51,10 +52,14 @@ export const PreziPresentationView = () => {
 
   const deptData = useMemo(() => {
     const counts: Record<string, number> = {};
-    baseFilteredData.forEach((d) => {
-      d.departments.forEach((dept) => {
-        counts[dept] = (counts[dept] || 0) + 1;
-      });
+    safeData.forEach((d) => {
+      if (d.departments && Array.isArray(d.departments)) {
+        d.departments.forEach((dept: string) => {
+          counts[dept] = (counts[dept] || 0) + 1;
+        });
+      } else if (d.sender) {
+        counts[d.sender] = (counts[d.sender] || 0) + 1;
+      }
     });
     return Object.entries(counts)
       .map(([name, count]) => {
@@ -69,8 +74,10 @@ export const PreziPresentationView = () => {
 
   const typeData = useMemo(() => {
     const counts: Record<string, number> = {};
-    currentData.forEach((d) => {
-      counts[d.letterType] = (counts[d.letterType] || 0) + 1;
+    safeData.forEach((d) => {
+      if (d.letterType) {
+        counts[d.letterType] = (counts[d.letterType] || 0) + 1;
+      }
     });
     return Object.entries(counts).map(([name, value]) => {
          const cleanName = name.replace('بەشی ', '').replace('سێکتەری ', '');
@@ -82,7 +89,7 @@ export const PreziPresentationView = () => {
 
   const timelineData = useMemo(() => {
     const counts: Record<string, number> = {};
-    currentData.forEach((d) => {
+    safeData.forEach((d) => {
       if (d.sentDate) {
         const date = parseISO(d.sentDate);
         if (isValid(date)) {
