@@ -254,7 +254,7 @@ export const PreziPresentationView = () => {
 
         {/* Node 1: KPIs */}
         <div 
-          className="absolute flex flex-col items-center justify-center w-[1200px] z-10"
+          className="absolute flex flex-col items-center justify-center w-[1000px] z-10"
           style={{ transform: `translate(${NODES[1].x}px, ${NODES[1].y}px)` }}
         >
           {/* Node Wrapper for clicking from map */}
@@ -264,42 +264,42 @@ export const PreziPresentationView = () => {
           >
             {activeNode !== 1 && (
               <div className="absolute inset-0 bg-slate-900/5 dark:bg-slate-900/40 backdrop-blur-[2px] rounded-[3rem] z-50 flex flex-col items-center justify-center border-4 border-slate-200/50 dark:border-slate-700/50 hover:border-blue-500 dark:hover:border-blue-500 transition-colors">
-                <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl px-12 py-8 rounded-3xl shadow-2xl flex flex-col items-center border border-slate-200 dark:border-slate-700 transform transition-transform group-hover:scale-105">
-                  <Layers size={80} className="text-blue-500 mb-6" />
-                  <h2 className="text-5xl font-black text-slate-800 dark:text-white whitespace-nowrap">{NODES[1].title}</h2>
+                <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl px-10 py-6 rounded-3xl shadow-2xl flex flex-col items-center border border-slate-200 dark:border-slate-700 transform transition-transform group-hover:scale-105">
+                  <Layers size={64} className="text-blue-500 mb-4" />
+                  <h2 className="text-4xl font-black text-slate-800 dark:text-white whitespace-nowrap">{NODES[1].title}</h2>
                 </div>
               </div>
             )}
             
-            <div className="w-full bg-white dark:bg-slate-900 rounded-[3rem] p-16 shadow-[0_20px_60px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.4)] border border-slate-200 dark:border-slate-800">
-              <h2 className="text-5xl font-black mb-16 text-center text-slate-800 dark:text-slate-100 flex items-center justify-center gap-6">
+            <div className="w-full bg-white dark:bg-slate-900 rounded-[3rem] p-10 shadow-[0_20px_60px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.4)] border border-slate-200 dark:border-slate-800">
+              <h2 className="text-4xl font-black mb-10 text-center text-slate-800 dark:text-slate-100 flex items-center justify-center gap-6">
                 <Layers className="text-blue-500" size={56} />
                 {NODES[1].title}
               </h2>
               
-              <div className="grid grid-cols-3 gap-10 w-full">
-                <div className="bg-blue-50 dark:bg-blue-900/20 p-12 rounded-[2rem] flex flex-col items-center text-center border border-blue-100 dark:border-blue-800/50">
-                  <div className="w-24 h-24 rounded-full bg-blue-100 dark:bg-blue-800/50 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-8">
-                    <Layers size={48} />
+              <div className="grid grid-cols-3 gap-8 w-full">
+                <div className="bg-blue-50 dark:bg-blue-900/20 p-8 rounded-[2rem] flex flex-col items-center text-center border border-blue-100 dark:border-blue-800/50">
+                  <div className="w-20 h-20 rounded-full bg-blue-100 dark:bg-blue-800/50 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-6">
+                    <Layers size={40} />
                   </div>
-                  <h3 className="text-2xl font-semibold text-slate-600 dark:text-slate-400 mb-4">کۆی گشتی نامەکان</h3>
-                  <span className="text-7xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-500">{totalLetters}</span>
+                  <h3 className="text-xl font-semibold text-slate-600 dark:text-slate-400 mb-4">کۆی گشتی نامەکان</h3>
+                  <span className="text-6xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-500">{totalLetters}</span>
                 </div>
                 
-                <div className="bg-amber-50 dark:bg-amber-900/20 p-12 rounded-[2rem] flex flex-col items-center text-center border border-amber-100 dark:border-amber-800/50">
-                  <div className="w-24 h-24 rounded-full bg-amber-100 dark:bg-amber-800/50 flex items-center justify-center text-amber-600 dark:text-amber-400 mb-8">
-                    <AlertTriangle size={48} />
+                <div className="bg-amber-50 dark:bg-amber-900/20 p-8 rounded-[2rem] flex flex-col items-center text-center border border-amber-100 dark:border-amber-800/50">
+                  <div className="w-20 h-20 rounded-full bg-amber-100 dark:bg-amber-800/50 flex items-center justify-center text-amber-600 dark:text-amber-400 mb-6">
+                    <AlertTriangle size={40} />
                   </div>
-                  <h3 className="text-2xl font-semibold text-slate-600 dark:text-slate-400 mb-4">هەڵپەسێردراو</h3>
-                  <span className="text-7xl font-black bg-clip-text text-transparent bg-gradient-to-r from-amber-500 to-orange-500">{pendingLetters}</span>
+                  <h3 className="text-xl font-semibold text-slate-600 dark:text-slate-400 mb-4">هەڵپەسێردراو</h3>
+                  <span className="text-6xl font-black bg-clip-text text-transparent bg-gradient-to-r from-amber-500 to-orange-500">{pendingLetters}</span>
                 </div>
                 
-                <div className="bg-emerald-50 dark:bg-emerald-900/20 p-12 rounded-[2rem] flex flex-col items-center text-center border border-emerald-100 dark:border-emerald-800/50">
-                  <div className="w-24 h-24 rounded-full bg-emerald-100 dark:bg-emerald-800/50 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-8">
-                    <Clock size={48} />
+                <div className="bg-emerald-50 dark:bg-emerald-900/20 p-8 rounded-[2rem] flex flex-col items-center text-center border border-emerald-100 dark:border-emerald-800/50">
+                  <div className="w-20 h-20 rounded-full bg-emerald-100 dark:bg-emerald-800/50 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-6">
+                    <Clock size={40} />
                   </div>
-                  <h3 className="text-2xl font-semibold text-slate-600 dark:text-slate-400 mb-4">تێکڕای کاتی وەڵام</h3>
-                  <span className="text-7xl font-black bg-clip-text text-transparent bg-gradient-to-r from-emerald-500 to-teal-500">{avgProcessingTime.toFixed(1)} <span className="text-3xl font-medium text-slate-400">ڕۆژ</span></span>
+                  <h3 className="text-xl font-semibold text-slate-600 dark:text-slate-400 mb-4">تێکڕای کاتی وەڵام</h3>
+                  <span className="text-6xl font-black bg-clip-text text-transparent bg-gradient-to-r from-emerald-500 to-teal-500">{avgProcessingTime.toFixed(1)} <span className="text-2xl font-medium text-slate-400">ڕۆژ</span></span>
                 </div>
               </div>
             </div>
@@ -308,7 +308,7 @@ export const PreziPresentationView = () => {
 
         {/* Node 2: Departments */}
         <div 
-          className="absolute flex flex-col items-center justify-center w-[1200px] z-10"
+          className="absolute flex flex-col items-center justify-center w-[1000px] z-10"
           style={{ transform: `translate(${NODES[2].x}px, ${NODES[2].y}px)` }}
         >
           <div 
@@ -317,20 +317,20 @@ export const PreziPresentationView = () => {
           >
             {activeNode !== 2 && (
               <div className="absolute inset-0 bg-slate-900/5 dark:bg-slate-900/40 backdrop-blur-[2px] rounded-[3rem] z-50 flex flex-col items-center justify-center border-4 border-slate-200/50 dark:border-slate-700/50 hover:border-emerald-500 dark:hover:border-emerald-500 transition-colors">
-                <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl px-12 py-8 rounded-3xl shadow-2xl flex flex-col items-center border border-slate-200 dark:border-slate-700 transform transition-transform group-hover:scale-105">
-                  <Building2 size={80} className="text-emerald-500 mb-6" />
-                  <h2 className="text-5xl font-black text-slate-800 dark:text-white whitespace-nowrap">{NODES[2].title}</h2>
+                <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl px-10 py-6 rounded-3xl shadow-2xl flex flex-col items-center border border-slate-200 dark:border-slate-700 transform transition-transform group-hover:scale-105">
+                  <Building2 size={64} className="text-emerald-500 mb-4" />
+                  <h2 className="text-4xl font-black text-slate-800 dark:text-white whitespace-nowrap">{NODES[2].title}</h2>
                 </div>
               </div>
             )}
             
-            <div className="w-full bg-white dark:bg-slate-900 rounded-[3rem] p-16 shadow-[0_20px_60px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.4)] border border-slate-200 dark:border-slate-800">
-              <h2 className="text-5xl font-black mb-16 text-center text-slate-800 dark:text-slate-100 flex items-center justify-center gap-6">
-                <Building2 className="text-emerald-500" size={56} />
+            <div className="w-full bg-white dark:bg-slate-900 rounded-[3rem] p-10 shadow-[0_20px_60px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.4)] border border-slate-200 dark:border-slate-800">
+              <h2 className="text-4xl font-black mb-10 text-center text-slate-800 dark:text-slate-100 flex items-center justify-center gap-6">
+                <Building2 className="text-emerald-500" size={48} />
                 {NODES[2].title}
               </h2>
               
-              <div className="w-full h-[600px]" dir="ltr">
+              <div className="w-full h-[450px]" dir="ltr">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={deptData} margin={{ top: 25, right: 10, left: -20, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#94a3b8" opacity={0.2} />
@@ -356,7 +356,7 @@ export const PreziPresentationView = () => {
 
         {/* Node 3: Types */}
         <div 
-          className="absolute flex flex-col items-center justify-center w-[1200px] z-10"
+          className="absolute flex flex-col items-center justify-center w-[1000px] z-10"
           style={{ transform: `translate(${NODES[3].x}px, ${NODES[3].y}px)` }}
         >
           <div 
@@ -365,21 +365,21 @@ export const PreziPresentationView = () => {
           >
             {activeNode !== 3 && (
               <div className="absolute inset-0 bg-slate-900/5 dark:bg-slate-900/40 backdrop-blur-[2px] rounded-[3rem] z-50 flex flex-col items-center justify-center border-4 border-slate-200/50 dark:border-slate-700/50 hover:border-purple-500 dark:hover:border-purple-500 transition-colors">
-                <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl px-12 py-8 rounded-3xl shadow-2xl flex flex-col items-center border border-slate-200 dark:border-slate-700 transform transition-transform group-hover:scale-105">
-                  <PieIcon size={80} className="text-purple-500 mb-6" />
-                  <h2 className="text-5xl font-black text-slate-800 dark:text-white whitespace-nowrap">{NODES[3].title}</h2>
+                <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl px-10 py-6 rounded-3xl shadow-2xl flex flex-col items-center border border-slate-200 dark:border-slate-700 transform transition-transform group-hover:scale-105">
+                  <PieIcon size={64} className="text-purple-500 mb-4" />
+                  <h2 className="text-4xl font-black text-slate-800 dark:text-white whitespace-nowrap">{NODES[3].title}</h2>
                 </div>
               </div>
             )}
             
-            <div className="w-full bg-white dark:bg-slate-900 rounded-[3rem] p-16 shadow-[0_20px_60px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.4)] border border-slate-200 dark:border-slate-800">
-              <h2 className="text-5xl font-black mb-16 text-center text-slate-800 dark:text-slate-100 flex items-center justify-center gap-6">
-                <PieIcon className="text-purple-500" size={56} />
+            <div className="w-full bg-white dark:bg-slate-900 rounded-[3rem] p-10 shadow-[0_20px_60px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.4)] border border-slate-200 dark:border-slate-800">
+              <h2 className="text-4xl font-black mb-10 text-center text-slate-800 dark:text-slate-100 flex items-center justify-center gap-6">
+                <PieIcon className="text-purple-500" size={48} />
                 {NODES[3].title}
               </h2>
               
-              <div className="grid grid-cols-2 gap-12 items-center">
-                <div className="h-[600px]" dir="ltr">
+              <div className="grid grid-cols-2 gap-8 items-center">
+                <div className="h-[450px]" dir="ltr">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
@@ -397,19 +397,19 @@ export const PreziPresentationView = () => {
                         ))}
                       </Pie>
                       <Tooltip
-                        contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff', fontSize: '1.2rem', padding: '1rem' }}
+                        contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff', fontSize: '1rem', padding: '1rem' }}
                       />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
-                <div className="flex flex-col gap-6" dir="rtl">
+                <div className="flex flex-col gap-4" dir="rtl">
                   {typeData.map((entry, index) => (
-                    <div key={index} className="flex items-center justify-between p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 transition-colors">
-                      <div className="flex items-center gap-4">
-                        <span className="w-6 h-6 rounded-full shadow-md" style={{ backgroundColor: COLORS[index % COLORS.length] }}></span>
-                        <span className="text-2xl font-semibold text-slate-800 dark:text-slate-200">{entry.name}</span>
+                    <div key={index} className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <span className="w-5 h-5 rounded-full shadow-md" style={{ backgroundColor: COLORS[index % COLORS.length] }}></span>
+                        <span className="text-xl font-semibold text-slate-800 dark:text-slate-200">{entry.name}</span>
                       </div>
-                      <span className="text-3xl font-black text-slate-600 dark:text-slate-400">{entry.value}</span>
+                      <span className="text-2xl font-black text-slate-600 dark:text-slate-400">{entry.value}</span>
                     </div>
                   ))}
                 </div>
@@ -420,7 +420,7 @@ export const PreziPresentationView = () => {
 
         {/* Node 4: Timeline */}
         <div 
-          className="absolute flex flex-col items-center justify-center w-[1200px] z-10"
+          className="absolute flex flex-col items-center justify-center w-[1000px] z-10"
           style={{ transform: `translate(${NODES[4].x}px, ${NODES[4].y}px)` }}
         >
           <div 
@@ -429,20 +429,20 @@ export const PreziPresentationView = () => {
           >
             {activeNode !== 4 && (
               <div className="absolute inset-0 bg-slate-900/5 dark:bg-slate-900/40 backdrop-blur-[2px] rounded-[3rem] z-50 flex flex-col items-center justify-center border-4 border-slate-200/50 dark:border-slate-700/50 hover:border-orange-500 dark:hover:border-orange-500 transition-colors">
-                <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl px-12 py-8 rounded-3xl shadow-2xl flex flex-col items-center border border-slate-200 dark:border-slate-700 transform transition-transform group-hover:scale-105">
-                  <TrendingUp size={80} className="text-orange-500 mb-6" />
-                  <h2 className="text-5xl font-black text-slate-800 dark:text-white whitespace-nowrap">{NODES[4].title}</h2>
+                <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl px-10 py-6 rounded-3xl shadow-2xl flex flex-col items-center border border-slate-200 dark:border-slate-700 transform transition-transform group-hover:scale-105">
+                  <TrendingUp size={64} className="text-orange-500 mb-4" />
+                  <h2 className="text-4xl font-black text-slate-800 dark:text-white whitespace-nowrap">{NODES[4].title}</h2>
                 </div>
               </div>
             )}
             
-            <div className="w-full bg-white dark:bg-slate-900 rounded-[3rem] p-16 shadow-[0_20px_60px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.4)] border border-slate-200 dark:border-slate-800">
-              <h2 className="text-5xl font-black mb-16 text-center text-slate-800 dark:text-slate-100 flex items-center justify-center gap-6">
-                <TrendingUp className="text-orange-500" size={56} />
+            <div className="w-full bg-white dark:bg-slate-900 rounded-[3rem] p-10 shadow-[0_20px_60px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.4)] border border-slate-200 dark:border-slate-800">
+              <h2 className="text-4xl font-black mb-10 text-center text-slate-800 dark:text-slate-100 flex items-center justify-center gap-6">
+                <TrendingUp className="text-orange-500" size={48} />
                 {NODES[4].title}
               </h2>
               
-              <div className="w-full h-[600px]" dir="ltr">
+              <div className="w-full h-[450px]" dir="ltr">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={timelineData} margin={{ top: 30, right: 20, left: -20, bottom: 0 }}>
                     <defs>
