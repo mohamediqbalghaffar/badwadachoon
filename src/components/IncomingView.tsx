@@ -569,7 +569,7 @@ const IncomingDataTable = () => {
                       </span>
                     )}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap">{row.sentDate || "-"}</td>
+                  <td className="px-4 py-3 whitespace-nowrap">{row.sentDate ? row.sentDate.split('T')[0] : "-"}</td>
                   {hasPermission('data:edit') && (
                     <td className="px-4 py-3 whitespace-nowrap text-center">
                       {editingId === row.id ? (

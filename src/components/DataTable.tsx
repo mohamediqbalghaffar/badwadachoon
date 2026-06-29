@@ -343,8 +343,8 @@ export const DataTable = () => {
                       </button>
                     )}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-slate-600 dark:text-slate-400">{row.sentDate || "-"}</td>
-                  <td className="px-4 py-3 whitespace-nowrap text-slate-600 dark:text-slate-400">{row.responseDate || <span className="text-amber-500 font-medium">لە چاوەڕوانیدایە</span>}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-slate-600 dark:text-slate-400">{row.sentDate ? row.sentDate.split('T')[0] : "-"}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-slate-600 dark:text-slate-400">{row.responseDate ? row.responseDate.split('T')[0] : <span className="text-amber-500 font-medium">لە چاوەڕوانیدایە</span>}</td>
                   <td className="px-4 py-3 whitespace-nowrap text-center font-semibold text-slate-700 dark:text-slate-300">{row.processingTime !== null ? row.processingTime : "-"}</td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     <span className={`px-2.5 py-1 text-xs font-medium border rounded-full ${getSLAColor(row.slaTime)}`}>
