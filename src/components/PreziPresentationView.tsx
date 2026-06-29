@@ -592,9 +592,9 @@ export const PreziPresentationView = () => {
       {/* TOP CENTER: View Toggle */}
       <div className="absolute top-6 left-1/2 -translate-x-1/2 flex bg-white/50 dark:bg-slate-800/50 p-1.5 rounded-2xl backdrop-blur-xl shadow-lg border border-white/30 dark:border-slate-700/50 z-50 pointer-events-auto">
         {[
-          { key: 'incoming', label: 'سەرجەم هاتووەکان', icon: ArrowDownToLine, activeColor: 'text-purple-600 dark:text-purple-400' },
           { key: 'received', label: 'پێویست بە وەڵام', icon: Inbox, activeColor: 'text-blue-600 dark:text-blue-400' },
           { key: 'sent', label: 'سەرجەم ڕەوانەکراوەکان', icon: Send, activeColor: 'text-teal-600 dark:text-teal-400' },
+          { key: 'incoming', label: 'سەرجەم هاتووەکان', icon: ArrowDownToLine, activeColor: 'text-purple-600 dark:text-purple-400' },
           { key: 'comparison', label: 'بەراوردکردن', icon: GitCompareArrows, activeColor: 'text-indigo-600 dark:text-indigo-400' },
         ].map(tab => (
           <button 

@@ -52,7 +52,7 @@ export const DataProvider = ({ children, mode }: { children: React.ReactNode, mo
   const [data, setData] = useState<DashboardData[]>([]);
   const [sentData, setSentData] = useState<SentLetterData[]>([]);
   const [incomingData, setIncomingData] = useState<IncomingLetterData[]>([]);
-  const [activeView, setActiveView] = useState<ActiveView>('incoming');
+  const [activeView, setActiveView] = useState<ActiveView>('received');
   const [filters, setFilters] = useState<FilterState>({
     dateRange: { start: null, end: null },
     departments: [],
