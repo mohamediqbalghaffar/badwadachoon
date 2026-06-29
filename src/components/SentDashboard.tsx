@@ -329,7 +329,7 @@ const SentDataTable = () => {
   const { filteredSentData, setSentData, sentData , filters, setFilters } = useData();
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortConfig, setSortConfig] = useState<{ key: keyof SentLetterData; direction: "asc" | "desc" } | null>(null);
+  const [sortConfig, setSortConfig] = useState<{ key: keyof SentLetterData; direction: "asc" | "desc" } | null>({ key: 'sentDate', direction: 'desc' });
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 15;
 
