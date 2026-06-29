@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from "react";
 import { useData } from "../context/DataContext";
 import { DashboardData } from "../utils/parser";
-import { Search, ChevronLeft, ChevronRight, ArrowUpDown, Edit2, Trash2, Check, X, ExternalLink } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Edit2, Trash2, Check, X, ExternalLink } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 export const DataTable = () => {
@@ -57,18 +57,27 @@ export const DataTable = () => {
     let sortableItems = [...searchedData];
     if (sortConfig !== null) {
       sortableItems.sort((a, b) => {
-        let aVal: any = a[sortConfig.key] ?? "";
-        let bVal: any = b[sortConfig.key] ?? "";
+        let aVal: any = a[sortConfig.key];
+        let bVal: any = b[sortConfig.key];
+
+        if (aVal === null || aVal === undefined) aVal = "";
+        if (bVal === null || bVal === undefined) bVal = "";
 
         if (Array.isArray(aVal)) aVal = aVal.join(", ");
         if (Array.isArray(bVal)) bVal = bVal.join(", ");
 
-        if (aVal === null) return 1;
-        if (bVal === null) return -1;
+        if (typeof aVal === 'number' && typeof bVal === 'number') {
+          return sortConfig.direction === "asc" ? aVal - bVal : bVal - aVal;
+        }
 
-        if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
-        if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
-        return 0;
+        const aStr = String(aVal).trim();
+        const bStr = String(bVal).trim();
+
+        if (!aStr && bStr) return 1;
+        if (aStr && !bStr) return -1;
+
+        const comparison = aStr.localeCompare(bStr, undefined, { numeric: true, sensitivity: 'base' });
+        return sortConfig.direction === "asc" ? comparison : -comparison;
       });
     }
     return sortableItems;
@@ -82,11 +91,20 @@ export const DataTable = () => {
   }, [sortedData, currentPage]);
 
   const requestSort = (key: keyof DashboardData) => {
-    let direction: "asc" | "desc" = "asc";
-    if (sortConfig && sortConfig.key === key && sortConfig.direction === "asc") {
-      direction = "desc";
+    let direction: "asc" | "desc" | null = "asc";
+    if (sortConfig && sortConfig.key === key) {
+      if (sortConfig.direction === "asc") {
+        direction = "desc";
+      } else if (sortConfig.direction === "desc") {
+        direction = null;
+      }
     }
-    setSortConfig({ key, direction });
+    
+    if (direction === null) {
+      setSortConfig(null);
+    } else {
+      setSortConfig({ key, direction });
+    }
   };
 
   const getSLAColor = (slaTime: string) => {
@@ -206,7 +224,15 @@ export const DataTable = () => {
                 >
                   <div className="flex items-center gap-1 justify-start">
                     <span>{col.label}</span>
-                    <ArrowUpDown size={12} className="opacity-50" />
+                    {sortConfig?.key === col.key ? (
+                      sortConfig.direction === "asc" ? (
+                        <ArrowUp size={12} className="text-blue-500" />
+                      ) : (
+                        <ArrowDown size={12} className="text-blue-500" />
+                      )
+                    ) : (
+                      <ArrowUpDown size={12} className="opacity-50" />
+                    )}
                   </div>
                 </th>
               ))}
