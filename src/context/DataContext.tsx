@@ -67,12 +67,13 @@ export const DataProvider = ({ children, mode }: { children: React.ReactNode, mo
 
   const { data: session } = useSession();
   const { hasPermission, loading: permsLoading } = usePermissions();
+  const canFetchDb = hasPermission('db:fetch');
 
   // Fetch initial data from DB on mount
   React.useEffect(() => {
     if (permsLoading) return; // Wait for permissions to load
 
-    if (mode === 'local' || !hasPermission('db:fetch')) {
+    if (mode === 'local' || !canFetchDb) {
       setDbLoading(false);
       return;
     }
@@ -106,7 +107,7 @@ export const DataProvider = ({ children, mode }: { children: React.ReactNode, mo
     };
 
     fetchFromDb();
-  }, [mode, hasPermission, permsLoading]);
+  }, [mode, canFetchDb, permsLoading]);
 
   // === VIEWER LIVE DATA FETCHING ===
   React.useEffect(() => {

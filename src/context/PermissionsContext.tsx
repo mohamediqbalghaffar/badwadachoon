@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 
 type PermissionKey = 'data:edit' | 'data:upload' | 'users:manage' | 'roles:manage' | 'db:fetch';
@@ -22,11 +22,12 @@ export const PermissionsProvider = ({ children }: { children: React.ReactNode })
   const [permissions, setPermissions] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const userRole = (session?.user as any)?.role;
+
   useEffect(() => {
     const fetchPermissions = async () => {
       if (status === 'loading') return;
       
-      const userRole = (session?.user as any)?.role;
       if (!userRole) {
         setPermissions([]);
         setLoading(false);
@@ -56,11 +57,11 @@ export const PermissionsProvider = ({ children }: { children: React.ReactNode })
     };
 
     fetchPermissions();
-  }, [session, status]);
+  }, [userRole, status]);
 
-  const hasPermission = (key: PermissionKey) => {
+  const hasPermission = useCallback((key: PermissionKey) => {
     return permissions.includes(key);
-  };
+  }, [permissions]);
 
   return (
     <PermissionsContext.Provider value={{ permissions, hasPermission, loading }}>
