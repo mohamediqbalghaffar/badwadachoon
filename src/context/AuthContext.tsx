@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext } from "react";
 import { SessionProvider, useSession, signOut } from "next-auth/react";
+import { PermissionsProvider } from "./PermissionsContext";
 
 export type UserRole = "admin" | "user" | "viewer" | null;
 
@@ -52,7 +53,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <SessionProvider>
       <AuthStateProvider>
-        {children}
+        <PermissionsProvider>
+          {children}
+        </PermissionsProvider>
       </AuthStateProvider>
     </SessionProvider>
   );

@@ -93,6 +93,18 @@ export async function GET() {
           "updatedAt" DATETIME NOT NULL,
           CONSTRAINT "SessionData_userId_fkey" FOREIGN KEY ("userId") REFERENCES "ActiveSession" ("userId") ON DELETE CASCADE ON UPDATE CASCADE
       );
+
+      CREATE TABLE IF NOT EXISTS "RolePermission" (
+          "role" TEXT NOT NULL PRIMARY KEY,
+          "permissions" TEXT NOT NULL,
+          "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+      );
+
+      INSERT OR IGNORE INTO "RolePermission" ("role", "permissions") VALUES 
+      ('admin', '["data:edit", "data:upload", "users:manage", "roles:manage", "db:fetch"]'),
+      ('user', '["data:edit", "db:fetch"]'),
+      ('viewer', '[]'),
+      ('guest', '["db:fetch"]');
     `;
 
     await libsql.executeMultiple(sql);

@@ -4,11 +4,13 @@ import React, { useState, useMemo } from "react";
 import { useData } from "../context/DataContext";
 import { DashboardData } from "../utils/parser";
 import { Search, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Edit2, Trash2, Check, X, ExternalLink } from "lucide-react";
+import { usePermissions } from '@/context/PermissionsContext';
 import { useAuth } from "../context/AuthContext";
 
 export const DataTable = () => {
   const { filteredData, setData, data , filters, setFilters } = useData();
   const { user } = useAuth();
+  const { hasPermission } = usePermissions();
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState<{ key: keyof DashboardData; direction: "asc" | "desc" } | null>({ key: 'sentDate', direction: 'desc' });
   const [currentPage, setCurrentPage] = useState(1);
@@ -294,7 +296,7 @@ export const DataTable = () => {
                   </div>
                 </th>
               ))}
-              {(user?.role === 'admin' || user?.role === 'user') && (
+              {hasPermission('data:edit') && (
                 <th className="px-4 py-3 whitespace-nowrap text-center">کردارەکان</th>
               )}
             </tr>
@@ -349,7 +351,7 @@ export const DataTable = () => {
                       {row.slaTime || "-"}
                     </span>
                   </td>
-                  {(user?.role === 'admin' || user?.role === 'user') && (
+                  {hasPermission('data:edit') && (
                     <td className="px-4 py-3 whitespace-nowrap text-center">
                       {editingId === row.id ? (
                         <div className="flex items-center justify-center gap-2">

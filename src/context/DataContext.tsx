@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useMemo } from "react";
 import { useSession } from "next-auth/react";
+import { usePermissions } from './PermissionsContext';
 import { DashboardData, SentLetterData, IncomingLetterData } from "../utils/parser";
 
 export type ActiveView = 'incoming' | 'received' | 'sent' | 'comparison';
@@ -65,11 +66,13 @@ export const DataProvider = ({ children, mode }: { children: React.ReactNode, mo
   const [viewerSelectedUserId, setViewerSelectedUserId] = useState<string | null>(null);
 
   const { data: session } = useSession();
-  const userRole = (session?.user as any)?.role;
+  const { hasPermission, loading: permsLoading } = usePermissions();
 
   // Fetch initial data from DB on mount
   React.useEffect(() => {
-    if (mode === 'local' || userRole === 'viewer') {
+    if (permsLoading) return; // Wait for permissions to load
+
+    if (mode === 'local' || !hasPermission('db:fetch')) {
       setDbLoading(false);
       return;
     }
@@ -103,7 +106,7 @@ export const DataProvider = ({ children, mode }: { children: React.ReactNode, mo
     };
 
     fetchFromDb();
-  }, [mode]);
+  }, [mode, hasPermission, permsLoading]);
 
   // === VIEWER LIVE DATA FETCHING ===
   React.useEffect(() => {

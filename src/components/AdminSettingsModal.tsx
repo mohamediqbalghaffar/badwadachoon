@@ -10,6 +10,7 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { parseFile } from "../utils/parser";
 import { UserManagement } from "./UserManagement";
+import { usePermissions } from "@/context/PermissionsContext";
 
 type Tab = 'database' | 'approvals' | 'profile';
 
@@ -25,6 +26,7 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose,
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const { setData, setSentData, setIncomingData, mode } = useData();
+  const { hasPermission } = usePermissions();
   const { user } = useAuth();
   const { update } = useSession();
   const { theme, setTheme } = useTheme();
@@ -334,7 +336,7 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose,
 
         {/* Tabs Navigation */}
         <div className="flex border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 px-6 pt-2 gap-4 overflow-x-auto">
-          {user?.role === 'admin' && (
+          {hasPermission('data:upload') && (
             <>
               <button 
                 onClick={() => setActiveTab('database')}
@@ -361,7 +363,7 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose,
         {/* Content */}
         <div className="p-6 sm:p-8 overflow-y-auto">
           
-          {activeTab === 'database' && user?.role === 'admin' && (
+          {activeTab === 'database' && hasPermission('data:upload') && (
             <div className="space-y-8 animate-in fade-in">
               <div className="bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 rounded-2xl p-5 text-blue-800 dark:text-blue-300 flex gap-4 text-sm leading-relaxed">
                 <AlertCircle className="shrink-0 mt-0.5" size={20} />
@@ -460,7 +462,7 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose,
             </div>
           )}
 
-          {activeTab === 'approvals' && user?.role === 'admin' && (
+          {activeTab === 'approvals' && hasPermission('users:manage') && (
             <div className="animate-in fade-in">
               <UserManagement />
             </div>

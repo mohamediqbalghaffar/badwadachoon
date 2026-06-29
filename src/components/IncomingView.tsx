@@ -4,6 +4,7 @@ import React, { useState, useMemo } from "react";
 import { useData } from "../context/DataContext";
 import { IncomingLetterData } from "../utils/parser";
 import { Send, Building2, FileText, Search, ChevronLeft, ChevronRight, ArrowUpDown, Edit2, Trash2, Check, X } from "lucide-react";
+import { usePermissions } from '@/context/PermissionsContext';
 import { useAuth } from "../context/AuthContext";
 import {
   BarChart,
@@ -330,6 +331,7 @@ const IncomingCharts = () => {
 const IncomingDataTable = () => {
   const { filteredIncomingData, setSentData, incomingData , filters, setFilters } = useData();
   const { user } = useAuth();
+  const { hasPermission } = usePermissions();
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState<{ key: keyof IncomingLetterData; direction: "asc" | "desc" } | null>({ key: 'sentDate', direction: 'desc' });
   const [currentPage, setCurrentPage] = useState(1);
@@ -506,7 +508,7 @@ const IncomingDataTable = () => {
                   </div>
                 </th>
               ))}
-              {(user?.role === 'admin' || user?.role === 'user') && (
+              {hasPermission('data:edit') && (
                 <th className="px-4 py-3 whitespace-nowrap text-center">کردارەکان</th>
               )}
             </tr>
@@ -568,7 +570,7 @@ const IncomingDataTable = () => {
                     )}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">{row.sentDate || "-"}</td>
-                  {(user?.role === 'admin' || user?.role === 'user') && (
+                  {hasPermission('data:edit') && (
                     <td className="px-4 py-3 whitespace-nowrap text-center">
                       {editingId === row.id ? (
                         <div className="flex items-center justify-center gap-2">

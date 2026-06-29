@@ -4,6 +4,7 @@ import React, { useState, useMemo } from "react";
 import { useData } from "../context/DataContext";
 import { SentLetterData } from "../utils/parser";
 import { Send, Building2, FileText, Search, ChevronLeft, ChevronRight, ArrowUpDown, Edit2, Trash2, Check, X } from "lucide-react";
+import { usePermissions } from '@/context/PermissionsContext';
 import { useAuth } from "../context/AuthContext";
 import {
   BarChart,
@@ -328,6 +329,7 @@ const SentCharts = () => {
 const SentDataTable = () => {
   const { filteredSentData, setSentData, sentData , filters, setFilters } = useData();
   const { user } = useAuth();
+  const { hasPermission } = usePermissions();
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState<{ key: keyof SentLetterData; direction: "asc" | "desc" } | null>({ key: 'sentDate', direction: 'desc' });
   const [currentPage, setCurrentPage] = useState(1);
@@ -503,7 +505,7 @@ const SentDataTable = () => {
                   </div>
                 </th>
               ))}
-              {(user?.role === 'admin' || user?.role === 'user') && (
+              {hasPermission('data:edit') && (
                 <th className="px-4 py-3 whitespace-nowrap text-center">کردارەکان</th>
               )}
             </tr>
@@ -555,7 +557,7 @@ const SentDataTable = () => {
                     )}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">{row.sentDate || "-"}</td>
-                  {(user?.role === 'admin' || user?.role === 'user') && (
+                  {hasPermission('data:edit') && (
                     <td className="px-4 py-3 whitespace-nowrap text-center">
                       {editingId === row.id ? (
                         <div className="flex items-center justify-center gap-2">

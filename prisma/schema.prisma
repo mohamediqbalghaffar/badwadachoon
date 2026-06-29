@@ -94,3 +94,10 @@ model SessionData {
   updatedAt    DateTime      @updatedAt
   session      ActiveSession @relation(fields: [userId], references: [userId], onDelete: Cascade)
 }
+
+model RolePermission {
+  role        String   @id
+  permissions String
+  updatedAt   DateTime @updatedAt
+}
+
