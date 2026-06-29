@@ -22,16 +22,16 @@ export async function POST(request: Request) {
     await prisma.sessionData.upsert({
       where: { userId },
       update: {
-        data,
-        sentData,
-        incomingData,
+        data: JSON.stringify(data),
+        sentData: JSON.stringify(sentData),
+        incomingData: JSON.stringify(incomingData),
         updatedAt: new Date(),
       },
       create: {
         userId,
-        data,
-        sentData,
-        incomingData,
+        data: JSON.stringify(data),
+        sentData: JSON.stringify(sentData),
+        incomingData: JSON.stringify(incomingData),
       },
     });
 
@@ -65,9 +65,9 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.json({
-      data: sessionData.data,
-      sentData: sessionData.sentData,
-      incomingData: sessionData.incomingData || [],
+      data: JSON.parse(sessionData.data),
+      sentData: JSON.parse(sessionData.sentData),
+      incomingData: sessionData.incomingData ? JSON.parse(sessionData.incomingData) : [],
     });
   } catch (error: any) {
     console.error('Data fetch error:', error);

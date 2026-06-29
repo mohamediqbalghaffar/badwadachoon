@@ -8,7 +8,7 @@ export async function GET() {
     const letters = await prisma.receivedLetter.findMany({
       orderBy: { id: 'asc' }
     });
-    return NextResponse.json(letters);
+    return NextResponse.json(letters.map(l => ({ ...l, departments: JSON.parse(l.departments) })));
   } catch (error: any) {
     console.error('Failed to fetch received letters:', error);
     return NextResponse.json({ error: 'Failed to fetch letters' }, { status: 500 });
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
         id: data.id,
         subject: data.subject || "نەزانراو",
         department: data.department || "نەزانراو",
-        departments: data.departments || [],
+        departments: JSON.stringify(data.departments || []),
         dept1: data.dept1 || null,
         dept2: data.dept2 || null,
         dept3: data.dept3 || null,
@@ -63,7 +63,7 @@ export async function PUT(request: Request) {
       data: {
         subject: data.subject,
         department: data.department,
-        departments: data.departments,
+        departments: JSON.stringify(data.departments || []),
         dept1: data.dept1,
         dept2: data.dept2,
         dept3: data.dept3,

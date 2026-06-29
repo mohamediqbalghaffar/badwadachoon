@@ -1,84 +1,78 @@
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("POSTGRES_URL")
-  directUrl = env("POSTGRES_URL_NON_POOLING")
+  provider = "sqlite"
+  url      = env("TURSO_DATABASE_URL")
 }
 
 model ReceivedLetter {
-  id             Int       @id @default(autoincrement()) @map("#")
-  subject        String    @map("بابەت")
-  department     String    @map("لایەنی پەیوەندیدار گشتی")
-  departments    String[]  @default([]) @map("لایەنە پەیوەندیدارەکان")
-  dept1          String?   @map("لایەنی پەیوەندیدار 1")
-  dept2          String?   @map("لایەنی پەیوەندیدار 2")
-  dept3          String?   @map("لایەنی پەیوەندیدار 3")
-  refCode        String    @map("جۆر")
-  letterType     String    @map("جۆری نامە")
-  sentDate       DateTime? @map("ڕۆژی ناردن")
-  responseDate   DateTime? @map("ڕۆژی وەڵام")
-  processingTime Int?      @map("تێبینی")
-  slaTime        String    @map("کاتی تێچوو بەپێی ڕێنمایی")
+  id             Int       @id @default(autoincrement())
+  subject        String
+  department     String
+  departments    String    @default("[]")
+  dept1          String?
+  dept2          String?
+  dept3          String?
+  refCode        String
+  letterType     String
+  sentDate       DateTime?
+  responseDate   DateTime?
+  processingTime Int?
+  slaTime        String
 
-  createdAt      DateTime  @default(now()) @map("کاتی دروستکردن")
-  updatedAt      DateTime  @updatedAt @map("کاتی نوێکردنەوە")
-
-  @@map("وەڵامی_نووسراوە_نێردراوەکان")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 }
 
 model SentLetter {
-  id             Int       @id @default(autoincrement()) @map("#")
-  subject        String    @map("بابەت")
-  department     String    @map("لایەنی پەیوەندیدار گشتی")
-  departments    String[]  @default([]) @map("لایەنە پەیوەندیدارەکان")
-  dept1          String?   @map("لایەنی پەیوەندیدار 1")
-  dept2          String?   @map("لایەنی پەیوەندیدار 2")
-  dept3          String?   @map("لایەنی پەیوەندیدار 3")
-  refCode        String    @map("جۆر")
-  letterType     String    @map("جۆری نامە")
-  sentDate       DateTime? @map("ڕۆژی ناردن")
+  id             Int       @id @default(autoincrement())
+  subject        String
+  department     String
+  departments    String    @default("[]")
+  dept1          String?
+  dept2          String?
+  dept3          String?
+  refCode        String
+  letterType     String
+  sentDate       DateTime?
 
-  createdAt      DateTime  @default(now()) @map("کاتی دروستکردن")
-  updatedAt      DateTime  @updatedAt @map("کاتی نوێکردنەوە")
-
-  @@map("سەرجەم_نووسراوە_ڕەوانەکراوەکان")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 }
 
 model IncomingLetter {
-  id             Int       @id @default(autoincrement()) @map("#")
-  subject        String    @map("بابەت")
-  sender         String?   @map("هاتووە لە")
-  department     String    @map("لایەنی پەیوەندیدار گشتی")
-  departments    String[]  @default([]) @map("لایەنە پەیوەندیدارەکان")
-  dept1          String?   @map("لایەنی پەیوەندیدار 1")
-  dept2          String?   @map("لایەنی پەیوەندیدار 2")
-  dept3          String?   @map("لایەنی پەیوەندیدار 3")
-  refCode        String    @map("جۆر")
-  letterType     String    @map("جۆری نامە")
-  sentDate       DateTime? @map("ڕۆژی ناردن")
+  id             Int       @id @default(autoincrement())
+  subject        String
+  sender         String?
+  department     String
+  departments    String    @default("[]")
+  dept1          String?
+  dept2          String?
+  dept3          String?
+  refCode        String
+  letterType     String
+  sentDate       DateTime?
 
-  createdAt      DateTime  @default(now()) @map("کاتی دروستکردن")
-  updatedAt      DateTime  @updatedAt @map("کاتی نوێکردنەوە")
-
-  @@map("سەرجەم_نووسراوە_هاتووەکان")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 }
 
 model UserAccount {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  image     String?
-  role      String   @default("user")
-  status    String   @default("pending") // pending, approved, active
-  authCode  String?
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
+  image        String?
+  role         String   @default("user")
+  status       String   @default("pending") // pending, approved, active
+  authCode     String?
   odooUrl      String?
   odooDb       String?
   odooUsername String?
   odooApiKey   String?
-  createdAt DateTime @default(now())
+  createdAt    DateTime @default(now())
 }
 
 model ActiveSession {
@@ -94,9 +88,9 @@ model ActiveSession {
 
 model SessionData {
   userId       String        @id
-  data         Json
-  sentData     Json
-  incomingData Json?         @default("[]")
+  data         String
+  sentData     String
+  incomingData String?       @default("[]")
   updatedAt    DateTime      @updatedAt
-  session   ActiveSession @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  session      ActiveSession @relation(fields: [userId], references: [userId], onDelete: Cascade)
 }
