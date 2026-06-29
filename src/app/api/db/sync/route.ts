@@ -40,7 +40,6 @@ export async function POST(request: Request) {
             processingTime: d.processingTime !== undefined ? d.processingTime : null,
             slaTime: d.slaTime || "-",
           })),
-          skipDuplicates: true,
         });
       }
 
@@ -59,7 +58,6 @@ export async function POST(request: Request) {
             letterType: d.letterType || "گشتی",
             sentDate: d.sentDate ? new Date(d.sentDate) : null,
           })),
-          skipDuplicates: true,
         });
       }
 
@@ -79,7 +77,6 @@ export async function POST(request: Request) {
             letterType: d.letterType || "گشتی",
             sentDate: d.sentDate ? new Date(d.sentDate) : null,
           })),
-          skipDuplicates: true,
         });
       }
     }, {
