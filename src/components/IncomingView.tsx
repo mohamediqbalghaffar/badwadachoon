@@ -292,7 +292,7 @@ const IncomingCharts = () => {
       <div className="glass glass-card glass-interactive p-6 flex flex-col min-h-80 h-auto relative overflow-hidden group mb-8">
         <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-sky-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
         <h3 className="text-lg font-semibold mb-6">هەڵکشان و داکشانی نامە هاتووەکان بەپێی کات</h3>
-        <div className="flex-1 min-h-[300px]" dir="ltr">
+        <div className="w-full h-[350px]" dir="ltr">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={timelineData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>
