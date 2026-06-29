@@ -125,20 +125,33 @@ const INCOMING_SHEET_NAMES = [
   "نووسراوە هاتووەکان"
 ];
 
-const findSheetByName = (workbook: XLSX.WorkBook, targetNames: string[]): XLSX.WorkSheet | null => {
+const findSheetByName = (workbook: XLSX.WorkBook, targetNames: string[], usedSheets: Set<string>): { sheet: XLSX.WorkSheet; name: string } | null => {
+  // Phase 1: Try exact matches first (highest priority)
   for (const sheetName of workbook.SheetNames) {
+    if (usedSheets.has(sheetName)) continue;
     const normSheet = normalizeHeader(sheetName);
     for (const target of targetNames) {
       const normTarget = normalizeHeader(target);
       if (normSheet === normTarget) {
-        return workbook.Sheets[sheetName];
-      }
-      // Also try substring match
-      if (normSheet.includes(normTarget) || normTarget.includes(normSheet)) {
-        return workbook.Sheets[sheetName];
+        return { sheet: workbook.Sheets[sheetName], name: sheetName };
       }
     }
   }
+
+  // Phase 2: Try substring match — only where the target is contained in the sheet name
+  for (const sheetName of workbook.SheetNames) {
+    if (usedSheets.has(sheetName)) continue;
+    const normSheet = normalizeHeader(sheetName);
+    // Sort target names by length descending to prefer longer (more specific) matches
+    const sortedTargets = [...targetNames].sort((a, b) => b.length - a.length);
+    for (const target of sortedTargets) {
+      const normTarget = normalizeHeader(target);
+      if (normSheet.includes(normTarget)) {
+        return { sheet: workbook.Sheets[sheetName], name: sheetName };
+      }
+    }
+  }
+
   return null;
 };
 
@@ -299,27 +312,53 @@ export const parseFile = async (file: File): Promise<ParseResult> => {
         const data = e.target?.result;
         const workbook = XLSX.read(data, { type: "array", cellDates: true });
 
+        // Track which sheets have been claimed to prevent duplicates
+        const usedSheets = new Set<string>();
+
         // --- Parse Sheet 1 (Received Letters) ---
-        let receivedSheet = findSheetByName(workbook, RECEIVED_SHEET_NAMES);
-        if (!receivedSheet) {
+        const receivedMatch = findSheetByName(workbook, RECEIVED_SHEET_NAMES, usedSheets);
+        let receivedWorksheet: XLSX.WorkSheet | null = null;
+        if (receivedMatch) {
+          receivedWorksheet = receivedMatch.sheet;
+          usedSheets.add(receivedMatch.name);
+        } else if (workbook.SheetNames.length > 0 && !usedSheets.has(workbook.SheetNames[0])) {
           // Fallback to first sheet
-          receivedSheet = workbook.Sheets[workbook.SheetNames[0]];
+          receivedWorksheet = workbook.Sheets[workbook.SheetNames[0]];
+          usedSheets.add(workbook.SheetNames[0]);
         }
-        const receivedData = receivedSheet ? parseReceivedSheet(receivedSheet) : [];
+        const receivedData = receivedWorksheet ? parseReceivedSheet(receivedWorksheet) : [];
 
         // --- Parse Sheet 2 (Sent Letters) ---
-        let sentSheet = findSheetByName(workbook, SENT_SHEET_NAMES);
-        if (!sentSheet && workbook.SheetNames.length >= 2) {
-          sentSheet = workbook.Sheets[workbook.SheetNames[1]];
+        const sentMatch = findSheetByName(workbook, SENT_SHEET_NAMES, usedSheets);
+        let sentWorksheet: XLSX.WorkSheet | null = null;
+        if (sentMatch) {
+          sentWorksheet = sentMatch.sheet;
+          usedSheets.add(sentMatch.name);
+        } else if (workbook.SheetNames.length >= 2) {
+          // Fallback to second unused sheet
+          const fallback = workbook.SheetNames.find(name => !usedSheets.has(name));
+          if (fallback) {
+            sentWorksheet = workbook.Sheets[fallback];
+            usedSheets.add(fallback);
+          }
         }
-        const sentData = sentSheet ? parseSentSheet(sentSheet) : [];
+        const sentData = sentWorksheet ? parseSentSheet(sentWorksheet) : [];
 
         // --- Parse Sheet 3 (Incoming Letters) ---
-        let incomingSheet = findSheetByName(workbook, INCOMING_SHEET_NAMES);
-        if (!incomingSheet && workbook.SheetNames.length >= 3) {
-          incomingSheet = workbook.Sheets[workbook.SheetNames[2]];
+        const incomingMatch = findSheetByName(workbook, INCOMING_SHEET_NAMES, usedSheets);
+        let incomingWorksheet: XLSX.WorkSheet | null = null;
+        if (incomingMatch) {
+          incomingWorksheet = incomingMatch.sheet;
+          usedSheets.add(incomingMatch.name);
+        } else if (workbook.SheetNames.length >= 3) {
+          // Fallback to next unused sheet
+          const fallback = workbook.SheetNames.find(name => !usedSheets.has(name));
+          if (fallback) {
+            incomingWorksheet = workbook.Sheets[fallback];
+            usedSheets.add(fallback);
+          }
         }
-        const incomingData = incomingSheet ? parseIncomingSheet(incomingSheet) : [];
+        const incomingData = incomingWorksheet ? parseIncomingSheet(incomingWorksheet) : [];
 
         resolve({ receivedData, sentData, incomingData });
       } catch (error) {
