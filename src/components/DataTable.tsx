@@ -41,54 +41,97 @@ export const DataTable = () => {
     setTimeout(() => setShowToast(false), 5000);
   };
 
+  // Deduplicate data by ID to prevent any source-level duplicates
+  const uniqueData = useMemo(() => {
+    const seen = new Set<string | number>();
+    return filteredData.filter((item) => {
+      const key = item.id;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [filteredData]);
+
   // Search logic
   const searchedData = useMemo(() => {
-    if (!searchTerm) return filteredData;
+    if (!searchTerm) return uniqueData;
     const lowerSearch = searchTerm.toLowerCase();
-    return filteredData.filter(
+    return uniqueData.filter(
       (item) =>
         item.subject.toLowerCase().includes(lowerSearch) ||
         item.refCode.toLowerCase().includes(lowerSearch)
     );
-  }, [filteredData, searchTerm]);
+  }, [uniqueData, searchTerm]);
 
-  // Sort logic
+  // Sort logic — carefully crafted to NEVER return NaN from the comparator
   const sortedData = useMemo(() => {
-    let sortableItems = [...searchedData];
-    if (sortConfig !== null) {
-      sortableItems.sort((a, b) => {
-        let aVal: any = a[sortConfig.key];
-        let bVal: any = b[sortConfig.key];
+    if (sortConfig === null) return [...searchedData];
 
-        if (aVal === null || aVal === undefined) aVal = "";
-        if (bVal === null || bVal === undefined) bVal = "";
+    const key = sortConfig.key;
+    const dir = sortConfig.direction === "asc" ? 1 : -1;
 
-        if (Array.isArray(aVal)) aVal = aVal.join(", ");
-        if (Array.isArray(bVal)) bVal = bVal.join(", ");
+    // Build a decorated array so we have stable original indices for tiebreaking
+    const decorated = searchedData.map((item, idx) => ({ item, idx }));
 
-        if (typeof aVal === 'number' && typeof bVal === 'number') {
-          return sortConfig.direction === "asc" ? aVal - bVal : bVal - aVal;
-        }
+    decorated.sort((a, b) => {
+      let aVal: any = a.item[key];
+      let bVal: any = b.item[key];
 
-        const aStr = String(aVal).trim();
-        const bStr = String(bVal).trim();
+      // Normalize nulls/undefined
+      if (aVal === null || aVal === undefined) aVal = null;
+      if (bVal === null || bVal === undefined) bVal = null;
 
-        if (!aStr && bStr) return 1;
-        if (aStr && !bStr) return -1;
+      // Flatten arrays
+      if (Array.isArray(aVal)) aVal = aVal.join(", ");
+      if (Array.isArray(bVal)) bVal = bVal.join(", ");
 
-        const comparison = aStr.localeCompare(bStr, undefined, { numeric: true, sensitivity: 'base' });
-        return sortConfig.direction === "asc" ? comparison : -comparison;
-      });
-    }
-    return sortableItems;
+      // Both null — equal, tiebreak by original index
+      if (aVal === null && bVal === null) return a.idx - b.idx;
+      // Nulls always sort to the end regardless of direction
+      if (aVal === null) return 1;
+      if (bVal === null) return -1;
+
+      // Numeric comparison (guard against NaN)
+      if (typeof aVal === "number" && typeof bVal === "number") {
+        // Explicitly guard NaN — treat NaN as null (sort to end)
+        const aNum = isNaN(aVal) ? null : aVal;
+        const bNum = isNaN(bVal) ? null : bVal;
+        if (aNum === null && bNum === null) return a.idx - b.idx;
+        if (aNum === null) return 1;
+        if (bNum === null) return -1;
+        const diff = aNum - bNum;
+        return diff !== 0 ? diff * dir : a.idx - b.idx;
+      }
+
+      // String comparison
+      const aStr = String(aVal).trim();
+      const bStr = String(bVal).trim();
+
+      if (!aStr && !bStr) return a.idx - b.idx;
+      if (!aStr) return 1;
+      if (!bStr) return -1;
+
+      // Use try-catch in case localeCompare has issues with certain characters
+      let cmp = 0;
+      try {
+        cmp = aStr.localeCompare(bStr, undefined, { numeric: true, sensitivity: "base" });
+      } catch {
+        cmp = aStr < bStr ? -1 : aStr > bStr ? 1 : 0;
+      }
+
+      return cmp !== 0 ? cmp * dir : a.idx - b.idx;
+    });
+
+    return decorated.map((d) => d.item);
   }, [searchedData, sortConfig]);
 
   // Pagination logic
   const totalPages = Math.ceil(sortedData.length / itemsPerPage);
   const paginatedData = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
+    const safePage = Math.min(currentPage, Math.max(1, totalPages));
+    const startIndex = (safePage - 1) * itemsPerPage;
     return sortedData.slice(startIndex, startIndex + itemsPerPage);
-  }, [sortedData, currentPage]);
+  }, [sortedData, currentPage, totalPages]);
 
   const requestSort = (key: keyof DashboardData) => {
     let direction: "asc" | "desc" | null = "asc";
@@ -100,6 +143,7 @@ export const DataTable = () => {
       }
     }
     
+    setCurrentPage(1);
     if (direction === null) {
       setSortConfig(null);
     } else {
@@ -245,7 +289,7 @@ export const DataTable = () => {
             {paginatedData.length > 0 ? (
               paginatedData.map((row, i) => (
                 <tr
-                  key={row.id}
+                  key={`${row.id}-${i}`}
                   className="border-b border-slate-100 dark:border-slate-800/50 hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors"
                 >
                   <td className="px-4 py-3 font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">{row.id}</td>
