@@ -21,17 +21,31 @@ export const DataTable = () => {
 
   const [showToast, setShowToast] = useState(false);
 
-  const handleCodeClick = (refCode: string) => {
+  const handleCodeClick = (refCode: string, sentDate: string | null) => {
     // Copy to clipboard
     navigator.clipboard.writeText(refCode);
     
+    // Determine which Odoo version to open based on sentDate
+    // Letters sent on or before 2025-12-31 go to old Odoo, otherwise new Odoo
+    const OLD_ODOO_CUTOFF = new Date('2025-12-31T23:59:59');
+    const OLD_ODOO_URL = 'https://olderp.halabjagroup.com/web#action=889&model=approval.request&view_type=list&cids=86%2C87%2C88%2C89&menu_id=588';
+    const NEW_ODOO_URL = 'https://erp.halabjagroup.com/odoo/action-817';
+
+    let targetUrl = NEW_ODOO_URL;
+    if (sentDate) {
+      const date = new Date(sentDate);
+      if (!isNaN(date.getTime()) && date <= OLD_ODOO_CUTOFF) {
+        targetUrl = OLD_ODOO_URL;
+      }
+    }
+
     // Open Odoo in a popup window
     const width = 1200;
     const height = 800;
     const left = window.innerWidth / 2 - width / 2;
     const top = window.innerHeight / 2 - height / 2;
     window.open(
-      'https://erp.halabjagroup.com/odoo/action-817', 
+      targetUrl, 
       'OdooPopup', 
       `width=${width},height=${height},top=${top},left=${left},popup=yes`
     );
@@ -318,7 +332,7 @@ export const DataTable = () => {
                       />
                     ) : (
                       <button
-                        onClick={() => handleCodeClick(row.refCode)}
+                        onClick={() => handleCodeClick(row.refCode, row.sentDate)}
                         className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline cursor-pointer transition-colors text-left inline-flex items-center gap-1.5 px-2 py-1 -ml-2 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20"
                         title="کرتە بکە بۆ کردنەوەی Odoo لەناو پەنجەرەیەکی نوێ"
                       >
