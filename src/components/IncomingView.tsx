@@ -175,7 +175,8 @@ const IncomingCharts = () => {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+    <>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
       {/* Department Bar Chart */}
       <div className="glass glass-card glass-interactive p-6 flex flex-col min-h-96 h-auto relative overflow-hidden group">
         <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-teal-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -285,9 +286,10 @@ const IncomingCharts = () => {
           ))}
         </div>
       </div>
+    </div>
 
-      {/* Timeline Area Chart */}
-      <div className="glass glass-card glass-interactive p-6 flex flex-col min-h-96 h-auto relative overflow-hidden group">
+      {/* Timeline Area Chart — Full width, below sections 1 & 2, above data table */}
+      <div className="glass glass-card glass-interactive p-6 flex flex-col min-h-80 h-auto relative overflow-hidden group mb-8">
         <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-sky-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
         <h3 className="text-lg font-semibold mb-6">هەڵکشان و داکشانی نامە هاتووەکان بەپێی کات</h3>
         <div className="flex-1 min-h-[300px]" dir="ltr">
@@ -319,7 +321,7 @@ const IncomingCharts = () => {
           </ResponsiveContainer>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
