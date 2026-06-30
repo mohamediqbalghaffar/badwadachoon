@@ -137,29 +137,31 @@ export const AdminDataEntry = () => {
   }, [incomingData]);
 
   const existingOptions = React.useMemo(() => {
-    const senderSet = new Set<string>();
-    const departmentSet = new Set<string>();
-    const dept1Set = new Set<string>();
-    const dept2Set = new Set<string>();
-    const dept3Set = new Set<string>();
-    const letterTypeSet = new Set<string>();
-    
-    [...localReceived, ...localSent, ...localIncoming].forEach(row => {
-      if (row.sender) senderSet.add(row.sender);
-      if (row.department) departmentSet.add(row.department);
-      if (row.dept1) dept1Set.add(row.dept1);
-      if (row.dept2) dept2Set.add(row.dept2);
-      if (row.dept3) dept3Set.add(row.dept3);
-      if (row.letterType) letterTypeSet.add(row.letterType);
-    });
-    
+    const extractOptions = (data: any[]) => {
+      const sets = {
+        sender: new Set<string>(), department: new Set<string>(),
+        dept1: new Set<string>(), dept2: new Set<string>(), dept3: new Set<string>(),
+        letterType: new Set<string>()
+      };
+      data.forEach(row => {
+        if (row.sender) sets.sender.add(row.sender);
+        if (row.department) sets.department.add(row.department);
+        if (row.dept1) sets.dept1.add(row.dept1);
+        if (row.dept2) sets.dept2.add(row.dept2);
+        if (row.dept3) sets.dept3.add(row.dept3);
+        if (row.letterType) sets.letterType.add(row.letterType);
+      });
+      return {
+        sender: Array.from(sets.sender), department: Array.from(sets.department),
+        dept1: Array.from(sets.dept1), dept2: Array.from(sets.dept2),
+        dept3: Array.from(sets.dept3), letterType: Array.from(sets.letterType)
+      };
+    };
+
     return {
-      sender: Array.from(senderSet),
-      department: Array.from(departmentSet),
-      dept1: Array.from(dept1Set),
-      dept2: Array.from(dept2Set),
-      dept3: Array.from(dept3Set),
-      letterType: Array.from(letterTypeSet)
+      received: extractOptions(localReceived),
+      sent: extractOptions(localSent),
+      incoming: extractOptions(localIncoming)
     };
   }, [localReceived, localSent, localIncoming]);
 

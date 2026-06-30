@@ -28,7 +28,7 @@ export interface OdooRow {
 
 interface Props {
   onApply: (receivedRows: any[], sentRows: any[], incomingRows: any[]) => void;
-  existingOptions?: Record<string, string[]>;
+  existingOptions?: Record<string, Record<string, string[]>>;
 }
 
 const DateFormatter = (props: any) => {
@@ -92,7 +92,22 @@ const EditableTextEditor = (props: any) => {
     );
   }
   const listId = `datalist-${column.key}`;
-  const options = column.options || [];
+  const optionsData = column.optionsData || {};
+  let options: string[] = [];
+  
+  if (optionsData) {
+    const optsSet = new Set<string>();
+    if (row.isReceived && optionsData.received) {
+      optionsData.received[column.key]?.forEach((opt: string) => optsSet.add(opt));
+    }
+    if (row.isSent && optionsData.sent) {
+      optionsData.sent[column.key]?.forEach((opt: string) => optsSet.add(opt));
+    }
+    if (row.isIncoming && optionsData.incoming) {
+      optionsData.incoming[column.key]?.forEach((opt: string) => optsSet.add(opt));
+    }
+    options = Array.from(optsSet);
+  }
 
   return (
     <div className="w-full h-full relative">
@@ -133,12 +148,12 @@ export const OdooStagingArea = ({ onApply, existingOptions }: Props) => {
     { key: 'isIncoming', name: '+ هاتووەکان', width: '8%', minWidth: 120, renderCell: BooleanFormatter },
 
     // Editable missing fields
-    { key: 'sender', name: 'هاتووە لە (Incoming)', width: '10%', minWidth: 120, renderCell: EditableCellFormatter, renderEditCell: EditableTextEditor, options: existingOptions?.sender || [] },
-    { key: 'department', name: 'لایەنی پەیوەندیدار', width: '12%', minWidth: 130, renderCell: EditableCellFormatter, renderEditCell: EditableTextEditor, options: existingOptions?.department || [] },
-    { key: 'dept1', name: 'بەشی 1', width: '8%', minWidth: 100, renderCell: EditableCellFormatter, renderEditCell: EditableTextEditor, options: existingOptions?.dept1 || [] },
-    { key: 'dept2', name: 'بەشی 2', width: '8%', minWidth: 100, renderCell: EditableCellFormatter, renderEditCell: EditableTextEditor, options: existingOptions?.dept2 || [] },
-    { key: 'dept3', name: 'بەشی 3', width: '8%', minWidth: 100, renderCell: EditableCellFormatter, renderEditCell: EditableTextEditor, options: existingOptions?.dept3 || [] },
-    { key: 'letterType', name: 'جۆری نامە', width: '8%', minWidth: 100, renderCell: EditableCellFormatter, renderEditCell: EditableTextEditor, options: existingOptions?.letterType || [] },
+    { key: 'sender', name: 'هاتووە لە (Incoming)', width: '10%', minWidth: 120, renderCell: EditableCellFormatter, renderEditCell: EditableTextEditor, optionsData: existingOptions },
+    { key: 'department', name: 'لایەنی پەیوەندیدار', width: '12%', minWidth: 130, renderCell: EditableCellFormatter, renderEditCell: EditableTextEditor, optionsData: existingOptions },
+    { key: 'dept1', name: 'بەشی 1', width: '8%', minWidth: 100, renderCell: EditableCellFormatter, renderEditCell: EditableTextEditor, optionsData: existingOptions },
+    { key: 'dept2', name: 'بەشی 2', width: '8%', minWidth: 100, renderCell: EditableCellFormatter, renderEditCell: EditableTextEditor, optionsData: existingOptions },
+    { key: 'dept3', name: 'بەشی 3', width: '8%', minWidth: 100, renderCell: EditableCellFormatter, renderEditCell: EditableTextEditor, optionsData: existingOptions },
+    { key: 'letterType', name: 'جۆری نامە', width: '8%', minWidth: 100, renderCell: EditableCellFormatter, renderEditCell: EditableTextEditor, optionsData: existingOptions },
     { key: 'responseDate', name: 'ڕۆژی وەڵام', width: '8%', minWidth: 100, renderCell: EditableCellFormatter, renderEditCell: EditableTextEditor },
   ];
 
