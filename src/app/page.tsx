@@ -78,8 +78,18 @@ const AppContent = () => {
         return prev;
       });
     };
+
+    const handleSwitchMode = (e: any) => {
+      setActiveModule({ type: 'admin', mode: e.detail.mode });
+    };
+
     window.addEventListener('open-admin-settings', handleOpenSettings);
-    return () => window.removeEventListener('open-admin-settings', handleOpenSettings);
+    window.addEventListener('switch-admin-mode', handleSwitchMode);
+
+    return () => {
+      window.removeEventListener('open-admin-settings', handleOpenSettings);
+      window.removeEventListener('switch-admin-mode', handleSwitchMode);
+    };
   }, []);
 
   const { user, isLoading } = useAuth();

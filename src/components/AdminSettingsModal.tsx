@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { X, UploadCloud, Download, Database, AlertCircle, CheckCircle2, Trash2, FileSpreadsheet, ShieldCheck, User, Users, Save } from "lucide-react";
+import { X, UploadCloud, Download, Database, AlertCircle, CheckCircle2, Trash2, FileSpreadsheet, ShieldCheck, User, Users, Save, Laptop } from "lucide-react";
 import * as XLSX from "xlsx";
 import { useData } from "../context/DataContext";
 import { useAuth } from "../context/AuthContext";
@@ -370,6 +370,30 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose,
                 <p>
                   لێرە دەتوانیت داتابەیسی سیستەمەکە نوێ بکەیتەوە لە ڕێگەی فایلی ئێکسڵ، یان سەرجەم داتاکان دابەزێنیت. تکایە ئاگاداربە کە بارکردنی فایلی ئێکسڵ <span className="font-bold">سەرجەم داتاکانی پێشوو دەسڕێتەوە</span> و داتای نوێ جێگیر دەکات.
                 </p>
+              </div>
+
+              <div className="bg-slate-100 dark:bg-slate-800/50 rounded-2xl p-4 flex flex-col gap-3">
+                <h3 className="font-bold text-slate-700 dark:text-slate-300">جۆری چوونەژوورەوە</h3>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      window.dispatchEvent(new CustomEvent('switch-admin-mode', { detail: { mode: 'live' } }));
+                    }}
+                    className={`flex-1 p-3 rounded-xl border flex items-center justify-center gap-2 font-medium transition-colors ${mode === 'live' ? 'bg-blue-500 text-white border-blue-500 shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-blue-300'}`}
+                  >
+                    <Database size={18} />
+                    سەرهێڵ (Online)
+                  </button>
+                  <button
+                    onClick={() => {
+                      window.dispatchEvent(new CustomEvent('switch-admin-mode', { detail: { mode: 'local' } }));
+                    }}
+                    className={`flex-1 p-3 rounded-xl border flex items-center justify-center gap-2 font-medium transition-colors ${mode === 'local' ? 'bg-emerald-500 text-white border-emerald-500 shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-emerald-300'}`}
+                  >
+                    <Laptop size={18} />
+                    لۆکاڵی کاتی (Local)
+                  </button>
+                </div>
               </div>
 
               <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-4">
