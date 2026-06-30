@@ -11,45 +11,92 @@ import { DashboardData, IncomingLetterData, SentLetterData } from '../utils/pars
 type TableType = 'incoming' | 'received' | 'sent';
 type EntryMode = 'manual' | 'auto';
 
+const DateFormatter = (props: any) => {
+  const val = props.row[props.column.key];
+  if (!val) return null;
+  if (typeof val === 'string') return val.split('T')[0];
+  if (val instanceof Date) return val.toISOString().split('T')[0];
+  return val;
+};
+
 const incomingColumns = [
-  { key: 'id', name: '# (ID)', renderEditCell: renderTextEditor },
-  { key: 'subject', name: 'بابەت (Subject)', renderEditCell: renderTextEditor },
-  { key: 'sender', name: 'هاتووە لە (Sender)', renderEditCell: renderTextEditor },
-  { key: 'department', name: 'لایەنی پەیوەندیدار (Dept)', renderEditCell: renderTextEditor },
-  { key: 'dept1', name: 'بەشی 1', renderEditCell: renderTextEditor },
-  { key: 'dept2', name: 'بەشی 2', renderEditCell: renderTextEditor },
-  { key: 'dept3', name: 'بەشی 3', renderEditCell: renderTextEditor },
-  { key: 'refCode', name: 'جۆر (Ref Code)', renderEditCell: renderTextEditor },
-  { key: 'letterType', name: 'جۆری نامە', renderEditCell: renderTextEditor },
-  { key: 'sentDate', name: 'ڕۆژی ناردن', renderEditCell: renderTextEditor },
+  { key: 'id', name: '# (ID)', width: 80, renderEditCell: renderTextEditor },
+  { key: 'subject', name: 'بابەت (Subject)', width: 250, renderEditCell: renderTextEditor },
+  { key: 'sender', name: 'هاتووە لە (Sender)', width: 150, renderEditCell: renderTextEditor },
+  { key: 'department', name: 'لایەنی پەیوەندیدار (Dept)', width: 200, renderEditCell: renderTextEditor },
+  { key: 'dept1', name: 'بەشی 1', width: 120, renderEditCell: renderTextEditor },
+  { key: 'dept2', name: 'بەشی 2', width: 120, renderEditCell: renderTextEditor },
+  { key: 'dept3', name: 'بەشی 3', width: 120, renderEditCell: renderTextEditor },
+  { key: 'refCode', name: 'جۆر (Ref Code)', width: 150, renderEditCell: renderTextEditor },
+  { key: 'letterType', name: 'جۆری نامە', width: 150, renderEditCell: renderTextEditor },
+  { key: 'sentDate', name: 'ڕۆژی ناردن', width: 150, renderCell: DateFormatter, renderEditCell: renderTextEditor },
 ];
 
 const receivedColumns = [
-  { key: 'id', name: '# (ID)', renderEditCell: renderTextEditor },
-  { key: 'subject', name: 'بابەت', renderEditCell: renderTextEditor },
-  { key: 'department', name: 'لایەنی پەیوەندیدار (Dept)', renderEditCell: renderTextEditor },
-  { key: 'dept1', name: 'بەشی 1', renderEditCell: renderTextEditor },
-  { key: 'dept2', name: 'بەشی 2', renderEditCell: renderTextEditor },
-  { key: 'dept3', name: 'بەشی 3', renderEditCell: renderTextEditor },
-  { key: 'refCode', name: 'جۆر (Ref Code)', renderEditCell: renderTextEditor },
-  { key: 'letterType', name: 'جۆری نامە', renderEditCell: renderTextEditor },
-  { key: 'sentDate', name: 'ڕۆژی ناردن', renderEditCell: renderTextEditor },
-  { key: 'responseDate', name: 'ڕۆژی وەڵام', renderEditCell: renderTextEditor },
-  { key: 'processingTime', name: 'تێبینی (رۆژ)', renderEditCell: renderTextEditor },
-  { key: 'slaTime', name: 'کاتی تێچوو بەپێی ڕێنمایی', renderEditCell: renderTextEditor },
+  { key: 'id', name: '# (ID)', width: 80, renderEditCell: renderTextEditor },
+  { key: 'subject', name: 'بابەت', width: 250, renderEditCell: renderTextEditor },
+  { key: 'department', name: 'لایەنی پەیوەندیدار (Dept)', width: 200, renderEditCell: renderTextEditor },
+  { key: 'dept1', name: 'بەشی 1', width: 120, renderEditCell: renderTextEditor },
+  { key: 'dept2', name: 'بەشی 2', width: 120, renderEditCell: renderTextEditor },
+  { key: 'dept3', name: 'بەشی 3', width: 120, renderEditCell: renderTextEditor },
+  { key: 'refCode', name: 'جۆر (Ref Code)', width: 150, renderEditCell: renderTextEditor },
+  { key: 'letterType', name: 'جۆری نامە', width: 150, renderEditCell: renderTextEditor },
+  { key: 'sentDate', name: 'ڕۆژی ناردن', width: 150, renderCell: DateFormatter, renderEditCell: renderTextEditor },
+  { key: 'responseDate', name: 'ڕۆژی وەڵام', width: 150, renderCell: DateFormatter, renderEditCell: renderTextEditor },
+  { key: 'processingTime', name: 'تێبینی (رۆژ)', width: 120, renderEditCell: renderTextEditor },
+  { key: 'slaTime', name: 'کاتی تێچوو بەپێی ڕێنمایی', width: 200, renderEditCell: renderTextEditor },
 ];
 
 const sentColumns = [
-  { key: 'id', name: '# (ID)', renderEditCell: renderTextEditor },
-  { key: 'subject', name: 'بابەت', renderEditCell: renderTextEditor },
-  { key: 'department', name: 'لایەنی پەیوەندیدار (Dept)', renderEditCell: renderTextEditor },
-  { key: 'dept1', name: 'بەشی 1', renderEditCell: renderTextEditor },
-  { key: 'dept2', name: 'بەشی 2', renderEditCell: renderTextEditor },
-  { key: 'dept3', name: 'بەشی 3', renderEditCell: renderTextEditor },
-  { key: 'refCode', name: 'جۆر (Ref Code)', renderEditCell: renderTextEditor },
-  { key: 'letterType', name: 'جۆری نامە', renderEditCell: renderTextEditor },
-  { key: 'sentDate', name: 'ڕۆژی ناردن', renderEditCell: renderTextEditor },
+  { key: 'id', name: '# (ID)', width: 80, renderEditCell: renderTextEditor },
+  { key: 'subject', name: 'بابەت', width: 250, renderEditCell: renderTextEditor },
+  { key: 'department', name: 'لایەنی پەیوەندیدار (Dept)', width: 200, renderEditCell: renderTextEditor },
+  { key: 'dept1', name: 'بەشی 1', width: 120, renderEditCell: renderTextEditor },
+  { key: 'dept2', name: 'بەشی 2', width: 120, renderEditCell: renderTextEditor },
+  { key: 'dept3', name: 'بەشی 3', width: 120, renderEditCell: renderTextEditor },
+  { key: 'refCode', name: 'جۆر (Ref Code)', width: 150, renderEditCell: renderTextEditor },
+  { key: 'letterType', name: 'جۆری نامە', width: 150, renderEditCell: renderTextEditor },
+  { key: 'sentDate', name: 'ڕۆژی ناردن', width: 150, renderCell: DateFormatter, renderEditCell: renderTextEditor },
 ];
+
+const gridStyles = `
+  .rdg {
+    --rdg-color: #334155;
+    --rdg-border-color: #e2e8f0;
+    --rdg-summary-border-color: #cbd5e1;
+    --rdg-background-color: #ffffff;
+    --rdg-header-background-color: #f8fafc;
+    --rdg-row-hover-background-color: #f1f5f9;
+    --rdg-row-selected-background-color: #e0f2fe;
+    --rdg-row-selected-hover-background-color: #bae6fd;
+    --rdg-selection-color: #3b82f6;
+    border: none;
+    font-size: 14px;
+  }
+  .dark .rdg {
+    --rdg-color: #cbd5e1;
+    --rdg-border-color: #334155;
+    --rdg-summary-border-color: #475569;
+    --rdg-background-color: #0f172a;
+    --rdg-header-background-color: #1e293b;
+    --rdg-row-hover-background-color: #334155;
+    --rdg-row-selected-background-color: #1e3a8a;
+    --rdg-row-selected-hover-background-color: #1e40af;
+    --rdg-selection-color: #60a5fa;
+  }
+  .rdg-cell {
+    border-right: 1px solid var(--rdg-border-color);
+    border-bottom: 1px solid var(--rdg-border-color);
+    padding: 0 12px;
+  }
+  .rdg-header-row .rdg-cell {
+    font-weight: 700;
+    color: #475569;
+  }
+  .dark .rdg-header-row .rdg-cell {
+    color: #94a3b8;
+  }
+`;
 
 export const AdminDataEntry = () => {
   const { user } = useAuth();
@@ -62,24 +109,30 @@ export const AdminDataEntry = () => {
   const [activeTab, setActiveTab] = useState<TableType>('received');
   const [entryMode, setEntryMode] = useState<EntryMode>('manual');
   
+  const sortDesc = (arr: any[]) => [...arr].sort((a, b) => {
+    const idA = typeof a.id === 'number' ? a.id : parseInt(String(a.id).replace('new-', '')) || 0;
+    const idB = typeof b.id === 'number' ? b.id : parseInt(String(b.id).replace('new-', '')) || 0;
+    return idB - idA;
+  });
+
   // Local state for grid edits
-  const [localReceived, setLocalReceived] = useState<any[]>(() => [...receivedData]);
-  const [localSent, setLocalSent] = useState<any[]>(() => [...sentData]);
-  const [localIncoming, setLocalIncoming] = useState<any[]>(() => [...incomingData]);
+  const [localReceived, setLocalReceived] = useState<any[]>(() => sortDesc(receivedData));
+  const [localSent, setLocalSent] = useState<any[]>(() => sortDesc(sentData));
+  const [localIncoming, setLocalIncoming] = useState<any[]>(() => sortDesc(incomingData));
   
   const [isSaving, setIsSaving] = useState(false);
 
   // Update local states when context data changes (e.g. after save)
   React.useEffect(() => {
-    setLocalReceived([...receivedData]);
+    setLocalReceived(sortDesc(receivedData));
   }, [receivedData]);
   
   React.useEffect(() => {
-    setLocalSent([...sentData]);
+    setLocalSent(sortDesc(sentData));
   }, [sentData]);
   
   React.useEffect(() => {
-    setLocalIncoming([...incomingData]);
+    setLocalIncoming(sortDesc(incomingData));
   }, [incomingData]);
 
   if (user?.role !== 'admin') {
@@ -127,6 +180,7 @@ export const AdminDataEntry = () => {
 
   return (
     <div className="flex flex-col h-[calc(100vh-140px)] bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-500">
+      <style>{gridStyles}</style>
       
       {/* Header and Sub-Navigation */}
       <div className="p-6 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80">
