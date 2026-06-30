@@ -23,8 +23,25 @@ export const DataTable = () => {
 
   const [showToast, setShowToast] = useState(false);
 
-  const handleCodeClick = (refCode: string, sentDate: string | null) => {
-    // Copy to clipboard
+  const handleCodeClick = (refCode: string, sentDate: string | null, subject: string) => {
+    // If it's an email, copy subject and open Outlook
+    if (refCode.includes('ئیمەیڵ')) {
+      navigator.clipboard.writeText(subject);
+      const width = 1200;
+      const height = 800;
+      const left = window.innerWidth / 2 - width / 2;
+      const top = window.innerHeight / 2 - height / 2;
+      window.open(
+        'https://mail.halabjagroup.com/owa/#path=/mail/search', 
+        'OutlookPopup', 
+        `width=${width},height=${height},top=${top},left=${left},popup=yes`
+      );
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 5000);
+      return;
+    }
+
+    // Copy code to clipboard for Odoo
     navigator.clipboard.writeText(refCode);
     
     // Determine which Odoo version to open based on sentDate
@@ -391,9 +408,9 @@ export const DataTable = () => {
                       />
                     ) : (
                       <button
-                        onClick={() => handleCodeClick(row.refCode, row.sentDate)}
+                        onClick={() => handleCodeClick(row.refCode, row.sentDate, row.subject)}
                         className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline cursor-pointer transition-colors text-left inline-flex items-center gap-1.5 px-2 py-1 -ml-2 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                        title="کرتە بکە بۆ کردنەوەی Odoo لەناو پەنجەرەیەکی نوێ"
+                        title={row.refCode.includes('ئیمەیڵ') ? "کرتە بکە بۆ کردنەوەی ئاوتلوک و کۆپیکردنی بابەت" : "کرتە بکە بۆ کردنەوەی Odoo لەناو پەنجەرەیەکی نوێ"}
                       >
                         {row.refCode}
                         <ExternalLink size={12} className="opacity-70" />
