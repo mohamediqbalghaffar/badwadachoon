@@ -26,9 +26,9 @@ export async function POST(request: Request) {
             dept3: d.dept3 || null,
             refCode: d.refCode || "-",
             letterType: d.letterType || "گشتی",
-            sentDate: d.sentDate ? new Date(d.sentDate) : null,
-            responseDate: d.responseDate ? new Date(d.responseDate) : null,
-            processingTime: d.processingTime !== undefined ? d.processingTime : null,
+            sentDate: d.sentDate && !isNaN(new Date(d.sentDate).getTime()) ? new Date(d.sentDate) : null,
+            responseDate: d.responseDate && !isNaN(new Date(d.responseDate).getTime()) ? new Date(d.responseDate) : null,
+            processingTime: d.processingTime !== undefined && d.processingTime !== null && d.processingTime !== "" ? parseInt(d.processingTime) : null,
             slaTime: d.slaTime || "-",
           })),
         });
@@ -46,7 +46,7 @@ export async function POST(request: Request) {
             dept3: d.dept3 || null,
             refCode: d.refCode || "-",
             letterType: d.letterType || "گشتی",
-            sentDate: d.sentDate ? new Date(d.sentDate) : null,
+            sentDate: d.sentDate && !isNaN(new Date(d.sentDate).getTime()) ? new Date(d.sentDate) : null,
           })),
         });
       }
@@ -64,7 +64,7 @@ export async function POST(request: Request) {
             dept3: d.dept3 || null,
             refCode: d.refCode || "-",
             letterType: d.letterType || "گشتی",
-            sentDate: d.sentDate ? new Date(d.sentDate) : null,
+            sentDate: d.sentDate && !isNaN(new Date(d.sentDate).getTime()) ? new Date(d.sentDate) : null,
           })),
         });
       }
