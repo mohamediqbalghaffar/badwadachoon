@@ -198,7 +198,7 @@ export const DataTable = () => {
   };
 
   return (
-    <div id="data-table-section" className="flex flex-col h-[600px] mb-8 relative">
+    <div id="data-table-section" className="flex flex-col h-[950px] mb-8 relative">
       {/* Table Header Controls (Title + Filter Clear) */}
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
         <h3 className="text-2xl font-black text-slate-800 dark:text-white flex items-center gap-2">

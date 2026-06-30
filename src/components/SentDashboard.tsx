@@ -166,7 +166,7 @@ export const SentDashboard = () => {
   };
 
   return (
-    <div className="flex flex-col h-[600px] mb-8 relative">
+    <div className="flex flex-col h-[950px] mb-8 relative">
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
         <h3 className="text-2xl font-black text-slate-800 dark:text-white flex items-center gap-2">
           <div className="w-1.5 h-6 bg-emerald-500 rounded-full"></div>
