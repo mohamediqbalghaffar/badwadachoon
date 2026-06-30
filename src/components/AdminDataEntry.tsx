@@ -21,42 +21,42 @@ const DateFormatter = (props: any) => {
 
 const incomingColumns = [
   { key: 'id', name: '# (ID)', width: 80, renderEditCell: renderTextEditor },
-  { key: 'subject', name: 'بابەت (Subject)', width: 250, renderEditCell: renderTextEditor },
-  { key: 'sender', name: 'هاتووە لە (Sender)', width: 150, renderEditCell: renderTextEditor },
-  { key: 'department', name: 'لایەنی پەیوەندیدار (Dept)', width: 200, renderEditCell: renderTextEditor },
-  { key: 'dept1', name: 'بەشی 1', width: 120, renderEditCell: renderTextEditor },
-  { key: 'dept2', name: 'بەشی 2', width: 120, renderEditCell: renderTextEditor },
-  { key: 'dept3', name: 'بەشی 3', width: 120, renderEditCell: renderTextEditor },
-  { key: 'refCode', name: 'جۆر (Ref Code)', width: 150, renderEditCell: renderTextEditor },
-  { key: 'letterType', name: 'جۆری نامە', width: 150, renderEditCell: renderTextEditor },
-  { key: 'sentDate', name: 'ڕۆژی ناردن', width: 150, renderCell: DateFormatter, renderEditCell: renderTextEditor },
+  { key: 'subject', name: 'بابەت (Subject)', width: '2fr', renderEditCell: renderTextEditor },
+  { key: 'sender', name: 'هاتووە لە (Sender)', width: '1fr', renderEditCell: renderTextEditor },
+  { key: 'department', name: 'لایەنی پەیوەندیدار (Dept)', width: '1.5fr', renderEditCell: renderTextEditor },
+  { key: 'dept1', name: 'بەشی 1', width: '1fr', renderEditCell: renderTextEditor },
+  { key: 'dept2', name: 'بەشی 2', width: '1fr', renderEditCell: renderTextEditor },
+  { key: 'dept3', name: 'بەشی 3', width: '1fr', renderEditCell: renderTextEditor },
+  { key: 'refCode', name: 'جۆر (Ref Code)', width: '1fr', renderEditCell: renderTextEditor },
+  { key: 'letterType', name: 'جۆری نامە', width: '1fr', renderEditCell: renderTextEditor },
+  { key: 'sentDate', name: 'ڕۆژی ناردن', width: '1fr', renderCell: DateFormatter, renderEditCell: renderTextEditor },
 ];
 
 const receivedColumns = [
   { key: 'id', name: '# (ID)', width: 80, renderEditCell: renderTextEditor },
-  { key: 'subject', name: 'بابەت', width: 250, renderEditCell: renderTextEditor },
-  { key: 'department', name: 'لایەنی پەیوەندیدار (Dept)', width: 200, renderEditCell: renderTextEditor },
-  { key: 'dept1', name: 'بەشی 1', width: 120, renderEditCell: renderTextEditor },
-  { key: 'dept2', name: 'بەشی 2', width: 120, renderEditCell: renderTextEditor },
-  { key: 'dept3', name: 'بەشی 3', width: 120, renderEditCell: renderTextEditor },
-  { key: 'refCode', name: 'جۆر (Ref Code)', width: 150, renderEditCell: renderTextEditor },
-  { key: 'letterType', name: 'جۆری نامە', width: 150, renderEditCell: renderTextEditor },
-  { key: 'sentDate', name: 'ڕۆژی ناردن', width: 150, renderCell: DateFormatter, renderEditCell: renderTextEditor },
-  { key: 'responseDate', name: 'ڕۆژی وەڵام', width: 150, renderCell: DateFormatter, renderEditCell: renderTextEditor },
-  { key: 'processingTime', name: 'تێبینی (رۆژ)', width: 120, renderEditCell: renderTextEditor },
-  { key: 'slaTime', name: 'کاتی تێچوو بەپێی ڕێنمایی', width: 200, renderEditCell: renderTextEditor },
+  { key: 'subject', name: 'بابەت', width: '2fr', renderEditCell: renderTextEditor },
+  { key: 'department', name: 'لایەنی پەیوەندیدار (Dept)', width: '1.5fr', renderEditCell: renderTextEditor },
+  { key: 'dept1', name: 'بەشی 1', width: '1fr', renderEditCell: renderTextEditor },
+  { key: 'dept2', name: 'بەشی 2', width: '1fr', renderEditCell: renderTextEditor },
+  { key: 'dept3', name: 'بەشی 3', width: '1fr', renderEditCell: renderTextEditor },
+  { key: 'refCode', name: 'جۆر (Ref Code)', width: '1fr', renderEditCell: renderTextEditor },
+  { key: 'letterType', name: 'جۆری نامە', width: '1fr', renderEditCell: renderTextEditor },
+  { key: 'sentDate', name: 'ڕۆژی ناردن', width: '1fr', renderCell: DateFormatter, renderEditCell: renderTextEditor },
+  { key: 'responseDate', name: 'ڕۆژی وەڵام', width: '1fr', renderCell: DateFormatter, renderEditCell: renderTextEditor },
+  { key: 'processingTime', name: 'تێبینی (رۆژ)', width: '0.8fr', renderEditCell: renderTextEditor },
+  { key: 'slaTime', name: 'کاتی تێچوو بەپێی ڕێنمایی', width: '1.2fr', renderEditCell: renderTextEditor },
 ];
 
 const sentColumns = [
   { key: 'id', name: '# (ID)', width: 80, renderEditCell: renderTextEditor },
-  { key: 'subject', name: 'بابەت', width: 250, renderEditCell: renderTextEditor },
-  { key: 'department', name: 'لایەنی پەیوەندیدار (Dept)', width: 200, renderEditCell: renderTextEditor },
-  { key: 'dept1', name: 'بەشی 1', width: 120, renderEditCell: renderTextEditor },
-  { key: 'dept2', name: 'بەشی 2', width: 120, renderEditCell: renderTextEditor },
-  { key: 'dept3', name: 'بەشی 3', width: 120, renderEditCell: renderTextEditor },
-  { key: 'refCode', name: 'جۆر (Ref Code)', width: 150, renderEditCell: renderTextEditor },
-  { key: 'letterType', name: 'جۆری نامە', width: 150, renderEditCell: renderTextEditor },
-  { key: 'sentDate', name: 'ڕۆژی ناردن', width: 150, renderCell: DateFormatter, renderEditCell: renderTextEditor },
+  { key: 'subject', name: 'بابەت', width: '2fr', renderEditCell: renderTextEditor },
+  { key: 'department', name: 'لایەنی پەیوەندیدار (Dept)', width: '1.5fr', renderEditCell: renderTextEditor },
+  { key: 'dept1', name: 'بەشی 1', width: '1fr', renderEditCell: renderTextEditor },
+  { key: 'dept2', name: 'بەشی 2', width: '1fr', renderEditCell: renderTextEditor },
+  { key: 'dept3', name: 'بەشی 3', width: '1fr', renderEditCell: renderTextEditor },
+  { key: 'refCode', name: 'جۆر (Ref Code)', width: '1fr', renderEditCell: renderTextEditor },
+  { key: 'letterType', name: 'جۆری نامە', width: '1fr', renderEditCell: renderTextEditor },
+  { key: 'sentDate', name: 'ڕۆژی ناردن', width: '1fr', renderCell: DateFormatter, renderEditCell: renderTextEditor },
 ];
 
 const gridStyles = `
@@ -206,6 +206,19 @@ export const AdminDataEntry = () => {
             </button>
           </div>
 
+          {/* Add Row Button (Center) */}
+          {entryMode === 'manual' && (
+            <div className="flex-1 flex justify-center w-full xl:w-auto">
+              <button 
+                onClick={addRow}
+                className="flex items-center gap-2 px-6 py-2.5 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 font-bold rounded-xl transition-colors border border-blue-200 dark:border-blue-800 shadow-sm"
+              >
+                <Plus size={18} />
+                زیادکردنی دێڕ (Add Row)
+              </button>
+            </div>
+          )}
+
           <div className="flex items-center gap-3 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-xl self-end xl:self-auto">
             <button 
               onClick={() => setEntryMode('manual')}
@@ -253,24 +266,16 @@ export const AdminDataEntry = () => {
             </div>
             
             {/* Action Bar */}
-            <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex justify-between items-center" dir="rtl">
-              <button 
-                onClick={addRow}
-                className="flex items-center gap-2 px-5 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-xl transition-colors"
-              >
-                <Plus size={18} />
-                زیادکردنی دێڕ (Add Row)
-              </button>
-              
+            <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex justify-end items-center" dir="rtl">
               <button 
                 onClick={handleSave}
                 disabled={isSaving}
-                className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50"
+                className="flex items-center gap-2 px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50"
               >
                 {isSaving ? (
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 ) : (
-                  <Save size={18} />
+                  <Save size={20} />
                 )}
                 پاشەکەوتکردن (Save Changes)
               </button>
