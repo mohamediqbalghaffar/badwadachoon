@@ -296,7 +296,38 @@ export const AdminDataEntry = () => {
                 columns={activeTab === 'received' ? getColumnsWithDelete(receivedColumns) : activeTab === 'sent' ? getColumnsWithDelete(sentColumns) : getColumnsWithDelete(incomingColumns)} 
                 rows={activeTab === 'received' ? localReceived : activeTab === 'sent' ? localSent : localIncoming} 
                 onRowsChange={(newRows) => {
-                  if (activeTab === 'received') setLocalReceived(newRows);
+                  if (activeTab === 'received') {
+                    const updatedRows = newRows.map(row => {
+                      let pTime = row.processingTime;
+                      let sTime = row.slaTime;
+
+                      // Auto-calculate processingTime if sentDate exists
+                      if (row.sentDate) {
+                        const start = new Date(row.sentDate);
+                        const end = row.responseDate ? new Date(row.responseDate) : new Date();
+                        if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+                          const diff = end.getTime() - start.getTime();
+                          pTime = Math.max(0, Math.round(diff / (1000 * 60 * 60 * 24)));
+                        }
+                      }
+
+                      // Auto-calculate SLA status based on processingTime
+                      if (pTime !== null && pTime !== undefined && pTime !== "") {
+                        const pTimeNum = typeof pTime === 'string' ? parseInt(pTime) : pTime;
+                        if (!isNaN(pTimeNum)) {
+                          if (pTimeNum < 3) sTime = "کەمتر لە 3 ڕۆژ";
+                          else if (pTimeNum < 5) sTime = "کەمتر لە 5 ڕۆژ";
+                          else if (pTimeNum < 10) sTime = "کەمتر لە 10 ڕۆژ";
+                          else sTime = "زیاتر لە 10 ڕۆژ";
+                        }
+                      } else {
+                        sTime = "-";
+                      }
+
+                      return { ...row, processingTime: pTime, slaTime: sTime };
+                    });
+                    setLocalReceived(updatedRows);
+                  }
                   else if (activeTab === 'sent') setLocalSent(newRows);
                   else setLocalIncoming(newRows);
                 }}
