@@ -64,7 +64,7 @@ export const DashboardCharts = () => {
   const deptData = useMemo(() => {
     const counts: Record<string, number> = {};
     activeData.forEach((d: any) => {
-      d.departments.forEach((dept) => {
+      d.departments?.forEach((dept: string) => {
         counts[dept] = (counts[dept] || 0) + 1;
       });
     });
