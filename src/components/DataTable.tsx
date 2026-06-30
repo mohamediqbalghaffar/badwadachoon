@@ -202,8 +202,8 @@ export const DataTable = () => {
     }
   };
 
-  const getSLAColor = (slaTime: string) => {
-    // Basic logic mapping based on text. Adjust to real data.
+  const getSLAColor = (slaTime?: string | null) => {
+    if (!slaTime) return "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800";
     if (slaTime.includes("کەمتر")) return "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800";
     if (slaTime.includes("زیاتر")) return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800";
     return "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800";
