@@ -95,7 +95,7 @@ const EditableTextEditor = (props: any) => {
   const options = column.options || [];
 
   return (
-    <>
+    <div className="w-full h-full relative">
       <input 
         autoFocus
         className="rdg-text-editor w-full h-full px-2 outline-none border-2 border-blue-500 focus:border-blue-600 bg-white dark:bg-slate-800 dark:text-slate-100"
@@ -111,7 +111,7 @@ const EditableTextEditor = (props: any) => {
           ))}
         </datalist>
       )}
-    </>
+    </div>
   );
 };
 

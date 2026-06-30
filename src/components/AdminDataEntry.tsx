@@ -131,10 +131,37 @@ export const AdminDataEntry = () => {
   React.useEffect(() => {
     setLocalSent(sortDesc(sentData));
   }, [sentData]);
-  
+
   React.useEffect(() => {
     setLocalIncoming(sortDesc(incomingData));
   }, [incomingData]);
+
+  const existingOptions = React.useMemo(() => {
+    const senderSet = new Set<string>();
+    const departmentSet = new Set<string>();
+    const dept1Set = new Set<string>();
+    const dept2Set = new Set<string>();
+    const dept3Set = new Set<string>();
+    const letterTypeSet = new Set<string>();
+    
+    [...localReceived, ...localSent, ...localIncoming].forEach(row => {
+      if (row.sender) senderSet.add(row.sender);
+      if (row.department) departmentSet.add(row.department);
+      if (row.dept1) dept1Set.add(row.dept1);
+      if (row.dept2) dept2Set.add(row.dept2);
+      if (row.dept3) dept3Set.add(row.dept3);
+      if (row.letterType) letterTypeSet.add(row.letterType);
+    });
+    
+    return {
+      sender: Array.from(senderSet),
+      department: Array.from(departmentSet),
+      dept1: Array.from(dept1Set),
+      dept2: Array.from(dept2Set),
+      dept3: Array.from(dept3Set),
+      letterType: Array.from(letterTypeSet)
+    };
+  }, [localReceived, localSent, localIncoming]);
 
   if (user?.role !== 'admin') {
     return <div className="p-8 text-center text-red-500">Access Denied</div>;
@@ -282,32 +309,7 @@ export const AdminDataEntry = () => {
       <div className="flex-1 overflow-hidden relative">
         {entryMode === 'auto' ? (
           <OdooStagingArea 
-            existingOptions={React.useMemo(() => {
-              const senderSet = new Set<string>();
-              const departmentSet = new Set<string>();
-              const dept1Set = new Set<string>();
-              const dept2Set = new Set<string>();
-              const dept3Set = new Set<string>();
-              const letterTypeSet = new Set<string>();
-              
-              [...localReceived, ...localSent, ...localIncoming].forEach(row => {
-                if (row.sender) senderSet.add(row.sender);
-                if (row.department) departmentSet.add(row.department);
-                if (row.dept1) dept1Set.add(row.dept1);
-                if (row.dept2) dept2Set.add(row.dept2);
-                if (row.dept3) dept3Set.add(row.dept3);
-                if (row.letterType) letterTypeSet.add(row.letterType);
-              });
-              
-              return {
-                sender: Array.from(senderSet),
-                department: Array.from(departmentSet),
-                dept1: Array.from(dept1Set),
-                dept2: Array.from(dept2Set),
-                dept3: Array.from(dept3Set),
-                letterType: Array.from(letterTypeSet)
-              };
-            }, [localReceived, localSent, localIncoming])}
+            existingOptions={existingOptions}
             onApply={(newReceived, newSent, newIncoming) => {
               if (newReceived.length > 0) setLocalReceived([...newReceived, ...localReceived]);
               if (newSent.length > 0) setLocalSent([...newSent, ...localSent]);
