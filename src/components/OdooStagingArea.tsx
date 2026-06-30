@@ -199,19 +199,44 @@ export const OdooStagingArea = ({ onApply, existingOptions }: Props) => {
 
     for (const row of rows) {
       if (row.isReceived) {
+        let pTime: number | null = null;
+        let sTime = '-';
+        let sDateStr = null;
+        let rDateStr = null;
+
+        if (row.odooDate) {
+          const sDate = new Date(row.odooDate);
+          sDateStr = sDate.toISOString().split('T')[0];
+          
+          if (row.responseDate) {
+            const rDate = new Date(row.responseDate);
+            rDateStr = rDate.toISOString().split('T')[0];
+            
+            // Calculate processing time
+            const diffTime = rDate.getTime() - sDate.getTime();
+            pTime = Math.max(0, Math.round(diffTime / (1000 * 60 * 60 * 24)));
+            
+            // Calculate SLA
+            if (pTime > 15) sTime = "زیاتر لە 15 ڕۆژ";
+            else if (pTime >= 5) sTime = "بەپێی کاتی ئاسایی بۆ نووسراوی گشتیی";
+            else sTime = "کەمتر لە 5 ڕۆژ";
+          }
+        }
+
         receivedToApply.push({
           id: generateId(),
           subject: row.subject,
           department: row.department,
+          departments: [row.dept1, row.dept2, row.dept3].filter(Boolean),
           dept1: row.dept1,
           dept2: row.dept2,
           dept3: row.dept3,
           refCode: row.approvalSubject,
           letterType: row.letterType,
-          sentDate: new Date(row.odooDate),
-          responseDate: row.responseDate ? new Date(row.responseDate) : null,
-          processingTime: null,
-          slaTime: '-'
+          sentDate: sDateStr,
+          responseDate: rDateStr,
+          processingTime: pTime,
+          slaTime: sTime
         });
       }
       
@@ -220,12 +245,13 @@ export const OdooStagingArea = ({ onApply, existingOptions }: Props) => {
           id: generateId(),
           subject: row.subject,
           department: row.department,
+          departments: [row.dept1, row.dept2, row.dept3].filter(Boolean),
           dept1: row.dept1,
           dept2: row.dept2,
           dept3: row.dept3,
           refCode: row.approvalSubject,
           letterType: row.letterType,
-          sentDate: new Date(row.odooDate),
+          sentDate: row.odooDate ? new Date(row.odooDate).toISOString().split('T')[0] : null,
         });
       }
 
@@ -235,12 +261,13 @@ export const OdooStagingArea = ({ onApply, existingOptions }: Props) => {
           subject: row.subject,
           sender: row.sender || row.requestOwner, // Fallback to owner if empty
           department: row.department,
+          departments: [row.dept1, row.dept2, row.dept3].filter(Boolean),
           dept1: row.dept1,
           dept2: row.dept2,
           dept3: row.dept3,
           refCode: row.approvalSubject,
           letterType: row.letterType,
-          sentDate: new Date(row.odooDate),
+          sentDate: row.odooDate ? new Date(row.odooDate).toISOString().split('T')[0] : null,
         });
       }
     }
