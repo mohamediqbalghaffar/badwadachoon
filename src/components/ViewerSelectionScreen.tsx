@@ -45,7 +45,7 @@ export const ViewerSelectionScreen = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-slate-200 flex flex-col items-center p-8 pt-20 relative overflow-hidden" dir="rtl">
+    <div className="min-h-[135vh] bg-[#0f172a] text-slate-200 flex flex-col items-center p-8 pt-20 relative overflow-hidden" dir="rtl">
       {/* Logout Button */}
       <button
         onClick={logout}

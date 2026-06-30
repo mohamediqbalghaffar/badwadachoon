@@ -23,7 +23,7 @@ const MainContent: React.FC<MainContentProps> = ({ onBack }) => {
 
   if (dbLoading) {
     return (
-      <div className="relative z-10 w-full h-full min-h-screen flex flex-col items-center justify-center pt-20 pb-12">
+      <div className="relative z-10 w-full h-full min-h-[135vh] flex flex-col items-center justify-center pt-20 pb-12">
         <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md p-8 rounded-3xl shadow-xl flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
           <p className="text-lg font-bold text-slate-700 dark:text-slate-300">خوێندنەوەی داتابەیس...</p>
@@ -43,7 +43,7 @@ const MainContent: React.FC<MainContentProps> = ({ onBack }) => {
         <span className="font-medium text-sm">گەڕانەوە</span>
       </button>
 
-      <div className="relative z-10 w-full h-full min-h-screen flex flex-col items-center justify-center pt-20 pb-12">
+      <div className="relative z-10 w-full h-full min-h-[135vh] flex flex-col items-center justify-center pt-20 pb-12">
         <Dashboard />
       </div>
     </>
@@ -85,14 +85,14 @@ const AppContent = () => {
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+    return <div className="min-h-[135vh] flex items-center justify-center bg-slate-50 dark:bg-slate-950">
       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
     </div>;
   }
 
   if (!user) {
     return (
-      <main className="min-h-screen relative overflow-hidden bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 transition-colors duration-500">
+      <main className="min-h-[135vh] relative overflow-hidden bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 transition-colors duration-500">
         <HTSLogoBackground />
         <ParticlesCanvas />
         <LoginPage />
@@ -102,7 +102,7 @@ const AppContent = () => {
 
   if (user.role === 'viewer') {
     return (
-      <main className="min-h-screen relative overflow-hidden bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 transition-colors duration-500">
+      <main className="min-h-[135vh] relative overflow-hidden bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 transition-colors duration-500">
         <HTSLogoBackground />
         <ParticlesCanvas />
         <DataProvider mode="live">
@@ -114,7 +114,7 @@ const AppContent = () => {
 
   if (user.role !== 'admin' && (user.status === "pending" || user.status === "approved")) {
     return (
-      <main className="min-h-screen relative overflow-hidden bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 transition-colors duration-500">
+      <main className="min-h-[135vh] relative overflow-hidden bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 transition-colors duration-500">
         <HTSLogoBackground />
         <ParticlesCanvas />
         <PendingApprovalView />
@@ -123,7 +123,7 @@ const AppContent = () => {
   }
 
   return (
-    <main className="min-h-screen relative overflow-hidden bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 transition-colors duration-500">
+    <main className="min-h-[135vh] relative overflow-hidden bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 transition-colors duration-500">
       <HTSLogoBackground />
       <ParticlesCanvas />
       

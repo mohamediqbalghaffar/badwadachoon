@@ -22,7 +22,7 @@ export const LandingPortals: React.FC<LandingPortalsProps> = ({ onSelectAdmin })
   const liquidGlassClasses = "group relative flex flex-col items-center justify-center h-36 w-full max-w-[220px] mx-auto overflow-hidden transition-all duration-500 hover:scale-[1.05] z-10";
 
   return (
-    <div className="relative z-10 w-full h-full min-h-screen flex flex-col items-center justify-center p-4">
+    <div className="relative z-10 w-full h-full min-h-[135vh] flex flex-col items-center justify-center p-4">
       <div className="mb-10 flex justify-center animate-in fade-in slide-in-from-bottom-4 duration-700">
         <HTSLogo className="w-56 md:w-72 h-auto drop-shadow-xl" />
       </div>

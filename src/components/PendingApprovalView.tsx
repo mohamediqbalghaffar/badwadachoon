@@ -64,7 +64,7 @@ export const PendingApprovalView = () => {
   };
 
   return (
-    <div className="relative z-10 w-full h-full min-h-screen flex flex-col items-center justify-center p-4">
+    <div className="relative z-10 w-full h-full min-h-[135vh] flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md p-8 rounded-[2.5rem] backdrop-blur-3xl bg-white/10 dark:bg-slate-900/40 border border-white/20 dark:border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.1)]">
         
         {status === "pending" && (
