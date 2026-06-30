@@ -342,6 +342,24 @@ const IncomingDataTable = () => {
   const [editForm, setEditForm] = useState<Partial<IncomingLetterData>>({});
   const [isSaving, setIsSaving] = useState(false);
 
+  const uniqueDepartments = useMemo(() => {
+    const set = new Set<string>();
+    filteredIncomingData.forEach(d => {
+      d.departments?.forEach(dept => set.add(dept));
+      if (d.department && !d.departments?.length) set.add(d.department);
+      if (d.dept1) set.add(d.dept1);
+    });
+    return Array.from(set).sort();
+  }, [filteredIncomingData]);
+
+  const uniqueLetterTypes = useMemo(() => {
+    const set = new Set<string>();
+    filteredIncomingData.forEach(d => {
+      if (d.letterType) set.add(d.letterType);
+    });
+    return Array.from(set).sort();
+  }, [filteredIncomingData]);
+
   // Search logic
   const searchedData = useMemo(() => {
     if (!searchTerm) return filteredIncomingData;
@@ -542,7 +560,20 @@ const IncomingDataTable = () => {
                     ) : (row.sender || "-")}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap max-w-[200px] truncate" title={row.departments?.join("، ") || row.dept1}>
-                    {row.departments?.join("، ") || row.dept1 || "-"}
+                    {editingId === row.id ? (
+                      <select 
+                        value={editForm.departments?.[0] || editForm.department || editForm.dept1 || ''}
+                        onChange={e => setEditForm({...editForm, department: e.target.value, departments: [e.target.value], dept1: e.target.value})}
+                        className="w-full bg-white dark:bg-slate-900 border border-blue-300 rounded px-2 py-1 outline-none focus:ring-2 focus:ring-blue-500 text-right"
+                      >
+                        <option value="">هەڵبژێرە...</option>
+                        {uniqueDepartments.map(d => (
+                          <option key={d} value={d}>{d}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      row.departments?.join("، ") || row.dept1 || "-"
+                    )}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap font-mono text-xs">
                     {editingId === row.id ? (
@@ -557,19 +588,35 @@ const IncomingDataTable = () => {
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     {editingId === row.id ? (
-                      <input 
-                        type="text" 
-                        value={editForm.letterType || ''} 
+                      <select 
+                        value={editForm.letterType || ''}
                         onChange={e => setEditForm({...editForm, letterType: e.target.value})}
-                        className="w-24 bg-white dark:bg-slate-900 border border-blue-300 rounded px-2 py-1 text-right outline-none focus:ring-2 focus:ring-blue-500"
-                      />
+                        className="w-full bg-white dark:bg-slate-900 border border-blue-300 rounded px-2 py-1 outline-none focus:ring-2 focus:ring-blue-500 text-right"
+                      >
+                        <option value="">هەڵبژێرە...</option>
+                        {uniqueLetterTypes.map(lt => (
+                          <option key={lt} value={lt}>{lt}</option>
+                        ))}
+                      </select>
                     ) : (
                       <span className="px-2.5 py-1 text-xs font-medium border rounded-full bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400 border-teal-200 dark:border-teal-800">
                         {row.letterType || "-"}
                       </span>
                     )}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap">{row.sentDate ? row.sentDate.split('T')[0] : "-"}</td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    {editingId === row.id ? (
+                      <input 
+                        type="date"
+                        value={editForm.sentDate || ''}
+                        onChange={e => setEditForm({...editForm, sentDate: e.target.value})}
+                        className="w-full bg-white dark:bg-slate-900 border border-blue-300 rounded px-2 py-1 outline-none focus:ring-2 focus:ring-blue-500"
+                        dir="ltr"
+                      />
+                    ) : (
+                      row.sentDate ? row.sentDate.split('T')[0] : "-"
+                    )}
+                  </td>
                   {hasPermission('data:edit') && (
                     <td className="px-4 py-3 whitespace-nowrap text-center">
                       {editingId === row.id ? (

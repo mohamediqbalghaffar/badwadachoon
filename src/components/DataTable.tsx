@@ -68,6 +68,24 @@ export const DataTable = () => {
     });
   }, [filteredData]);
 
+  const uniqueDepartments = useMemo(() => {
+    const set = new Set<string>();
+    filteredData.forEach(d => {
+      d.departments?.forEach(dept => set.add(dept));
+      if (d.department && !d.departments?.length) set.add(d.department);
+      if (d.dept1) set.add(d.dept1);
+    });
+    return Array.from(set).sort();
+  }, [filteredData]);
+
+  const uniqueLetterTypes = useMemo(() => {
+    const set = new Set<string>();
+    filteredData.forEach(d => {
+      if (d.letterType) set.add(d.letterType);
+    });
+    return Array.from(set).sort();
+  }, [filteredData]);
+
   // Search logic
   const searchedData = useMemo(() => {
     if (!searchTerm) return uniqueData;
@@ -174,6 +192,32 @@ export const DataTable = () => {
     return "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800";
   };
 
+  const handleDateChange = (field: 'sentDate' | 'responseDate', value: string) => {
+    const newForm = { ...editForm, [field]: value };
+    
+    if (newForm.sentDate && newForm.responseDate) {
+      const start = new Date(newForm.sentDate);
+      const end = new Date(newForm.responseDate);
+      const diffTime = end.getTime() - start.getTime();
+      const diffDays = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+      
+      newForm.processingTime = diffDays;
+      
+      if (diffDays <= 5) {
+        newForm.slaTime = "کەمتر لە 5 ڕۆژ";
+      } else if (diffDays <= 10) {
+        newForm.slaTime = "کەمتر لە 10 ڕۆژ";
+      } else {
+        newForm.slaTime = "زیاتر لە 10 ڕۆژ";
+      }
+    } else {
+      newForm.processingTime = null;
+      newForm.slaTime = "-";
+    }
+    
+    setEditForm(newForm);
+  };
+
   const handleEdit = (row: DashboardData) => {
     setEditingId(row.id);
     setEditForm({ ...row });
@@ -272,6 +316,7 @@ export const DataTable = () => {
                 { key: "subject", label: "بابەت" },
                 { key: "department", label: "لایەنی پەیوەندیدار" },
                 { key: "refCode", label: "کۆد" },
+                { key: "letterType", label: "جۆری نامە" },
                 { key: "sentDate", label: "ڕۆژی ناردن" },
                 { key: "responseDate", label: "ڕۆژی وەڵام" },
                 { key: "processingTime", label: "کاتی تێچوو بۆ وەڵام (ڕۆژ)" },
@@ -320,8 +365,20 @@ export const DataTable = () => {
                     ) : (row.subject)}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-slate-600 dark:text-slate-400">
-                    {/* Simplified: Array editing is hard in a single cell, so we keep it read-only for now */}
-                    {row.departments?.join("، ") || row.dept1}
+                    {editingId === row.id ? (
+                      <select 
+                        value={editForm.departments?.[0] || editForm.department || editForm.dept1 || ''}
+                        onChange={e => setEditForm({...editForm, department: e.target.value, departments: [e.target.value], dept1: e.target.value})}
+                        className="w-full bg-white dark:bg-slate-900 border border-blue-300 rounded px-2 py-1 outline-none focus:ring-2 focus:ring-blue-500 text-right"
+                      >
+                        <option value="">هەڵبژێرە...</option>
+                        {uniqueDepartments.map(d => (
+                          <option key={d} value={d}>{d}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      row.departments?.join("، ") || row.department || row.dept1
+                    )}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-slate-500 dark:text-slate-400">
                     {editingId === row.id ? (
@@ -343,8 +400,48 @@ export const DataTable = () => {
                       </button>
                     )}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-slate-600 dark:text-slate-400">{row.sentDate ? row.sentDate.split('T')[0] : "-"}</td>
-                  <td className="px-4 py-3 whitespace-nowrap text-slate-600 dark:text-slate-400">{row.responseDate ? row.responseDate.split('T')[0] : <span className="text-amber-500 font-medium">لە چاوەڕوانیدایە</span>}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-slate-600 dark:text-slate-400">
+                    {editingId === row.id ? (
+                      <select 
+                        value={editForm.letterType || ''}
+                        onChange={e => setEditForm({...editForm, letterType: e.target.value})}
+                        className="w-full bg-white dark:bg-slate-900 border border-blue-300 rounded px-2 py-1 outline-none focus:ring-2 focus:ring-blue-500 text-right"
+                      >
+                        <option value="">هەڵبژێرە...</option>
+                        {uniqueLetterTypes.map(lt => (
+                          <option key={lt} value={lt}>{lt}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      row.letterType || "-"
+                    )}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap text-slate-600 dark:text-slate-400">
+                    {editingId === row.id ? (
+                      <input 
+                        type="date"
+                        value={editForm.sentDate || ''}
+                        onChange={e => handleDateChange('sentDate', e.target.value)}
+                        className="w-full bg-white dark:bg-slate-900 border border-blue-300 rounded px-2 py-1 outline-none focus:ring-2 focus:ring-blue-500"
+                        dir="ltr"
+                      />
+                    ) : (
+                      row.sentDate ? row.sentDate.split('T')[0] : "-"
+                    )}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap text-slate-600 dark:text-slate-400">
+                    {editingId === row.id ? (
+                      <input 
+                        type="date"
+                        value={editForm.responseDate || ''}
+                        onChange={e => handleDateChange('responseDate', e.target.value)}
+                        className="w-full bg-white dark:bg-slate-900 border border-blue-300 rounded px-2 py-1 outline-none focus:ring-2 focus:ring-blue-500"
+                        dir="ltr"
+                      />
+                    ) : (
+                      row.responseDate ? row.responseDate.split('T')[0] : <span className="text-amber-500 font-medium">لە چاوەڕوانیدایە</span>
+                    )}
+                  </td>
                   <td className="px-4 py-3 whitespace-nowrap text-center font-semibold text-slate-700 dark:text-slate-300">{row.processingTime !== null ? row.processingTime : "-"}</td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     <span className={`px-2.5 py-1 text-xs font-medium border rounded-full ${getSLAColor(row.slaTime)}`}>
