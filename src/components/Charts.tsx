@@ -57,12 +57,13 @@ const renderCustomizedLabel = (props: any) => {
 };
 
 export const DashboardCharts = () => {
-  const { filteredData, setFilters, filters } = useData();
+  const { filteredData, filteredSentData, filteredIncomingData, activeView, setFilters, filters } = useData();
+  const activeData = activeView === 'received' ? filteredData : activeView === 'sent' ? filteredSentData : filteredIncomingData;
 
   // Prepare Department Data
   const deptData = useMemo(() => {
     const counts: Record<string, number> = {};
-    filteredData.forEach((d) => {
+    activeData.forEach((d: any) => {
       d.departments.forEach((dept) => {
         counts[dept] = (counts[dept] || 0) + 1;
       });
@@ -76,12 +77,12 @@ export const DashboardCharts = () => {
       })
       .sort((a, b) => b.count - a.count)
       .slice(0, 10); // Top 10
-  }, [filteredData]);
+  }, [activeData]);
 
   // Prepare Letter Type Data
   const typeData = useMemo(() => {
     const counts: Record<string, number> = {};
-    filteredData.forEach((d) => {
+    activeData.forEach((d: any) => {
       counts[d.letterType] = (counts[d.letterType] || 0) + 1;
     });
     return Object.entries(counts).map(([name, value]) => {
@@ -90,7 +91,7 @@ export const DashboardCharts = () => {
          const abbr = words.slice(0, 2).map(w => w.charAt(0)).join('.');
          return { name, value, abbr: abbr || name.charAt(0) };
     });
-  }, [filteredData]);
+  }, [activeData]);
 
   // Prepare Enhanced SLA Data (Stacked Bar + Line)
   const slaEnhancedData = useMemo(() => {
@@ -108,7 +109,7 @@ export const DashboardCharts = () => {
     let totalOnTime = 0;
     let totalLate = 0;
 
-    filteredData.forEach((d) => {
+    activeData.forEach((d: any) => {
       const sla = d.slaTime || '-';
       const category = d.letterType || 'نەزانراو';
 
@@ -154,12 +155,12 @@ export const DashboardCharts = () => {
       .sort((a, b) => (b.onTime + b.late) - (a.onTime + a.late));
 
     return { data, totalOnTime, totalLate };
-  }, [filteredData]);
+  }, [activeData]);
 
   // Prepare Timeline Data (By Month)
   const timelineData = useMemo(() => {
     const counts: Record<string, number> = {};
-    filteredData.forEach((d) => {
+    activeData.forEach((d: any) => {
       if (d.sentDate) {
         const date = parseISO(d.sentDate);
         if (isValid(date)) {
@@ -171,14 +172,14 @@ export const DashboardCharts = () => {
     return Object.entries(counts)
       .map(([date, count]) => ({ date, count }))
       .sort((a, b) => a.date.localeCompare(b.date));
-  }, [filteredData]);
+  }, [activeData]);
 
   // Prepare Month Data when exactly one department is selected
   const monthDataForDept = useMemo(() => {
     if (filters.departments.length !== 1) return [];
     
     const counts: Record<string, number> = {};
-    filteredData.forEach((d) => {
+    activeData.forEach((d: any) => {
       if (d.sentDate) {
         const date = parseISO(d.sentDate);
         if (isValid(date)) {

@@ -194,49 +194,24 @@ export const OdooStagingArea = ({ onApply, existingOptions }: Props) => {
     const incomingToApply: any[] = [];
 
     // Helper to generate a dummy ID. AdminDataEntry will re-assign proper IDs on addRow, 
-    // but here we just need a unique negative number to identify new rows.
-    const generateId = () => -Math.floor(Math.random() * 1000000);
+    // but here we just need a unique string to identify new rows that the DB will ignore.
+    const generateId = () => `new-${Math.floor(Math.random() * 1000000)}`;
 
     for (const row of rows) {
       if (row.isReceived) {
-        let pTime: number | null = null;
-        let sTime = '-';
-        let sDateStr = null;
-        let rDateStr = null;
-
-        if (row.odooDate) {
-          const sDate = new Date(row.odooDate);
-          sDateStr = sDate.toISOString().split('T')[0];
-          
-          if (row.responseDate) {
-            const rDate = new Date(row.responseDate);
-            rDateStr = rDate.toISOString().split('T')[0];
-            
-            // Calculate processing time
-            const diffTime = rDate.getTime() - sDate.getTime();
-            pTime = Math.max(0, Math.round(diffTime / (1000 * 60 * 60 * 24)));
-            
-            // Calculate SLA
-            if (pTime > 15) sTime = "زیاتر لە 15 ڕۆژ";
-            else if (pTime >= 5) sTime = "بەپێی کاتی ئاسایی بۆ نووسراوی گشتیی";
-            else sTime = "کەمتر لە 5 ڕۆژ";
-          }
-        }
-
         receivedToApply.push({
           id: generateId(),
           subject: row.subject,
           department: row.department,
-          departments: [row.dept1, row.dept2, row.dept3].filter(Boolean),
           dept1: row.dept1,
           dept2: row.dept2,
           dept3: row.dept3,
           refCode: row.approvalSubject,
           letterType: row.letterType,
-          sentDate: sDateStr,
-          responseDate: rDateStr,
-          processingTime: pTime,
-          slaTime: sTime
+          sentDate: row.odooDate ? new Date(row.odooDate).toISOString() : null,
+          responseDate: row.responseDate ? new Date(row.responseDate).toISOString() : null,
+          processingTime: null,
+          slaTime: '-'
         });
       }
       
@@ -245,13 +220,12 @@ export const OdooStagingArea = ({ onApply, existingOptions }: Props) => {
           id: generateId(),
           subject: row.subject,
           department: row.department,
-          departments: [row.dept1, row.dept2, row.dept3].filter(Boolean),
           dept1: row.dept1,
           dept2: row.dept2,
           dept3: row.dept3,
           refCode: row.approvalSubject,
           letterType: row.letterType,
-          sentDate: row.odooDate ? new Date(row.odooDate).toISOString().split('T')[0] : null,
+          sentDate: row.odooDate ? new Date(row.odooDate).toISOString() : null,
         });
       }
 
@@ -261,13 +235,12 @@ export const OdooStagingArea = ({ onApply, existingOptions }: Props) => {
           subject: row.subject,
           sender: row.sender || row.requestOwner, // Fallback to owner if empty
           department: row.department,
-          departments: [row.dept1, row.dept2, row.dept3].filter(Boolean),
           dept1: row.dept1,
           dept2: row.dept2,
           dept3: row.dept3,
           refCode: row.approvalSubject,
           letterType: row.letterType,
-          sentDate: row.odooDate ? new Date(row.odooDate).toISOString().split('T')[0] : null,
+          sentDate: row.odooDate ? new Date(row.odooDate).toISOString() : null,
         });
       }
     }

@@ -99,7 +99,7 @@ const MultiSelect = ({ label, options, selected, onChange, placeholder }: MultiS
 };
 
 export const OmniFilter = () => {
-  const { data, sentData, filters, setFilters, clearFilters, activeView } = useData();
+  const { data, sentData, incomingData, filters, setFilters, clearFilters, activeView } = useData();
 
   const formatDateDisplay = (dateStr: string | null) => {
     if (!dateStr) return "dd/mm/yyyy";
@@ -115,7 +115,7 @@ export const OmniFilter = () => {
   };
 
   // Extract unique options from the appropriate dataset based on activeView
-  const activeData = activeView === 'sent' ? sentData : data;
+  const activeData = activeView === 'received' ? data : activeView === 'sent' ? sentData : incomingData;
   const departments = useMemo(() => Array.from(new Set(activeData.flatMap((d) => d.departments))), [activeData]);
   const letterTypes = useMemo(() => Array.from(new Set(activeData.map((d) => d.letterType))), [activeData]);
   const slaStatuses = useMemo(() => {
