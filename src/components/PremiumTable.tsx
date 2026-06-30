@@ -25,7 +25,9 @@ interface PremiumTableProps<TData> {
 
 export function PremiumTable<TData>({ data, columns, renderExpandedRow, exportFilename = 'export', searchPlaceholder = 'گەڕان...' }: PremiumTableProps<TData>) {
   const [globalFilter, setGlobalFilter] = useState('');
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const [sorting, setSorting] = useState<SortingState>([
+    { id: 'sentDate', desc: true }
+  ]);
   const [expanded, setExpanded] = useState({});
 
   const table = useReactTable({
