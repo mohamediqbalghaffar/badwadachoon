@@ -7,6 +7,7 @@ import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
 import { Save, Plus, Database, Cloud, Trash2 } from 'lucide-react';
 import { DashboardData, IncomingLetterData, SentLetterData } from '../utils/parser';
+import { OdooStagingArea } from './OdooStagingArea';
 
 type TableType = 'incoming' | 'received' | 'sent';
 type EntryMode = 'manual' | 'auto';
@@ -280,15 +281,24 @@ export const AdminDataEntry = () => {
       {/* Content Area */}
       <div className="flex-1 overflow-hidden relative">
         {entryMode === 'auto' ? (
-          <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-slate-50 dark:bg-slate-900/50">
-            <div className="w-24 h-24 mb-6 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-500 animate-pulse">
-              <Cloud size={48} />
-            </div>
-            <h2 className="text-3xl font-bold text-slate-800 dark:text-slate-200 mb-4">بەم زووانە (Coming Soon)</h2>
-            <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto text-lg leading-relaxed">
-              ئەم بەشە تەرخانکراوە بۆ بەستنەوەی ڕاستەوخۆ بە سیستەمی Odoo API. لە ئایندەدا دەتوانیت داتاکان بە یەک کلیک نوێ بکەیتەوە.
-            </p>
-          </div>
+          <OdooStagingArea 
+            onApply={(newReceived, newSent, newIncoming) => {
+              if (newReceived.length > 0) setLocalReceived([...newReceived, ...localReceived]);
+              if (newSent.length > 0) setLocalSent([...newSent, ...localSent]);
+              if (newIncoming.length > 0) setLocalIncoming([...newIncoming, ...localIncoming]);
+              
+              // Switch back to manual mode to let user review and save
+              setEntryMode('manual');
+              // Automatically switch to the tab that received the most rows
+              if (newReceived.length >= newSent.length && newReceived.length >= newIncoming.length) {
+                setActiveTab('received');
+              } else if (newSent.length >= newIncoming.length) {
+                setActiveTab('sent');
+              } else {
+                setActiveTab('incoming');
+              }
+            }}
+          />
         ) : (
           <div className="h-full flex flex-col" dir="ltr">
             <div className="flex-1 overflow-hidden p-2">
