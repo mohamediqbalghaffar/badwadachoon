@@ -29,6 +29,7 @@ export interface OdooRow {
 interface Props {
   onApply: (receivedRows: any[], sentRows: any[], incomingRows: any[]) => void;
   existingOptions?: Record<string, Record<string, string[]>>;
+  existingRefCodes?: string[];
 }
 
 const DateFormatter = (props: any) => {
@@ -130,7 +131,7 @@ const EditableTextEditor = (props: any) => {
   );
 };
 
-export const OdooStagingArea = ({ onApply, existingOptions }: Props) => {
+export const OdooStagingArea = ({ onApply, existingOptions, existingRefCodes }: Props) => {
   const [rows, setRows] = useState<OdooRow[]>([]);
   const [isFetching, setIsFetching] = useState(false);
   const [hasFetched, setHasFetched] = useState(false);
@@ -163,7 +164,12 @@ export const OdooStagingArea = ({ onApply, existingOptions }: Props) => {
       const res = await fetch('/api/odoo/fetch');
       const json = await res.json();
       if (json.success) {
-        const initialRows: OdooRow[] = json.data.map((item: any) => ({
+        // Filter out records that already exist in the database (by id or refCode)
+        const filteredData = json.data.filter((item: any) => {
+          return !existingRefCodes?.includes(item.approvalSubject) && !existingRefCodes?.includes(item.id);
+        });
+
+        const initialRows: OdooRow[] = filteredData.map((item: any) => ({
           ...item,
           department: '',
           dept1: '',
@@ -171,11 +177,16 @@ export const OdooStagingArea = ({ onApply, existingOptions }: Props) => {
           dept3: '',
           letterType: '',
           responseDate: '',
-          sender: '',
+          sender: item.requestOwner || '',
           isReceived: false,
           isSent: false,
           isIncoming: false
         }));
+        
+        if (filteredData.length < json.data.length && filteredData.length === 0) {
+          alert(`هەموو ئەو ${json.data.length} نامەیەی لە ١٠ ڕۆژی ڕابردوودا هەبوون پێشتر داخڵکراون (All ${json.data.length} recent requests are already in the database).`);
+        }
+        
         setRows(initialRows);
         setHasFetched(true);
       } else {
@@ -194,8 +205,8 @@ export const OdooStagingArea = ({ onApply, existingOptions }: Props) => {
     const incomingToApply: any[] = [];
 
     // Helper to generate a dummy ID. AdminDataEntry will re-assign proper IDs on addRow, 
-    // but here we just need a unique string to identify new rows that the DB will ignore.
-    const generateId = () => `new-${Math.floor(Math.random() * 1000000)}`;
+    // but here we just need a unique negative number to identify new rows.
+    const generateId = () => -Math.floor(Math.random() * 1000000);
 
     for (const row of rows) {
       if (row.isReceived) {
@@ -208,8 +219,8 @@ export const OdooStagingArea = ({ onApply, existingOptions }: Props) => {
           dept3: row.dept3,
           refCode: row.approvalSubject,
           letterType: row.letterType,
-          sentDate: row.odooDate ? new Date(row.odooDate).toISOString() : null,
-          responseDate: row.responseDate ? new Date(row.responseDate).toISOString() : null,
+          sentDate: new Date(row.odooDate),
+          responseDate: row.responseDate ? new Date(row.responseDate) : null,
           processingTime: null,
           slaTime: '-'
         });
@@ -225,7 +236,7 @@ export const OdooStagingArea = ({ onApply, existingOptions }: Props) => {
           dept3: row.dept3,
           refCode: row.approvalSubject,
           letterType: row.letterType,
-          sentDate: row.odooDate ? new Date(row.odooDate).toISOString() : null,
+          sentDate: new Date(row.odooDate),
         });
       }
 
@@ -240,7 +251,7 @@ export const OdooStagingArea = ({ onApply, existingOptions }: Props) => {
           dept3: row.dept3,
           refCode: row.approvalSubject,
           letterType: row.letterType,
-          sentDate: row.odooDate ? new Date(row.odooDate).toISOString() : null,
+          sentDate: new Date(row.odooDate),
         });
       }
     }

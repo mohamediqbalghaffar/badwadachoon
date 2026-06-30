@@ -111,10 +111,69 @@ export const AdminDataEntry = () => {
   const [entryMode, setEntryMode] = useState<EntryMode>('manual');
   
   const sortDesc = (arr: any[]) => [...arr].sort((a, b) => {
-    const idA = typeof a.id === 'number' ? a.id : parseInt(String(a.id).replace('new-', '')) || 0;
-    const idB = typeof b.id === 'number' ? b.id : parseInt(String(b.id).replace('new-', '')) || 0;
-    return idB - idA;
+    const parseSortId = (id: any) => {
+      if (typeof id === 'number') return id;
+      if (typeof id === 'string') {
+        return parseInt(id.replace('new-', '').replace('odoo-', '')) || 0;
+      }
+      return 0;
+    };
+    return parseSortId(b.id) - parseSortId(a.id);
   });
+
+  const calculateSLA = (row: any) => {
+    let pTime = row.processingTime;
+    let sTime = row.slaTime;
+
+    // Auto-calculate processingTime if sentDate exists
+    if (row.sentDate) {
+      const start = new Date(row.sentDate);
+      const end = row.responseDate ? new Date(row.responseDate) : new Date();
+      if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+        const diff = end.getTime() - start.getTime();
+        pTime = Math.max(0, Math.round(diff / (1000 * 60 * 60 * 24)));
+      }
+    }
+
+    // Auto-calculate SLA status based on Excel Column M formula
+    if (pTime !== null && pTime !== undefined && pTime !== "") {
+      const pTimeNum = typeof pTime === 'string' ? parseInt(pTime) : pTime;
+      if (!isNaN(pTimeNum)) {
+        const lType = row.letterType || "";
+        const rCode = String(row.refCode || "").trim().toLowerCase();
+
+        if (rCode === "2" || lType === "داواکاری کاندیدکردن") {
+          if (pTimeNum > 12) sTime = "زیاتر لە 12 ڕۆژ";
+          else if (pTimeNum >= 8) sTime = "بەپێی کاتی ڕێنمایی";
+          else sTime = "کەمتر لە 8 ڕۆژ";
+        } 
+        else if (rCode === "4" || lType === "داواکاری زیاد کردنی ڕاژە") {
+          if (pTimeNum > 15) sTime = "زیاتر لە 15 ڕۆژ";
+          else if (pTimeNum >= 12) sTime = "بەپێی کاتی ڕێنمایی";
+          else sTime = "کەمتر لە 12 ڕۆژ";
+        } 
+        else if (rCode === "7" || lType === "داواکاریی گۆڕانکاریی پۆست") {
+          if (pTimeNum > 12) sTime = "زیاتر لە 12 ڕۆژ";
+          else if (pTimeNum >= 8) sTime = "بەپێی کاتی ڕێنمایی";
+          else sTime = "کەمتر لە 8 ڕۆژ";
+        } 
+        else if (rCode === "1a") {
+          if (pTimeNum > 10) sTime = "زیاتر لە 10 ڕۆژ";
+          else if (pTimeNum >= 5) sTime = "کەمتر لە 10 ڕۆژ";
+          else sTime = "کەمتر لە5 ڕۆژ";
+        } 
+        else {
+          if (pTimeNum > 15) sTime = "زیاتر لە 15 ڕۆژ";
+          else if (pTimeNum >= 5) sTime = "بەپێی کاتی ئاسایی بۆ نووسراوی گشتیی";
+          else sTime = "کەمتر لە 5 ڕۆژ";
+        }
+      }
+    } else {
+      sTime = "-";
+    }
+
+    return { ...row, processingTime: pTime, slaTime: sTime };
+  };
 
   // Local state for grid edits
   const [localReceived, setLocalReceived] = useState<any[]>(() => sortDesc(receivedData));
@@ -165,6 +224,15 @@ export const AdminDataEntry = () => {
     };
   }, [localReceived, localSent, localIncoming]);
 
+  const existingRefCodes = React.useMemo(() => {
+    const codes = new Set<string>();
+    [...localReceived, ...localSent, ...localIncoming].forEach(row => {
+      if (row.refCode) codes.add(row.refCode);
+      if (row.id && typeof row.id === 'string' && row.id.startsWith('odoo-')) codes.add(row.id);
+    });
+    return Array.from(codes);
+  }, [localReceived, localSent, localIncoming]);
+
   if (user?.role !== 'admin') {
     return <div className="p-8 text-center text-red-500">Access Denied</div>;
   }
@@ -211,7 +279,10 @@ export const AdminDataEntry = () => {
     let currentData = activeTab === 'received' ? localReceived : activeTab === 'sent' ? localSent : localIncoming;
     let maxId = 0;
     currentData.forEach((row: any) => {
-      const idNum = typeof row.id === 'number' ? row.id : parseInt(String(row.id).replace('new-', '')) || 0;
+      let idNum = 0;
+      if (typeof row.id === 'number') idNum = row.id;
+      else if (typeof row.id === 'string') idNum = parseInt(row.id.replace('new-', '').replace('odoo-', '')) || 0;
+      
       if (idNum > maxId) maxId = idNum;
     });
     
@@ -312,8 +383,12 @@ export const AdminDataEntry = () => {
         {entryMode === 'auto' ? (
           <OdooStagingArea 
             existingOptions={existingOptions}
+            existingRefCodes={existingRefCodes}
             onApply={(newReceived, newSent, newIncoming) => {
-              if (newReceived.length > 0) setLocalReceived([...newReceived, ...localReceived]);
+              if (newReceived.length > 0) {
+                const computedReceived = newReceived.map(r => calculateSLA(r));
+                setLocalReceived([...computedReceived, ...localReceived]);
+              }
               if (newSent.length > 0) setLocalSent([...newSent, ...localSent]);
               if (newIncoming.length > 0) setLocalIncoming([...newIncoming, ...localIncoming]);
               
@@ -337,59 +412,7 @@ export const AdminDataEntry = () => {
                 rows={activeTab === 'received' ? localReceived : activeTab === 'sent' ? localSent : localIncoming} 
                 onRowsChange={(newRows) => {
                   if (activeTab === 'received') {
-                    const updatedRows = newRows.map(row => {
-                      let pTime = row.processingTime;
-                      let sTime = row.slaTime;
-
-                      // Auto-calculate processingTime if sentDate exists
-                      if (row.sentDate) {
-                        const start = new Date(row.sentDate);
-                        const end = row.responseDate ? new Date(row.responseDate) : new Date();
-                        if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
-                          const diff = end.getTime() - start.getTime();
-                          pTime = Math.max(0, Math.round(diff / (1000 * 60 * 60 * 24)));
-                        }
-                      }
-
-                      // Auto-calculate SLA status based on Excel Column M formula
-                      if (pTime !== null && pTime !== undefined && pTime !== "") {
-                        const pTimeNum = typeof pTime === 'string' ? parseInt(pTime) : pTime;
-                        if (!isNaN(pTimeNum)) {
-                          const lType = row.letterType || "";
-                          const rCode = String(row.refCode || "").trim().toLowerCase();
-
-                          if (rCode === "2" || lType === "داواکاری کاندیدکردن") {
-                            if (pTimeNum > 12) sTime = "زیاتر لە 12 ڕۆژ";
-                            else if (pTimeNum >= 8) sTime = "بەپێی کاتی ڕێنمایی";
-                            else sTime = "کەمتر لە 8 ڕۆژ";
-                          } 
-                          else if (rCode === "4" || lType === "داواکاری زیاد کردنی ڕاژە") {
-                            if (pTimeNum > 15) sTime = "زیاتر لە 15 ڕۆژ";
-                            else if (pTimeNum >= 12) sTime = "بەپێی کاتی ڕێنمایی";
-                            else sTime = "کەمتر لە 12 ڕۆژ";
-                          } 
-                          else if (rCode === "7" || lType === "داواکاریی گۆڕانکاریی پۆست") {
-                            if (pTimeNum > 12) sTime = "زیاتر لە 12 ڕۆژ";
-                            else if (pTimeNum >= 8) sTime = "بەپێی کاتی ڕێنمایی";
-                            else sTime = "کەمتر لە 8 ڕۆژ";
-                          } 
-                          else if (rCode === "1a") {
-                            if (pTimeNum > 10) sTime = "زیاتر لە 10 ڕۆژ";
-                            else if (pTimeNum >= 5) sTime = "کەمتر لە 10 ڕۆژ";
-                            else sTime = "کەمتر لە5 ڕۆژ";
-                          } 
-                          else {
-                            if (pTimeNum > 15) sTime = "زیاتر لە 15 ڕۆژ";
-                            else if (pTimeNum >= 5) sTime = "بەپێی کاتی ئاسایی بۆ نووسراوی گشتیی";
-                            else sTime = "کەمتر لە 5 ڕۆژ";
-                          }
-                        }
-                      } else {
-                        sTime = "-";
-                      }
-
-                      return { ...row, processingTime: pTime, slaTime: sTime };
-                    });
+                    const updatedRows = newRows.map(row => calculateSLA(row));
                     setLocalReceived(updatedRows);
                   }
                   else if (activeTab === 'sent') setLocalSent(newRows);

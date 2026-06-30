@@ -53,7 +53,7 @@ export async function GET() {
           "search_read",
           [[["date", ">=", dateStr]]], // Only last 10 days
           { 
-            limit: 50, // Increase limit just in case there are many in 10 days
+            limit: 500, // Increased limit to capture all requests in 10 days
             fields: ["name", "date", "approval_subject", "request_owner_id"],
             order: "id desc"
           }

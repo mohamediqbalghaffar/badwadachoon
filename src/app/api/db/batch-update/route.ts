@@ -14,10 +14,18 @@ export async function POST(request: Request) {
       await tx.incomingLetter.deleteMany({});
 
       // 2. Re-insert all rows, skipping string IDs (like "new-123") to let DB auto-increment them
+      const parseId = (id: any) => {
+        if (typeof id === 'string') {
+          if (id.startsWith('new-')) return undefined;
+          if (id.startsWith('odoo-')) return parseInt(id.replace('odoo-', '')) || undefined;
+        }
+        return parseInt(id) || undefined;
+      };
+
       if (receivedData && receivedData.length > 0) {
         await tx.receivedLetter.createMany({
           data: receivedData.map((d: any) => ({
-            id: typeof d.id === 'string' && d.id.startsWith('new-') ? undefined : parseInt(d.id) || undefined,
+            id: parseId(d.id),
             subject: d.subject || "نەزانراو",
             department: d.department || "نەزانراو",
             departments: JSON.stringify(d.departments || []),
@@ -37,7 +45,7 @@ export async function POST(request: Request) {
       if (sentData && sentData.length > 0) {
         await tx.sentLetter.createMany({
           data: sentData.map((d: any) => ({
-            id: typeof d.id === 'string' && d.id.startsWith('new-') ? undefined : parseInt(d.id) || undefined,
+            id: parseId(d.id),
             subject: d.subject || "نەزانراو",
             department: d.department || "نەزانراو",
             departments: JSON.stringify(d.departments || []),
@@ -54,7 +62,7 @@ export async function POST(request: Request) {
       if (incomingData && incomingData.length > 0) {
         await tx.incomingLetter.createMany({
           data: incomingData.map((d: any) => ({
-            id: typeof d.id === 'string' && d.id.startsWith('new-') ? undefined : parseInt(d.id) || undefined,
+            id: parseId(d.id),
             subject: d.subject || "نەزانراو",
             sender: d.sender || "نەزانراو",
             department: d.department || "نەزانراو",
