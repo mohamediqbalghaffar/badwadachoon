@@ -14,10 +14,11 @@ import { LiquidGlassCard } from "@/components/ui/liquid-glass";
 import { SentDashboard } from "./SentDashboard";
 import { ComparisonView } from "./ComparisonView";
 import { IncomingView } from "./IncomingView";
-import { MonitorPlay, X, Inbox, Send, GitCompareArrows, ArrowDownToLine, LogOut, User, ShieldCheck, Settings, Database, UploadCloud } from "lucide-react";
+import { MonitorPlay, X, Inbox, Send, GitCompareArrows, ArrowDownToLine, LogOut, User, ShieldCheck, Settings, Database, UploadCloud, Edit3 } from "lucide-react";
 import { parseFile } from "../utils/parser";
 import { AdminSettingsModal } from "./AdminSettingsModal";
 import { LiveActivityTracker } from "./LiveActivityTracker";
+import { AdminDataEntry } from "./AdminDataEntry";
 
 const VIEW_SEGMENTS: { key: ActiveView; label: string; icon: React.ReactNode }[] = [
   { key: 'incoming', label: 'سەرجەم هاتووەکان', icon: <ArrowDownToLine size={16} /> },
@@ -163,11 +164,12 @@ export const Dashboard = () => {
     setActiveView(view);
   };
 
-  const subtitles: Record<ActiveView, string> = {
+  const subtitles: Record<string, string> = {
     incoming: 'داشبۆردی شیکاری سەرجەم نووسراوە هاتووەکان',
     received: 'داشبۆردی بەدواداچوونی ئەو نامانەی پێویستیان بە وەڵامە',
     sent: 'داشبۆردی شیکاری سەرجەم نووسراوە ڕەوانەکراوەکان',
     comparison: 'بەراوردکردنی سەرجەم نامەکان لەگەڵ ئەوانەی پێویستیان بە وەڵامە',
+    'data-entry': 'بەڕێوەبردنی داتای سیستەم',
   };
 
   return (
@@ -193,7 +195,7 @@ export const Dashboard = () => {
                 بەدواداچوون
               </h1>
               <p className="text-slate-500 dark:text-slate-400 mt-2 text-lg animate-fade-up delay-100">
-                {subtitles[activeView]}
+                {subtitles[activeView] || ''}
               </p>
             </div>
 
@@ -276,6 +278,22 @@ export const Dashboard = () => {
                     </label>
                   </div>
                 )}
+                
+                {/* Admin Data Entry Button */}
+                {user?.role === 'admin' && (
+                  <button
+                    onClick={() => setActiveView('data-entry')}
+                    title="بەڕێوەبردنی داتا"
+                    className={`relative backdrop-blur-md px-4 py-2 rounded-2xl border transition-all flex items-center gap-2 ${
+                      activeView === 'data-entry'
+                        ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white border-amber-400 shadow-lg shadow-amber-500/30'
+                        : 'bg-white/50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    <Edit3 size={18} />
+                    <span className="font-bold whitespace-nowrap">بەڕێوەبردنی داتا</span>
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -338,6 +356,12 @@ export const Dashboard = () => {
           {activeView === 'comparison' && (
             <div className="animate-fade-in">
               <ComparisonView />
+            </div>
+          )}
+
+          {activeView === 'data-entry' && (
+            <div className="animate-fade-in">
+              <AdminDataEntry />
             </div>
           )}
         </>

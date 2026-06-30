@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { usePermissions } from './PermissionsContext';
 import { DashboardData, SentLetterData, IncomingLetterData } from "../utils/parser";
 
-export type ActiveView = 'incoming' | 'received' | 'sent' | 'comparison';
+export type ActiveView = 'incoming' | 'received' | 'sent' | 'comparison' | 'data-entry';
 export type AdminMode = 'live' | 'local';
 
 interface FilterState {
