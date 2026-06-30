@@ -238,7 +238,7 @@ export const PresentationView = () => {
 
   const isSingleDeptSelected = filters.departments.length === 1;
   const chartData = isSingleDeptSelected ? monthDataForDept : deptData;
-  const chartTitle = isSingleDeptSelected ? "قەبارەی نامەکان بەپێی مانگ" : "نامەکان بەپێی بەش و لایەنەکان";
+  const chartTitle = isSingleDeptSelected ? "ژمارەی نامەکان بەپێی مانگ" : "نامەکان بەپێی بەش و لایەنەکان";
   // Actual fastest replied letters (subjects and actual times)
   const fastestLetters = useMemo(() => {
     return baseFilteredData
@@ -662,7 +662,7 @@ export const PresentationView = () => {
                 {chartTitle}
               </h2>
               <span className="text-sm text-slate-400">
-                {isSingleDeptSelected ? "ڕەوتی قەبارەی کار بەپێی مانگەکان" : "لایەنە سەرەکییەکان بەپێی قەبارەی کار"}
+                {isSingleDeptSelected ? "ڕەوتی ژمارەی کار بەپێی مانگەکان" : "لایەنە سەرەکییەکان بەپێی ژمارەی کار"}
               </span>
             </motion.div>
             <motion.div variants={itemVariants} className="w-full h-[380px] glass rounded-3xl p-6 border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] backdrop-blur-3xl" dir="ltr">
@@ -702,7 +702,7 @@ export const PresentationView = () => {
                 <Lightbulb className="text-blue-500 shrink-0" size={28} />
                 <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
                   <strong className="text-blue-600 dark:text-blue-400">شیکاری هۆشمەند: </strong> 
-                  زۆرترین پاڵەپەستۆی کار لەسەر <strong className="text-blue-500">{(chartData[0] as any).name || (chartData[0] as any).date}</strong>ە بە قەبارەی <strong className="text-blue-500">{(chartData[0] as any).count}</strong> نامە، کە دەکاتە نزیکەی <strong className="text-emerald-500">{Math.round(((chartData[0] as any).count / Math.max(totalLetters, 1)) * 100)}%</strong>ی کۆی گشتی کارەکان.
+                  زۆرترین پاڵەپەستۆی کار لەسەر <strong className="text-blue-500">{(chartData[0] as any).name || (chartData[0] as any).date}</strong>ە بە ژمارەی <strong className="text-blue-500">{(chartData[0] as any).count}</strong> نامە، کە دەکاتە نزیکەی <strong className="text-emerald-500">{Math.round(((chartData[0] as any).count / Math.max(totalLetters, 1)) * 100)}%</strong>ی کۆی گشتی کارەکان.
                 </p>
               </motion.div>
             )}
@@ -1380,7 +1380,7 @@ export const PresentationView = () => {
                   <GitCompareArrows className="text-indigo-500" size={32} />
                   بەراوردکردنی نامەکان
                 </h2>
-                <span className="text-sm text-slate-400 mt-2 block">بەراوردی قەبارەی کارەکان لەنێوان دوو سەرچاوەی دیاریکراو</span>
+                <span className="text-sm text-slate-400 mt-2 block">بەراوردی ژمارەی کارەکان لەنێوان دوو سەرچاوەی دیاریکراو</span>
               </div>
             </motion.div>
             
@@ -1418,7 +1418,7 @@ export const PresentationView = () => {
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-indigo-500/10 -z-10" />
             <motion.h2 variants={itemVariants} className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 mb-8 flex items-center gap-3">
               <GitCompareArrows className="text-indigo-500" size={32} />
-              بەراوردی قەبارەی کارەکان بەپێی بەشەکان
+              بەراوردی ژمارەی کارەکان بەپێی بەشەکان
             </motion.h2>
             
             <motion.div variants={itemVariants} className="w-full h-[350px] glass rounded-3xl p-6 border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] backdrop-blur-3xl" dir="ltr">
@@ -1454,7 +1454,7 @@ export const PresentationView = () => {
                 <Lightbulb className="text-indigo-500 shrink-0" size={28} />
                 <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
                   <strong className="text-indigo-600 dark:text-indigo-400">شیکاری هۆشمەند: </strong> 
-                  بەشی <strong className="text-indigo-500">{[...deptComparisonData].sort((a,b)=>b.total-a.total)[0].name}</strong> گەورەترین قەبارەی کاری هەیە لەنێوان هەردوو سەرچاوەی بەراوردکراودا.
+                  بەشی <strong className="text-indigo-500">{[...deptComparisonData].sort((a,b)=>b.total-a.total)[0].name}</strong> گەورەترین ژمارەی کاری هەیە لەنێوان هەردوو سەرچاوەی بەراوردکراودا.
                 </p>
               </motion.div>
             )}
@@ -1511,7 +1511,7 @@ export const PresentationView = () => {
                 <Lightbulb className="text-indigo-500 shrink-0" size={28} />
                 <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
                   <strong className="text-indigo-600 dark:text-indigo-400">شیکاری هۆشمەند: </strong> 
-                  ئەم بەراوردکارییە دەریدەخات کە چۆن گۆڕانکارییەکان بەپێی کات کاریگەرییان هەبووە لەسەر قەبارەی کار لە هەردوو سەرچاوەکەدا.
+                  ئەم بەراوردکارییە دەریدەخات کە چۆن گۆڕانکارییەکان بەپێی کات کاریگەرییان هەبووە لەسەر ژمارەی کار لە هەردوو سەرچاوەکەدا.
                 </p>
               </motion.div>
             )}

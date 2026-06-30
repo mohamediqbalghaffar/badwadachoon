@@ -205,7 +205,7 @@ export const DashboardCharts = () => {
 
   const isSingleDeptSelected = filters.departments.length === 1;
   const chartData = isSingleDeptSelected ? monthDataForDept : deptData;
-  const chartTitle = isSingleDeptSelected ? "قەبارەی نامەکان بەپێی مانگ" : "قەبارەی نامەکان بەپێی لایەن";
+  const chartTitle = isSingleDeptSelected ? "ژمارەی نامەکان بەپێی مانگ" : "ژمارەی نامەکان بەپێی لایەن";
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
