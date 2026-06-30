@@ -51,6 +51,49 @@ const BooleanFormatter = (props: any) => {
   );
 };
 
+const EditableCellFormatter = (props: any) => {
+  const { column, row } = props;
+  const isAnySelected = row.isReceived || row.isSent || row.isIncoming;
+  
+  let isDisabled = !isAnySelected;
+  if (column.key === 'sender') isDisabled = !row.isIncoming;
+  if (column.key === 'responseDate') isDisabled = !row.isReceived;
+
+  if (isDisabled) {
+    return (
+      <div className="w-full h-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 select-none">
+        <span className="text-lg opacity-50">-</span>
+      </div>
+    );
+  }
+  
+  return <div className="px-2">{row[column.key] || ''}</div>;
+};
+
+const EditableTextEditor = (props: any) => {
+  const { column, row } = props;
+  const isAnySelected = row.isReceived || row.isSent || row.isIncoming;
+  
+  let isDisabled = !isAnySelected;
+  if (column.key === 'sender') isDisabled = !row.isIncoming;
+  if (column.key === 'responseDate') isDisabled = !row.isReceived;
+
+  if (isDisabled) {
+    return (
+      <input 
+        autoFocus
+        disabled
+        className="w-full h-full bg-slate-100 dark:bg-slate-800 px-2 cursor-not-allowed text-center text-slate-400"
+        value="-"
+        readOnly
+        onBlur={() => props.onClose(true)}
+      />
+    );
+  }
+  
+  return renderTextEditor(props);
+};
+
 export const OdooStagingArea = ({ onApply }: Props) => {
   const [rows, setRows] = useState<OdooRow[]>([]);
   const [isFetching, setIsFetching] = useState(false);
@@ -69,13 +112,13 @@ export const OdooStagingArea = ({ onApply }: Props) => {
     { key: 'isIncoming', name: '+ هاتووەکان', width: '8%', minWidth: 120, renderCell: BooleanFormatter },
 
     // Editable missing fields
-    { key: 'sender', name: 'هاتووە لە (Incoming)', width: '10%', minWidth: 120, renderEditCell: renderTextEditor },
-    { key: 'department', name: 'لایەنی پەیوەندیدار', width: '12%', minWidth: 130, renderEditCell: renderTextEditor },
-    { key: 'dept1', name: 'بەشی 1', width: '8%', minWidth: 100, renderEditCell: renderTextEditor },
-    { key: 'dept2', name: 'بەشی 2', width: '8%', minWidth: 100, renderEditCell: renderTextEditor },
-    { key: 'dept3', name: 'بەشی 3', width: '8%', minWidth: 100, renderEditCell: renderTextEditor },
-    { key: 'letterType', name: 'جۆری نامە', width: '8%', minWidth: 100, renderEditCell: renderTextEditor },
-    { key: 'responseDate', name: 'ڕۆژی وەڵام', width: '8%', minWidth: 100, renderEditCell: renderTextEditor },
+    { key: 'sender', name: 'هاتووە لە (Incoming)', width: '10%', minWidth: 120, renderCell: EditableCellFormatter, renderEditCell: EditableTextEditor },
+    { key: 'department', name: 'لایەنی پەیوەندیدار', width: '12%', minWidth: 130, renderCell: EditableCellFormatter, renderEditCell: EditableTextEditor },
+    { key: 'dept1', name: 'بەشی 1', width: '8%', minWidth: 100, renderCell: EditableCellFormatter, renderEditCell: EditableTextEditor },
+    { key: 'dept2', name: 'بەشی 2', width: '8%', minWidth: 100, renderCell: EditableCellFormatter, renderEditCell: EditableTextEditor },
+    { key: 'dept3', name: 'بەشی 3', width: '8%', minWidth: 100, renderCell: EditableCellFormatter, renderEditCell: EditableTextEditor },
+    { key: 'letterType', name: 'جۆری نامە', width: '8%', minWidth: 100, renderCell: EditableCellFormatter, renderEditCell: EditableTextEditor },
+    { key: 'responseDate', name: 'ڕۆژی وەڵام', width: '8%', minWidth: 100, renderCell: EditableCellFormatter, renderEditCell: EditableTextEditor },
   ];
 
   const fetchOdooData = async () => {
