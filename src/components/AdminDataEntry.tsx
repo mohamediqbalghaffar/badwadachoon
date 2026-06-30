@@ -5,7 +5,7 @@ import { DataGrid, renderTextEditor } from 'react-data-grid';
 import 'react-data-grid/lib/styles.css';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
-import { Save, Plus, Database, Cloud } from 'lucide-react';
+import { Save, Plus, Database, Cloud, Trash2 } from 'lucide-react';
 import { DashboardData, IncomingLetterData, SentLetterData } from '../utils/parser';
 
 type TableType = 'incoming' | 'received' | 'sent';
@@ -167,8 +167,26 @@ export const AdminDataEntry = () => {
     }
   };
 
+  const handleDeleteRow = (id: string | number) => {
+    if (activeTab === 'received') {
+      setLocalReceived(localReceived.filter(r => r.id !== id));
+    } else if (activeTab === 'sent') {
+      setLocalSent(localSent.filter(r => r.id !== id));
+    } else {
+      setLocalIncoming(localIncoming.filter(r => r.id !== id));
+    }
+  };
+
   const addRow = () => {
-    const newId = `new-${Date.now()}`;
+    let currentData = activeTab === 'received' ? localReceived : activeTab === 'sent' ? localSent : localIncoming;
+    let maxId = 0;
+    currentData.forEach((row: any) => {
+      const idNum = typeof row.id === 'number' ? row.id : parseInt(String(row.id).replace('new-', '')) || 0;
+      if (idNum > maxId) maxId = idNum;
+    });
+    
+    const newId = maxId > 0 ? maxId + 1 : 1;
+    
     if (activeTab === 'received') {
       setLocalReceived([{ id: newId, subject: '', department: '', departments: [], refCode: '', letterType: '', sentDate: null, responseDate: null, processingTime: null, slaTime: '-' }, ...localReceived]);
     } else if (activeTab === 'sent') {
@@ -176,6 +194,27 @@ export const AdminDataEntry = () => {
     } else {
       setLocalIncoming([{ id: newId, subject: '', department: '', departments: [], refCode: '', letterType: '', sentDate: null }, ...localIncoming]);
     }
+  };
+
+  const getColumnsWithDelete = (cols: any[]) => {
+    return [
+      ...cols,
+      {
+        key: 'actions',
+        name: '',
+        width: '5%',
+        minWidth: 50,
+        renderCell: (props: any) => (
+          <button 
+            onClick={() => handleDeleteRow(props.row.id)}
+            className="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-1.5 rounded-lg transition-colors flex items-center justify-center w-full"
+            title="سڕینەوەی ئەم دێڕە"
+          >
+            <Trash2 size={16} />
+          </button>
+        )
+      }
+    ];
   };
 
   return (
@@ -254,7 +293,7 @@ export const AdminDataEntry = () => {
           <div className="h-full flex flex-col" dir="ltr">
             <div className="flex-1 overflow-hidden p-2">
               <DataGrid 
-                columns={activeTab === 'received' ? receivedColumns : activeTab === 'sent' ? sentColumns : incomingColumns} 
+                columns={activeTab === 'received' ? getColumnsWithDelete(receivedColumns) : activeTab === 'sent' ? getColumnsWithDelete(sentColumns) : getColumnsWithDelete(incomingColumns)} 
                 rows={activeTab === 'received' ? localReceived : activeTab === 'sent' ? localSent : localIncoming} 
                 onRowsChange={(newRows) => {
                   if (activeTab === 'received') setLocalReceived(newRows);
