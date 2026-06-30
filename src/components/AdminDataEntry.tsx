@@ -311,14 +311,38 @@ export const AdminDataEntry = () => {
                         }
                       }
 
-                      // Auto-calculate SLA status based on processingTime
+                      // Auto-calculate SLA status based on Excel Column M formula
                       if (pTime !== null && pTime !== undefined && pTime !== "") {
                         const pTimeNum = typeof pTime === 'string' ? parseInt(pTime) : pTime;
                         if (!isNaN(pTimeNum)) {
-                          if (pTimeNum < 3) sTime = "کەمتر لە 3 ڕۆژ";
-                          else if (pTimeNum < 5) sTime = "کەمتر لە 5 ڕۆژ";
-                          else if (pTimeNum < 10) sTime = "کەمتر لە 10 ڕۆژ";
-                          else sTime = "زیاتر لە 10 ڕۆژ";
+                          const lType = row.letterType || "";
+                          const rCode = String(row.refCode || "").trim().toLowerCase();
+
+                          if (rCode === "2" || lType === "داواکاری کاندیدکردن") {
+                            if (pTimeNum > 12) sTime = "زیاتر لە 12 ڕۆژ";
+                            else if (pTimeNum >= 8) sTime = "بەپێی کاتی ڕێنمایی";
+                            else sTime = "کەمتر لە 8 ڕۆژ";
+                          } 
+                          else if (rCode === "4" || lType === "داواکاری زیاد کردنی ڕاژە") {
+                            if (pTimeNum > 15) sTime = "زیاتر لە 15 ڕۆژ";
+                            else if (pTimeNum >= 12) sTime = "بەپێی کاتی ڕێنمایی";
+                            else sTime = "کەمتر لە 12 ڕۆژ";
+                          } 
+                          else if (rCode === "7" || lType === "داواکاریی گۆڕانکاریی پۆست") {
+                            if (pTimeNum > 12) sTime = "زیاتر لە 12 ڕۆژ";
+                            else if (pTimeNum >= 8) sTime = "بەپێی کاتی ڕێنمایی";
+                            else sTime = "کەمتر لە 8 ڕۆژ";
+                          } 
+                          else if (rCode === "1a") {
+                            if (pTimeNum > 10) sTime = "زیاتر لە 10 ڕۆژ";
+                            else if (pTimeNum >= 5) sTime = "کەمتر لە 10 ڕۆژ";
+                            else sTime = "کەمتر لە5 ڕۆژ";
+                          } 
+                          else {
+                            if (pTimeNum > 15) sTime = "زیاتر لە 15 ڕۆژ";
+                            else if (pTimeNum >= 5) sTime = "بەپێی کاتی ئاسایی بۆ نووسراوی گشتیی";
+                            else sTime = "کەمتر لە 5 ڕۆژ";
+                          }
                         }
                       } else {
                         sTime = "-";
