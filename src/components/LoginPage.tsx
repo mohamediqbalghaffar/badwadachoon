@@ -75,8 +75,8 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="relative z-10 w-full h-full min-h-[135vh] flex flex-col items-center justify-center p-4 overflow-hidden">
-      <div className="absolute top-12 md:top-20 animate-in fade-in slide-in-from-top-8 duration-1000">
+    <div className="relative z-10 w-full min-h-screen flex flex-col items-center justify-center p-4 py-12">
+      <div className="absolute top-8 md:top-12 animate-in fade-in slide-in-from-top-8 duration-1000">
         <HTSLogo className="w-48 md:w-64 h-auto drop-shadow-2xl opacity-90" />
       </div>
 
