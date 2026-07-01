@@ -4,7 +4,7 @@ const ODOO_URL = process.env.ODOO_URL || "https://erp.halabjagroup.com";
 const ODOO_DB = process.env.ODOO_DB || "HalabjaGroup";
 const ODOO_USER = process.env.ODOO_USER || "mohammed.iqbal@halabjagroup.com";
 // Using the API Key in place of the password
-const ODOO_PASS = process.env.ODOO_PASS || "060cd9028edeae314568e577869cded5aeb7fb20";
+const ODOO_PASS = process.env.ODOO_PASS || "8118d3d4560146aed84264cf83f083bcce3583f3";
 
 export async function GET() {
   try {
