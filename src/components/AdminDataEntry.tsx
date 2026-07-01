@@ -325,26 +325,32 @@ export const AdminDataEntry = () => {
       {/* Header and Sub-Navigation */}
       <div className="p-6 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80">
         <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4">
-          <div className="flex gap-2 sm:gap-4 overflow-x-auto w-full xl:w-auto pb-2 xl:pb-0">
-            <button 
-              onClick={() => setActiveTab('received')}
-              className={`px-4 py-2 font-bold rounded-xl transition-colors whitespace-nowrap ${activeTab === 'received' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
-            >
-              پێویست بە وەڵام (Received)
-            </button>
-            <button 
-              onClick={() => setActiveTab('sent')}
-              className={`px-4 py-2 font-bold rounded-xl transition-colors whitespace-nowrap ${activeTab === 'sent' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
-            >
-              سەرجەم ڕەوانەکراوەکان (Sent)
-            </button>
-            <button 
-              onClick={() => setActiveTab('incoming')}
-              className={`px-4 py-2 font-bold rounded-xl transition-colors whitespace-nowrap ${activeTab === 'incoming' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
-            >
-              سەرجەم هاتووەکان (Incoming)
-            </button>
-          </div>
+          {entryMode === 'manual' && (
+            <div className="flex gap-2 sm:gap-4 overflow-x-auto w-full xl:w-auto pb-2 xl:pb-0">
+              <button 
+                onClick={() => setActiveTab('received')}
+                className={`px-4 py-2 font-bold rounded-xl transition-colors whitespace-nowrap ${activeTab === 'received' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
+              >
+                پێویست بە وەڵام (Received)
+              </button>
+              <button 
+                onClick={() => setActiveTab('sent')}
+                className={`px-4 py-2 font-bold rounded-xl transition-colors whitespace-nowrap ${activeTab === 'sent' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
+              >
+                سەرجەم ڕەوانەکراوەکان (Sent)
+              </button>
+              <button 
+                onClick={() => setActiveTab('incoming')}
+                className={`px-4 py-2 font-bold rounded-xl transition-colors whitespace-nowrap ${activeTab === 'incoming' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
+              >
+                سەرجەم هاتووەکان (Incoming)
+              </button>
+            </div>
+          )}
+          
+          {entryMode === 'auto' && (
+            <div className="flex-1" />
+          )}
 
           {/* Add Row Button (Center) */}
           {entryMode === 'manual' && (
