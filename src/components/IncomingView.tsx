@@ -6,6 +6,7 @@ import { IncomingLetterData } from "../utils/parser";
 import { ExternalLink, X, FileText, Building2, User } from "lucide-react";
 import { PremiumTable } from "./PremiumTable";
 import { ColumnDef } from "@tanstack/react-table";
+import { IncomingCharts } from "./Charts";
 
 export const IncomingView = () => {
   const { filteredIncomingData, filters, setFilters } = useData();
@@ -165,7 +166,8 @@ export const IncomingView = () => {
   };
 
   return (
-    <div className="flex flex-col h-[950px] mb-8 relative">
+    <div className="flex flex-col mb-8 relative h-full">
+      <IncomingCharts />
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
         <h3 className="text-2xl font-black text-slate-800 dark:text-white flex items-center gap-2">
           <div className="w-1.5 h-6 bg-amber-500 rounded-full"></div>
