@@ -275,8 +275,7 @@ export const AdminDataEntry = () => {
     }
   };
 
-  const addRow = () => {
-    let currentData = activeTab === 'received' ? localReceived : activeTab === 'sent' ? localSent : localIncoming;
+  const getNextId = (currentData: any[], count: number = 1) => {
     let maxId = 0;
     currentData.forEach((row: any) => {
       let idNum = 0;
@@ -285,8 +284,12 @@ export const AdminDataEntry = () => {
       
       if (idNum > maxId) maxId = idNum;
     });
-    
-    const newId = maxId > 0 ? maxId + 1 : 1;
+    return Array.from({ length: count }, (_, i) => maxId + 1 + i);
+  };
+
+  const addRow = () => {
+    let currentData = activeTab === 'received' ? localReceived : activeTab === 'sent' ? localSent : localIncoming;
+    const [newId] = getNextId(currentData, 1);
     
     if (activeTab === 'received') {
       setLocalReceived([{ id: newId, subject: '', department: '', departments: [], refCode: '', letterType: '', sentDate: null, responseDate: null, processingTime: null, slaTime: '-' }, ...localReceived]);
@@ -392,11 +395,20 @@ export const AdminDataEntry = () => {
             existingRefCodes={existingRefCodes}
             onApply={(newReceived, newSent, newIncoming) => {
               if (newReceived.length > 0) {
-                const computedReceived = newReceived.map(r => calculateSLA(r));
+                const nextIds = getNextId(localReceived, newReceived.length);
+                const computedReceived = newReceived.map((r, i) => calculateSLA({ ...r, id: nextIds[i] }));
                 setLocalReceived([...computedReceived, ...localReceived]);
               }
-              if (newSent.length > 0) setLocalSent([...newSent, ...localSent]);
-              if (newIncoming.length > 0) setLocalIncoming([...newIncoming, ...localIncoming]);
+              if (newSent.length > 0) {
+                const nextIds = getNextId(localSent, newSent.length);
+                const computedSent = newSent.map((r, i) => ({ ...r, id: nextIds[i] }));
+                setLocalSent([...computedSent, ...localSent]);
+              }
+              if (newIncoming.length > 0) {
+                const nextIds = getNextId(localIncoming, newIncoming.length);
+                const computedIncoming = newIncoming.map((r, i) => ({ ...r, id: nextIds[i] }));
+                setLocalIncoming([...computedIncoming, ...localIncoming]);
+              }
               
               // Switch back to manual mode to let user review and save
               setEntryMode('manual');
