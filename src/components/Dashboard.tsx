@@ -323,9 +323,15 @@ export const Dashboard = () => {
             </div>
           </div>
 
-          {/* Common Dashboard Widgets (Charts & Filters) */}
-          {['incoming', 'received', 'sent'].includes(activeView) && (
-            <div className="flex flex-col gap-4 mb-4">
+          {/* Main Content — Conditional on activeView */}
+          {activeView === 'incoming' && (
+            <div className="animate-fade-in">
+              <IncomingView />
+            </div>
+          )}
+
+          {activeView === 'received' && (
+            <div className="flex flex-col gap-4">
               <div className="animate-fade-up delay-200 relative z-30">
                 <OmniFilter />
               </div>
@@ -335,19 +341,9 @@ export const Dashboard = () => {
               <div className="animate-fade-up delay-400 relative z-10">
                 <DashboardCharts />
               </div>
-            </div>
-          )}
-
-          {/* Main Content — Conditional on activeView */}
-          {activeView === 'incoming' && (
-            <div className="animate-fade-in delay-500">
-              <IncomingView />
-            </div>
-          )}
-
-          {activeView === 'received' && (
-            <div className="animate-fade-up delay-500 relative z-0">
-              <DataTable />
+              <div className="animate-fade-up delay-500 relative z-0">
+                <DataTable />
+              </div>
             </div>
           )}
 

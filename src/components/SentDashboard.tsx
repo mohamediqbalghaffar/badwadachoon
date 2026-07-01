@@ -5,7 +5,6 @@ import { useData } from "../context/DataContext";
 import { SentLetterData } from "../utils/parser";
 import { ExternalLink, X, FileText } from "lucide-react";
 import { PremiumTable } from "./PremiumTable";
-import { SentCharts } from "./SentCharts";
 import { ColumnDef } from "@tanstack/react-table";
 
 export const SentDashboard = () => {
