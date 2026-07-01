@@ -11,6 +11,7 @@ export type AdminMode = 'live' | 'local';
 interface FilterState {
   dateRange: { start: string | null; end: string | null };
   departments: string[];
+  senders: string[];
   letterType: string[];
   slaStatus: string[];
   completionStatus: 'all' | 'pending' | 'completed';
@@ -57,6 +58,7 @@ export const DataProvider = ({ children, mode }: { children: React.ReactNode, mo
   const [filters, setFilters] = useState<FilterState>({
     dateRange: { start: null, end: null },
     departments: [],
+    senders: [],
     letterType: [],
     slaStatus: [],
     completionStatus: 'all',
@@ -223,8 +225,12 @@ export const DataProvider = ({ children, mode }: { children: React.ReactNode, mo
     }
     if (filters.departments.length > 0) {
       filtered = filtered.filter(item => 
-        item.departments.some(d => filters.departments.includes(d)) || 
-        (item.sender && filters.departments.includes(item.sender))
+        item.departments.some(d => filters.departments.includes(d))
+      );
+    }
+    if (filters.senders.length > 0) {
+      filtered = filtered.filter(item => 
+        item.sender && filters.senders.includes(item.sender)
       );
     }
     if (filters.letterType.length > 0) {
@@ -233,7 +239,7 @@ export const DataProvider = ({ children, mode }: { children: React.ReactNode, mo
       );
     }
     return filtered;
-  }, [incomingData, filters.dateRange, filters.departments, filters.letterType]);
+  }, [incomingData, filters.dateRange, filters.departments, filters.senders, filters.letterType]);
 
   const filteredIncomingData = useMemo(() => baseFilteredIncomingData, [baseFilteredIncomingData]);
 
@@ -241,6 +247,7 @@ export const DataProvider = ({ children, mode }: { children: React.ReactNode, mo
     setFilters({
       dateRange: { start: null, end: null },
       departments: [],
+      senders: [],
       letterType: [],
       slaStatus: [],
       completionStatus: 'all',

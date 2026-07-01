@@ -118,10 +118,14 @@ export const OmniFilter = () => {
   const activeData = activeView === 'sent' ? sentData : activeView === 'incoming' ? incomingData : data;
   
   const departments = useMemo(() => {
-    if (activeView === 'incoming') {
-      return Array.from(new Set(activeData.flatMap((d: any) => d.sender || d.departments || []))).filter(Boolean) as string[];
-    }
     return Array.from(new Set(activeData.flatMap((d: any) => d.departments || []))).filter(Boolean) as string[];
+  }, [activeData]);
+  
+  const senders = useMemo(() => {
+    if (activeView === 'incoming') {
+      return Array.from(new Set(activeData.map((d: any) => d.sender))).filter(Boolean) as string[];
+    }
+    return [];
   }, [activeData, activeView]);
   
   const letterTypes = useMemo(() => Array.from(new Set(activeData.map((d: any) => d.letterType))).filter(Boolean) as string[], [activeData]);
@@ -131,11 +135,13 @@ export const OmniFilter = () => {
   }, [data, activeView]);
 
   const showSlaFilter = activeView === 'received';
+  const showSenderFilter = activeView === 'incoming';
 
   const activeFilterCount =
     (filters.dateRange.start ? 1 : 0) +
     (filters.dateRange.end ? 1 : 0) +
     (filters.departments.length > 0 ? 1 : 0) +
+    (showSenderFilter && filters.senders?.length > 0 ? 1 : 0) +
     (filters.letterType.length > 0 ? 1 : 0) +
     (showSlaFilter && filters.slaStatus.length > 0 ? 1 : 0);
 
@@ -160,7 +166,7 @@ export const OmniFilter = () => {
           )}
         </div>
 
-        <div className={`flex-1 grid grid-cols-1 sm:grid-cols-2 ${showSlaFilter ? 'md:grid-cols-5' : 'md:grid-cols-4'} gap-4 w-full`}>
+        <div className={`flex-1 grid grid-cols-1 sm:grid-cols-2 ${showSlaFilter || showSenderFilter ? 'md:grid-cols-5' : 'md:grid-cols-4'} gap-4 w-full`}>
           {/* Date Range */}
           <div className="flex flex-col space-y-1 col-span-1 sm:col-span-2 md:col-span-2">
             <label className="text-xs text-slate-500 dark:text-slate-400">مەودای بەروار</label>
@@ -198,6 +204,17 @@ export const OmniFilter = () => {
               </div>
             </div>
           </div>
+
+          {/* Sender - Only for Incoming View */}
+          {showSenderFilter && (
+            <MultiSelect
+              label="هاتووە لە"
+              options={senders}
+              selected={filters.senders || []}
+              onChange={(vals) => setFilters(prev => ({ ...prev, senders: vals }))}
+              placeholder="هەموو سەرچاوەکان"
+            />
+          )}
 
           {/* Department */}
           <MultiSelect
