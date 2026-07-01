@@ -99,7 +99,7 @@ const MultiSelect = ({ label, options, selected, onChange, placeholder }: MultiS
 };
 
 export const OmniFilter = () => {
-  const { data, sentData, filters, setFilters, clearFilters, activeView } = useData();
+  const { data, sentData, incomingData, filters, setFilters, clearFilters, activeView } = useData();
 
   const formatDateDisplay = (dateStr: string | null) => {
     if (!dateStr) return "dd/mm/yyyy";
@@ -115,9 +115,16 @@ export const OmniFilter = () => {
   };
 
   // Extract unique options from the appropriate dataset based on activeView
-  const activeData = activeView === 'sent' ? sentData : data;
-  const departments = useMemo(() => Array.from(new Set(activeData.flatMap((d) => d.departments))), [activeData]);
-  const letterTypes = useMemo(() => Array.from(new Set(activeData.map((d) => d.letterType))), [activeData]);
+  const activeData = activeView === 'sent' ? sentData : activeView === 'incoming' ? incomingData : data;
+  
+  const departments = useMemo(() => {
+    if (activeView === 'incoming') {
+      return Array.from(new Set(activeData.flatMap((d: any) => d.sender || d.departments || []))).filter(Boolean) as string[];
+    }
+    return Array.from(new Set(activeData.flatMap((d: any) => d.departments || []))).filter(Boolean) as string[];
+  }, [activeData, activeView]);
+  
+  const letterTypes = useMemo(() => Array.from(new Set(activeData.map((d: any) => d.letterType))).filter(Boolean) as string[], [activeData]);
   const slaStatuses = useMemo(() => {
     if (activeView === 'sent') return [];
     return Array.from(new Set((data as any[]).map((d: any) => d.slaTime).filter(Boolean)));

@@ -2,10 +2,86 @@
 
 import React from "react";
 import { useData } from "../context/DataContext";
-import { Layers, Clock, AlertTriangle } from "lucide-react";
+import { Layers, Clock, AlertTriangle, Building2, PieChart as PieIcon, Send, ArrowDownToLine } from "lucide-react";
 
 export const KPICards = () => {
-  const { baseFilteredData, setFilters, clearFilters } = useData();
+  const { baseFilteredData, baseFilteredSentData, baseFilteredIncomingData, activeView, setFilters, clearFilters } = useData();
+
+  if (activeView === 'sent') {
+    const totalLetters = baseFilteredSentData.length;
+    const uniqueDepts = new Set(baseFilteredSentData.flatMap(d => d.departments || [])).size;
+    const uniqueTypes = new Set(baseFilteredSentData.map(d => d.letterType)).size;
+
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="glass glass-card p-6 flex items-center justify-between relative overflow-hidden">
+          <div>
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">کۆی گشتی ڕەوانەکراو</p>
+            <h3 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 to-teal-500">{totalLetters}</h3>
+          </div>
+          <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 relative z-10">
+            <Send size={24} />
+          </div>
+        </div>
+        <div className="glass glass-card p-6 flex items-center justify-between relative overflow-hidden">
+          <div>
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">کۆی لایەنەکان</p>
+            <h3 className="text-3xl font-bold text-slate-700 dark:text-slate-200">{uniqueDepts}</h3>
+          </div>
+          <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 relative z-10">
+            <Building2 size={24} />
+          </div>
+        </div>
+        <div className="glass glass-card p-6 flex items-center justify-between relative overflow-hidden">
+          <div>
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">جۆرەکانی نامە</p>
+            <h3 className="text-3xl font-bold text-slate-700 dark:text-slate-200">{uniqueTypes}</h3>
+          </div>
+          <div className="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400 relative z-10">
+            <PieIcon size={24} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (activeView === 'incoming') {
+    const totalLetters = baseFilteredIncomingData.length;
+    const uniqueSenders = new Set(baseFilteredIncomingData.map(d => d.sender).filter(Boolean)).size;
+    const uniqueTypes = new Set(baseFilteredIncomingData.map(d => d.letterType)).size;
+
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="glass glass-card p-6 flex items-center justify-between relative overflow-hidden">
+          <div>
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">کۆی گشتی هاتووەکان</p>
+            <h3 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-500">{totalLetters}</h3>
+          </div>
+          <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 relative z-10">
+            <ArrowDownToLine size={24} />
+          </div>
+        </div>
+        <div className="glass glass-card p-6 flex items-center justify-between relative overflow-hidden">
+          <div>
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">سەرچاوەکان (نێرەر)</p>
+            <h3 className="text-3xl font-bold text-slate-700 dark:text-slate-200">{uniqueSenders}</h3>
+          </div>
+          <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 relative z-10">
+            <Building2 size={24} />
+          </div>
+        </div>
+        <div className="glass glass-card p-6 flex items-center justify-between relative overflow-hidden">
+          <div>
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">جۆرەکانی نامە</p>
+            <h3 className="text-3xl font-bold text-slate-700 dark:text-slate-200">{uniqueTypes}</h3>
+          </div>
+          <div className="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400 relative z-10">
+            <PieIcon size={24} />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const totalLetters = baseFilteredData.length;
   const pendingLetters = baseFilteredData.filter((item) => !item.responseDate).length;
