@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useData } from "../context/DataContext";
@@ -951,7 +951,7 @@ export const PresentationView = () => {
                   {mostPendingDepts.length > 0 ? (
                     mostPendingDepts.map((d, i) => (
                       <div key={i} className="flex justify-between items-center py-2.5 border-b border-white/5 last:border-b-0">
-                        <span className="text-sm text-slate-750 dark:text-slate-300 line-clamp-1 w-2/3">{d.name}</span>
+                        <span className="text-sm text-slate-700 dark:text-slate-300 line-clamp-1 w-2/3">{d.name}</span>
                         <span className="text-sm font-bold text-amber-500 shrink-0">{d.count} نامە</span>
                       </div>
                     ))
@@ -1353,9 +1353,9 @@ export const PresentationView = () => {
               value={compSourceA}
               onChange={(e) => setCompSourceA(e.target.value as DataSourceType)}
             >
-              <option className="text-slate-900" value="received" disabled={compSourceB === 'received'}>پێویست بە وەڵام</option>
-              <option className="text-slate-900" value="sent" disabled={compSourceB === 'sent'}>سەرجەم ڕەوانەکراوەکان</option>
-              <option className="text-slate-900" value="incoming" disabled={compSourceB === 'incoming'}>سەرجەم هاتووەکان</option>
+              <option className="text-slate-900 dark:text-slate-100 dark:bg-slate-800" value="received" disabled={compSourceB === 'received'}>پێویست بە وەڵام</option>
+              <option className="text-slate-900 dark:text-slate-100 dark:bg-slate-800" value="sent" disabled={compSourceB === 'sent'}>سەرجەم ڕەوانەکراوەکان</option>
+              <option className="text-slate-900 dark:text-slate-100 dark:bg-slate-800" value="incoming" disabled={compSourceB === 'incoming'}>سەرجەم هاتووەکان</option>
             </select>
             <GitCompareArrows className="text-slate-400" size={20} />
             <select 
@@ -1363,9 +1363,9 @@ export const PresentationView = () => {
               value={compSourceB}
               onChange={(e) => setCompSourceB(e.target.value as DataSourceType)}
             >
-              <option className="text-slate-900" value="received" disabled={compSourceA === 'received'}>پێویست بە وەڵام</option>
-              <option className="text-slate-900" value="sent" disabled={compSourceA === 'sent'}>سەرجەم ڕەوانەکراوەکان</option>
-              <option className="text-slate-900" value="incoming" disabled={compSourceA === 'incoming'}>سەرجەم هاتووەکان</option>
+              <option className="text-slate-900 dark:text-slate-100 dark:bg-slate-800" value="received" disabled={compSourceA === 'received'}>پێویست بە وەڵام</option>
+              <option className="text-slate-900 dark:text-slate-100 dark:bg-slate-800" value="sent" disabled={compSourceA === 'sent'}>سەرجەم ڕەوانەکراوەکان</option>
+              <option className="text-slate-900 dark:text-slate-100 dark:bg-slate-800" value="incoming" disabled={compSourceA === 'incoming'}>سەرجەم هاتووەکان</option>
             </select>
           </div>
         )}
