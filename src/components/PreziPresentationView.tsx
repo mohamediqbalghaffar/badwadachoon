@@ -459,7 +459,7 @@ export const PreziPresentationView = () => {
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#94a3b8" opacity={0.2} />
                   <XAxis dataKey="abbr" tick={{ fontSize: 18, fill: '#cbd5e1', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 18, fill: '#cbd5e1' }} axisLine={false} tickLine={false} />
-                  <Tooltip cursor={{ fill: 'rgba(100,116,139,0.1)' }} contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff', fontSize: '1.2rem', padding: '1rem' }} formatter={(value: any, name: any, props: any) => [value, props.payload.name]} />
+                  <Tooltip itemStyle={{ color: '#fff' }} cursor={{ fill: 'rgba(100,116,139,0.1)' }} contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff', fontSize: '1.2rem', padding: '1rem' }} formatter={(value: any, name: any, props: any) => [value, props.payload.name]} />
                   <Bar dataKey="count" radius={[12, 12, 0, 0]} maxBarSize={80} animationDuration={1200} animationEasing="ease-out">
                     <LabelList dataKey="count" position="top" offset={12} fill="#cbd5e1" fontSize={18} fontWeight="bold" />
                     {barData.map((entry, index) => (<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />))}
@@ -477,7 +477,7 @@ export const PreziPresentationView = () => {
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#94a3b8" opacity={0.2} />
                   <XAxis dataKey="abbr" tick={{ fontSize: 18, fill: '#cbd5e1', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 18, fill: '#cbd5e1' }} axisLine={false} tickLine={false} />
-                  <Tooltip cursor={{ fill: 'rgba(100,116,139,0.1)' }} contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff', fontSize: '1.2rem', padding: '1rem' }} />
+                  <Tooltip itemStyle={{ color: '#fff' }} cursor={{ fill: 'rgba(100,116,139,0.1)' }} contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff', fontSize: '1.2rem', padding: '1rem' }} />
                   <Legend verticalAlign="top" height={36} />
                   <Bar dataKey="received" name="پێویست بە وەڵام" fill="#3b82f6" radius={[6, 6, 0, 0]} maxBarSize={40} animationDuration={1200} />
                   <Bar dataKey="sent" name="ڕەوانەکراوەکان" fill="#10b981" radius={[6, 6, 0, 0]} maxBarSize={40} animationDuration={1200} />
@@ -495,7 +495,7 @@ export const PreziPresentationView = () => {
                     <Pie data={pieData} cx="50%" cy="50%" innerRadius={120} outerRadius={180} paddingAngle={5} dataKey="value" stroke="none" animationDuration={1200} animationEasing="ease-out">
                       {pieData.map((entry, index) => (<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />))}
                     </Pie>
-                    <Tooltip contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff', fontSize: '1rem', padding: '1rem' }} />
+                    <Tooltip itemStyle={{ color: '#fff' }} contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff', fontSize: '1rem', padding: '1rem' }} />
                   </PieChart>
                 </ResponsiveContainer>
               </motion.div>
@@ -527,7 +527,7 @@ export const PreziPresentationView = () => {
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#94a3b8" opacity={0.2} />
                   <XAxis dataKey="date" tick={{ fontSize: 18, fill: '#cbd5e1' }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 18, fill: '#cbd5e1' }} axisLine={false} tickLine={false} />
-                  <Tooltip contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff', fontSize: '1.2rem', padding: '1rem' }} />
+                  <Tooltip itemStyle={{ color: '#fff' }} contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff', fontSize: '1.2rem', padding: '1rem' }} />
                   <Area type="monotone" dataKey="count" stroke={node.color === 'orange' ? '#f59e0b' : '#3b82f6'} strokeWidth={6} fillOpacity={1} fill={`url(#colorTimeline-${node.color})`} dot={{ r: 8, stroke: node.color === 'orange' ? '#f59e0b' : '#3b82f6', strokeWidth: 4, fill: '#fff' }} animationDuration={1500}>
                     <LabelList dataKey="count" position="top" offset={16} fill={node.color === 'orange' ? '#f59e0b' : '#3b82f6'} fontSize={20} fontWeight="bold" />
                   </Area>
@@ -544,7 +544,7 @@ export const PreziPresentationView = () => {
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#94a3b8" opacity={0.2} />
                   <XAxis dataKey="date" tick={{ fontSize: 18, fill: '#cbd5e1' }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 18, fill: '#cbd5e1' }} axisLine={false} tickLine={false} />
-                  <Tooltip contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff', fontSize: '1.2rem', padding: '1rem' }} />
+                  <Tooltip itemStyle={{ color: '#fff' }} contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff', fontSize: '1.2rem', padding: '1rem' }} />
                   <Legend verticalAlign="top" height={36} />
                   <Line type="monotone" dataKey="received" name="پێویست بە وەڵام" stroke="#3b82f6" strokeWidth={6} dot={{ r: 6 }} animationDuration={1500} />
                   <Line type="monotone" dataKey="sent" name="ڕەوانەکراوەکان" stroke="#10b981" strokeWidth={6} dot={{ r: 6 }} animationDuration={1500} />
