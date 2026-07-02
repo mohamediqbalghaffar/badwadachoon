@@ -411,9 +411,9 @@ export const PreziPresentationView = () => {
           {/* KPI RECEIVED */}
           {node.type === 'kpi-received' && (
             <div className="grid grid-cols-3 gap-8 w-full">
-              <KPICard icon={Layers} label="کۆی گشتی نامەکان" value={totalLetters} gradient="from-blue-600 to-cyan-500" bgLight="bg-blue-50" bgDark="dark:bg-blue-900/20" borderLight="border-blue-100" borderDark="dark:border-blue-800/50" delay={0.1} />
-              <KPICard icon={AlertTriangle} label="هەڵپەسێردراو" value={pendingLetters} gradient="from-amber-500 to-orange-500" bgLight="bg-amber-50" bgDark="dark:bg-amber-900/20" borderLight="border-amber-100" borderDark="dark:border-amber-800/50" delay={0.25} />
-              <KPICard icon={Clock} label="تێکڕای کاتی وەڵام" value={avgProcessingTime.toFixed(1) + ' ڕۆژ'} gradient="from-emerald-500 to-teal-500" bgLight="bg-emerald-50" bgDark="dark:bg-emerald-900/20" borderLight="border-emerald-100" borderDark="dark:border-emerald-800/50" delay={0.4} />
+              <KPICard icon={Layers} label="کۆی گشتی نامەکان" value={totalLetters} gradient="from-blue-600 to-cyan-500" bgLight="bg-blue-50" bgDark="dark:bg-blue-900/20" borderLight="border-blue-100" borderDark="dark:border-blue-800/50" delay={0.1} onClick={() => setDrillDown({ title: "کۆی گشتی نامەکان", data: safeData, viewType: activeView as any })} />
+              <KPICard icon={AlertTriangle} label="هەڵپەسێردراو" value={pendingLetters} gradient="from-amber-500 to-orange-500" bgLight="bg-amber-50" bgDark="dark:bg-amber-900/20" borderLight="border-amber-100" borderDark="dark:border-amber-800/50" delay={0.25} onClick={() => setDrillDown({ title: "هەڵپەسێردراو", data: safeData.filter((d: any) => !d.responseDate), viewType: activeView as any })} />
+              <KPICard icon={Clock} label="تێکڕای کاتی وەڵامدانەوە" value={avgProcessingTime.toFixed(1) + ' ڕۆژ'} gradient="from-emerald-500 to-teal-500" bgLight="bg-emerald-50" bgDark="dark:bg-emerald-900/20" borderLight="border-emerald-100" borderDark="dark:border-emerald-800/50" delay={0.4} onClick={() => setDrillDown({ title: "تێکڕای کاتی وەڵامدانەوە", data: safeData.filter((d: any) => d.processingTime !== null && d.processingTime !== undefined), viewType: activeView as any })} />
             </div>
           )}
 
@@ -446,9 +446,9 @@ export const PreziPresentationView = () => {
           {/* KPI COMPARISON */}
           {node.type === 'kpi-comparison' && (
             <div className="grid grid-cols-3 gap-8 w-full">
-              <KPICard icon={ArrowDownToLine} label="کۆی هاتووەکان" value={baseFilteredIncomingData.length} gradient="from-purple-500 to-fuchsia-500" bgLight="bg-purple-50" bgDark="dark:bg-purple-900/20" borderLight="border-purple-100" borderDark="dark:border-purple-800/50" delay={0.1} />
-              <KPICard icon={Inbox} label="پێویست بە وەڵام" value={baseFilteredData.length} gradient="from-blue-500 to-cyan-500" bgLight="bg-blue-50" bgDark="dark:bg-blue-900/20" borderLight="border-blue-100" borderDark="dark:border-blue-800/50" delay={0.25} />
-              <KPICard icon={Send} label="کۆی ڕەوانەکراوەکان" value={baseFilteredSentData.length} gradient="from-teal-500 to-emerald-500" bgLight="bg-teal-50" bgDark="dark:bg-teal-900/20" borderLight="border-teal-100" borderDark="dark:border-teal-800/50" delay={0.4} />
+              <KPICard icon={ArrowDownToLine} label="کۆی هاتووەکان" value={baseFilteredIncomingData.length} gradient="from-purple-500 to-fuchsia-500" bgLight="bg-purple-50" bgDark="dark:bg-purple-900/20" borderLight="border-purple-100" borderDark="dark:border-purple-800/50" delay={0.1} onClick={() => setDrillDown({ title: "سەرجەم هاتووەکان", data: baseFilteredIncomingData, viewType: "incoming" })} />
+              <KPICard icon={Inbox} label="کۆی ناوخۆیی" value={baseFilteredData.length} gradient="from-blue-500 to-cyan-500" bgLight="bg-blue-50" bgDark="dark:bg-blue-900/20" borderLight="border-blue-100" borderDark="dark:border-blue-800/50" delay={0.25} onClick={() => setDrillDown({ title: "سەرجەم ناوخۆییەکان", data: baseFilteredData, viewType: "received" })} />
+              <KPICard icon={Send} label="کۆی نێردراوەکان" value={baseFilteredSentData.length} gradient="from-teal-500 to-emerald-500" bgLight="bg-teal-50" bgDark="dark:bg-teal-900/20" borderLight="border-teal-100" borderDark="dark:border-teal-800/50" delay={0.4} onClick={() => setDrillDown({ title: "سەرجەم نێردراوەکان", data: baseFilteredSentData, viewType: "sent" })} />
             </div>
           )}
 
