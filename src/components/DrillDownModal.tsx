@@ -23,12 +23,12 @@ export const DrillDownModal = () => {
   if (!drillDown) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 md:p-12">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4">
       <div 
         className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
         onClick={() => setDrillDown(null)}
       />
-      <div className="relative w-[95vw] h-[95vh] bg-white dark:bg-slate-900 rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative w-full h-full max-w-[98vw] max-h-[98vh] bg-white dark:bg-slate-900 rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
           <h2 className="text-2xl font-black text-slate-800 dark:text-white flex items-center gap-3">
@@ -62,4 +62,5 @@ export const DrillDownModal = () => {
     </div>
   );
 };
+
 
