@@ -130,7 +130,7 @@ const NodeWrapper = ({ active, node, onClick, children }: any) => {
         }`}>
           {/* Animated gradient underline on header */}
           <div className="relative mb-10">
-            <h2 className="text-4xl font-black text-center text-slate-800 dark:text-slate-100 flex items-center justify-center gap-6">
+            <h2 className="text-4xl font-black text-center text-slate-900 dark:text-white flex items-center justify-center gap-6">
               <Icon className={colors.text} size={48} />
               {node.title}
             </h2>
@@ -159,12 +159,13 @@ const NodeWrapper = ({ active, node, onClick, children }: any) => {
 };
 
 // --- KPI Card with animated number ---
-const KPICard = ({ icon: Icon, label, value, gradient, bgLight, bgDark, borderLight, borderDark, delay = 0 }: any) => {
+const KPICard = ({ icon: Icon, label, value, gradient, bgLight, bgDark, borderLight, borderDark, delay = 0, onClick }: any) => {
   const animatedVal = useAnimatedNumber(typeof value === 'number' ? value : 0);
   const isNumber = typeof value === 'number';
   return (
     <motion.div 
-      className={`${bgLight} ${bgDark} p-8 rounded-[2rem] flex flex-col items-center text-center border ${borderLight} ${borderDark}`}
+      onClick={onClick}
+      className={`${bgLight} ${bgDark} p-8 rounded-[2rem] flex flex-col items-center text-center border ${borderLight} ${borderDark} ${onClick ? 'cursor-pointer hover:scale-105 transition-transform' : ''}`}
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay }}
@@ -172,7 +173,7 @@ const KPICard = ({ icon: Icon, label, value, gradient, bgLight, bgDark, borderLi
       <div className={`w-20 h-20 rounded-full ${bgLight.replace('bg-', 'bg-').replace('/20', '/40')} flex items-center justify-center mb-6`}>
         <Icon size={40} />
       </div>
-      <h3 className="text-xl font-semibold text-slate-600 dark:text-slate-400 mb-4">{label}</h3>
+      <h3 className="text-xl font-semibold text-slate-800 dark:text-slate-200 mb-4">{label}</h3>
       <span className={`text-6xl font-black bg-clip-text text-transparent bg-gradient-to-r ${gradient}`}>
         {isNumber ? animatedVal : value}
       </span>
@@ -389,7 +390,7 @@ export const PreziPresentationView = () => {
             <Map size={100} className="text-white" />
           </div>
           <h1 className="text-8xl font-black text-slate-800 dark:text-white drop-shadow-2xl">سیستەمی بەدواداچوون</h1>
-          <p className="text-4xl text-slate-600 dark:text-slate-400 mt-4 font-bold">شیکاری هۆشمەندی داتاکان</p>
+          <p className="text-4xl text-slate-800 dark:text-slate-200 mt-4 font-bold">شیکاری هۆشمەندی داتاکان</p>
           
           {isActive && (
             <motion.div 
@@ -397,7 +398,7 @@ export const PreziPresentationView = () => {
               className="mt-12 flex items-center gap-4 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl p-6 rounded-3xl shadow-2xl border border-white/30 dark:border-slate-700/50"
             >
               <MousePointerClick size={40} className="text-blue-500 animate-bounce" />
-              <span className="text-3xl font-bold text-slate-700 dark:text-slate-300">کلیک لەسەر بەشەکان بکە بۆ بینینی وردەکاری</span>
+              <span className="text-3xl font-bold text-slate-900 dark:text-white">کلیک لەسەر بەشەکان بکە بۆ بینینی وردەکاری</span>
             </motion.div>
           )}
         </div>
@@ -423,7 +424,7 @@ export const PreziPresentationView = () => {
                 <div className="w-24 h-24 rounded-full bg-blue-100 dark:bg-blue-800/50 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-8">
                   <ArrowDownToLine size={48} />
                 </div>
-                <h3 className="text-2xl font-semibold text-slate-600 dark:text-slate-400 mb-4">کۆی گشتی هاتووەکان</h3>
+                <h3 className="text-2xl font-semibold text-slate-800 dark:text-slate-200 mb-4">کۆی گشتی هاتووەکان</h3>
                 <span className="text-7xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-500">{totalLetters}</span>
               </div>
             </motion.div>
@@ -436,7 +437,7 @@ export const PreziPresentationView = () => {
                 <div className="w-24 h-24 rounded-full bg-teal-100 dark:bg-teal-800/50 flex items-center justify-center text-teal-600 dark:text-teal-400 mb-8">
                   <Send size={48} />
                 </div>
-                <h3 className="text-2xl font-semibold text-slate-600 dark:text-slate-400 mb-4">کۆی گشتی ڕەوانەکراوەکان</h3>
+                <h3 className="text-2xl font-semibold text-slate-800 dark:text-slate-200 mb-4">کۆی گشتی ڕەوانەکراوەکان</h3>
                 <span className="text-7xl font-black bg-clip-text text-transparent bg-gradient-to-r from-teal-500 to-emerald-500">{totalLetters}</span>
               </div>
             </motion.div>
@@ -504,9 +505,9 @@ export const PreziPresentationView = () => {
                   <div key={index} className="flex items-center justify-between p-4 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-white/30 dark:border-slate-700 transition-all hover:scale-[1.02] hover:shadow-md">
                     <div className="flex items-center gap-3">
                       <span className="w-5 h-5 rounded-full shadow-md" style={{ backgroundColor: COLORS[index % COLORS.length] }}></span>
-                      <span className="text-xl font-semibold text-slate-800 dark:text-slate-200">{entry.name}</span>
+                      <span className="text-xl font-semibold text-slate-900 dark:text-white">{entry.name}</span>
                     </div>
-                    <span className="text-2xl font-black text-slate-600 dark:text-slate-400">{entry.value}</span>
+                    <span className="text-2xl font-black text-slate-800 dark:text-slate-200">{entry.value}</span>
                   </div>
                 ))}
               </motion.div>
@@ -600,7 +601,7 @@ export const PreziPresentationView = () => {
           <button 
             key={tab.key}
             onClick={() => { setActiveView(tab.key as any); }} 
-            className={`px-4 py-2 text-sm font-bold rounded-xl transition-all duration-300 flex items-center gap-2 ${activeView === tab.key ? `bg-white dark:bg-slate-700 ${tab.activeColor} shadow-sm` : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
+            className={`px-4 py-2 text-sm font-bold rounded-xl transition-all duration-300 flex items-center gap-2 ${activeView === tab.key ? `bg-white dark:bg-slate-700 ${tab.activeColor} shadow-sm` : 'text-slate-800 dark:text-slate-200 hover:text-slate-800 dark:hover:text-slate-200'}`}
           >
             <tab.icon size={16} />
             <span className="hidden sm:inline">{tab.label}</span>
@@ -640,7 +641,7 @@ export const PreziPresentationView = () => {
         <div className="flex gap-2 pointer-events-auto">
           <button 
             onClick={() => navigateTo(0)}
-            className={`px-5 py-3 rounded-2xl text-lg font-bold backdrop-blur-xl transition-all flex items-center gap-2 ${activeNode === 0 ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30' : 'bg-white/70 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 border border-white/30 dark:border-slate-700 shadow-xl'}`}
+            className={`px-5 py-3 rounded-2xl text-lg font-bold backdrop-blur-xl transition-all flex items-center gap-2 ${activeNode === 0 ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30' : 'bg-white/70 dark:bg-slate-800/70 text-slate-900 dark:text-white hover:bg-white dark:hover:bg-slate-800 border border-white/30 dark:border-slate-700 shadow-xl'}`}
           >
             <Map size={24} />
             نەخشەی گشتی
@@ -653,7 +654,7 @@ export const PreziPresentationView = () => {
               className={`px-4 py-3 rounded-2xl text-lg font-bold backdrop-blur-xl transition-all flex items-center gap-2 border shadow-xl ${
                 autoPlayInterval > 0 
                   ? 'bg-blue-600 text-white border-blue-500 shadow-blue-600/30' 
-                  : 'bg-white/70 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 border-white/30 dark:border-slate-700'
+                  : 'bg-white/70 dark:bg-slate-800/70 text-slate-900 dark:text-white border-white/30 dark:border-slate-700'
               }`}
             >
               {autoPlayInterval > 0 ? <Pause size={20} /> : <Play size={20} />}
@@ -677,7 +678,7 @@ export const PreziPresentationView = () => {
                       className={`w-full text-right px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
                         autoPlayInterval === opt.value 
                           ? 'bg-blue-500 text-white' 
-                          : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
+                          : 'text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700'
                       }`}
                     >
                       {opt.label}
@@ -690,13 +691,13 @@ export const PreziPresentationView = () => {
         </div>
 
         <div className="flex gap-4 pointer-events-auto bg-white/70 dark:bg-slate-800/70 p-2 rounded-3xl backdrop-blur-xl border border-white/30 dark:border-slate-700 shadow-xl items-center">
-          <button onClick={() => navigateTo(activeNode === 0 ? NODES.length - 1 : activeNode - 1)} className="p-3 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 rounded-2xl transition-colors text-slate-700 dark:text-slate-300">
+          <button onClick={() => navigateTo(activeNode === 0 ? NODES.length - 1 : activeNode - 1)} className="p-3 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 rounded-2xl transition-colors text-slate-900 dark:text-white">
             <ArrowRight size={24} />
           </button>
-          <div className="px-6 py-2 text-lg font-semibold text-slate-600 dark:text-slate-400 border-l border-r border-slate-300/50 dark:border-slate-600/50">
+          <div className="px-6 py-2 text-lg font-semibold text-slate-800 dark:text-slate-200 border-l border-r border-slate-300/50 dark:border-slate-600/50">
             {activeNode === 0 ? 'پێشەکی' : `بەشی ${activeNode} لە ${NODES.length - 1}`}
           </div>
-          <button onClick={() => navigateTo(activeNode === NODES.length - 1 ? 0 : activeNode + 1)} className="p-3 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 rounded-2xl transition-colors text-slate-700 dark:text-slate-300">
+          <button onClick={() => navigateTo(activeNode === NODES.length - 1 ? 0 : activeNode + 1)} className="p-3 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 rounded-2xl transition-colors text-slate-900 dark:text-white">
             <ArrowLeft size={24} />
           </button>
         </div>
@@ -747,4 +748,5 @@ export const PreziPresentationView = () => {
     </div>
   );
 };
+
 

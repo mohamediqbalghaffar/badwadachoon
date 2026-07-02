@@ -7,8 +7,9 @@ import { ExternalLink, X, MessageSquare, Clock, FileText } from "lucide-react";
 import { PremiumTable } from "./PremiumTable";
 import { ColumnDef } from "@tanstack/react-table";
 
-export const DataTable = () => {
+export const DataTable = ({ customData, hideHeader }: { customData?: DashboardData[], hideHeader?: boolean }) => {
   const { filteredData, filters, setFilters } = useData();
+  const dataToUse = customData || filteredData;
   const [showToast, setShowToast] = useState(false);
 
   const handleCodeClick = (refCode: string, sentDate: string | null, subject: string) => {
@@ -70,13 +71,13 @@ export const DataTable = () => {
   // Deduplicate data by ID
   const uniqueData = useMemo(() => {
     const seen = new Set<string | number>();
-    return filteredData.filter((item) => {
+    return dataToUse.filter((item) => {
       const key = item.id;
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
     });
-  }, [filteredData]);
+  }, [dataToUse]);
 
   const columns = useMemo<ColumnDef<DashboardData, any>[]>(() => [
     { accessorKey: 'id', header: '#' },
@@ -200,23 +201,25 @@ export const DataTable = () => {
   return (
     <div id="data-table-section" className="flex flex-col h-[950px] mb-8 relative">
       {/* Table Header Controls (Title + Filter Clear) */}
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
-        <h3 className="text-2xl font-black text-slate-800 dark:text-white flex items-center gap-2">
-          <div className="w-1.5 h-6 bg-blue-500 rounded-full"></div>
-          داتای وردی پێویست بە وەڵامەکان
-        </h3>
-        
-        {(filters?.departments?.length > 0 || filters?.letterType?.length > 0 || filters?.slaStatus?.length > 0) && (
-          <button
-            onClick={() => setFilters(prev => ({ ...prev, departments: [], letterType: [], slaStatus: [] }))}
-            className="flex items-center gap-2 text-xs font-bold text-red-500 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 px-4 py-2 rounded-xl transition-colors whitespace-nowrap shadow-sm border border-red-100 dark:border-red-500/20"
-            title="سڕینەوەی فلتەرەکان"
-          >
-            <X size={14} />
-            سڕینەوەی هەموو فلتەرەکان
-          </button>
-        )}
-      </div>
+      {!hideHeader && (
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
+          <h3 className="text-2xl font-black text-slate-800 dark:text-white flex items-center gap-2">
+            <div className="w-1.5 h-6 bg-blue-500 rounded-full"></div>
+            داتای وردی پێویست بە وەڵامەکان
+          </h3>
+          
+          {(filters?.departments?.length > 0 || filters?.letterType?.length > 0 || filters?.slaStatus?.length > 0) && (
+            <button
+              onClick={() => setFilters(prev => ({ ...prev, departments: [], letterType: [], slaStatus: [] }))}
+              className="flex items-center gap-2 text-xs font-bold text-red-500 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 px-4 py-2 rounded-xl transition-colors whitespace-nowrap shadow-sm border border-red-100 dark:border-red-500/20"
+              title="سڕینەوەی فلتەرەکان"
+            >
+              <X size={14} />
+              سڕینەوەی هەموو فلتەرەکان
+            </button>
+          )}
+        </div>
+      )}
 
       <PremiumTable 
         data={uniqueData} 

@@ -5,7 +5,7 @@ import { useData } from "../context/DataContext";
 import { Layers, Clock, AlertTriangle, Building2, PieChart as PieIcon, Send, ArrowDownToLine } from "lucide-react";
 
 export const KPICards = () => {
-  const { baseFilteredData, baseFilteredSentData, baseFilteredIncomingData, activeView, setFilters, clearFilters } = useData();
+  const { baseFilteredData, baseFilteredSentData, baseFilteredIncomingData, activeView, setFilters, clearFilters, setDrillDown } = useData();
 
   if (activeView === 'sent') {
     const totalLetters = baseFilteredSentData.length;
@@ -14,16 +14,22 @@ export const KPICards = () => {
 
     return (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="glass glass-card p-6 flex items-center justify-between relative overflow-hidden">
+        <div 
+          onClick={() => setDrillDown({ title: 'کۆی گشتی نامەی نێردراو', data: baseFilteredSentData, viewType: 'sent' })}
+          className="glass glass-card p-6 flex items-center justify-between relative overflow-hidden cursor-pointer hover:scale-[1.02] transition-transform"
+        >
           <div>
-            <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">کۆی گشتی ڕەوانەکراو</p>
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">کۆی گشتی نامەی نێردراو</p>
             <h3 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 to-teal-500">{totalLetters}</h3>
           </div>
           <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 relative z-10">
             <Send size={24} />
           </div>
         </div>
-        <div className="glass glass-card p-6 flex items-center justify-between relative overflow-hidden">
+        <div 
+          onClick={() => setDrillDown({ title: 'کۆی لایەنەکان', data: baseFilteredSentData, viewType: 'sent' })}
+          className="glass glass-card p-6 flex items-center justify-between relative overflow-hidden cursor-pointer hover:scale-[1.02] transition-transform"
+        >
           <div>
             <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">کۆی لایەنەکان</p>
             <h3 className="text-3xl font-bold text-slate-700 dark:text-slate-200">{uniqueDepts}</h3>
@@ -32,9 +38,12 @@ export const KPICards = () => {
             <Building2 size={24} />
           </div>
         </div>
-        <div className="glass glass-card p-6 flex items-center justify-between relative overflow-hidden">
+        <div 
+          onClick={() => setDrillDown({ title: 'نامەکان بەپێی جۆر', data: baseFilteredSentData, viewType: 'sent' })}
+          className="glass glass-card p-6 flex items-center justify-between relative overflow-hidden cursor-pointer hover:scale-[1.02] transition-transform"
+        >
           <div>
-            <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">جۆرەکانی نامە</p>
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">نامەکان بەپێی جۆر</p>
             <h3 className="text-3xl font-bold text-slate-700 dark:text-slate-200">{uniqueTypes}</h3>
           </div>
           <div className="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400 relative z-10">
@@ -52,7 +61,10 @@ export const KPICards = () => {
 
     return (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="glass glass-card p-6 flex items-center justify-between relative overflow-hidden">
+        <div 
+          onClick={() => setDrillDown({ title: 'کۆی گشتی هاتووەکان', data: baseFilteredIncomingData, viewType: 'incoming' })}
+          className="glass glass-card p-6 flex items-center justify-between relative overflow-hidden cursor-pointer hover:scale-[1.02] transition-transform"
+        >
           <div>
             <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">کۆی گشتی هاتووەکان</p>
             <h3 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-500">{totalLetters}</h3>
@@ -61,7 +73,10 @@ export const KPICards = () => {
             <ArrowDownToLine size={24} />
           </div>
         </div>
-        <div className="glass glass-card p-6 flex items-center justify-between relative overflow-hidden">
+        <div 
+          onClick={() => setDrillDown({ title: 'کۆی نێرەرەکان (لایەنەکان)', data: baseFilteredIncomingData, viewType: 'incoming' })}
+          className="glass glass-card p-6 flex items-center justify-between relative overflow-hidden cursor-pointer hover:scale-[1.02] transition-transform"
+        >
           <div>
             <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">سەرچاوەکان (نێرەر)</p>
             <h3 className="text-3xl font-bold text-slate-700 dark:text-slate-200">{uniqueSenders}</h3>
@@ -70,9 +85,12 @@ export const KPICards = () => {
             <Building2 size={24} />
           </div>
         </div>
-        <div className="glass glass-card p-6 flex items-center justify-between relative overflow-hidden">
+        <div 
+          onClick={() => setDrillDown({ title: 'نامەکان بەپێی جۆر', data: baseFilteredIncomingData, viewType: 'incoming' })}
+          className="glass glass-card p-6 flex items-center justify-between relative overflow-hidden cursor-pointer hover:scale-[1.02] transition-transform"
+        >
           <div>
-            <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">جۆرەکانی نامە</p>
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">نامەکان بەپێی جۆر</p>
             <h3 className="text-3xl font-bold text-slate-700 dark:text-slate-200">{uniqueTypes}</h3>
           </div>
           <div className="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400 relative z-10">
@@ -92,20 +110,11 @@ export const KPICards = () => {
       ? completedLetters.reduce((acc, curr) => acc + (curr.processingTime ?? 0), 0) / completedLetters.length
       : 0;
 
-  const handleCardClick = (status: 'all' | 'pending' | 'completed') => {
-    if (status === 'all') {
-      clearFilters();
-    } else {
-      setFilters(prev => ({ ...prev, completionStatus: status }));
-    }
-    document.getElementById('data-table-section')?.scrollIntoView({ behavior: 'smooth' });
-  };
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
       {/* Total Letters */}
       <div 
-        onClick={() => handleCardClick('all')}
+        onClick={() => setDrillDown({ title: 'کۆی گشتی نامەکان', data: baseFilteredData, viewType: 'received' })}
         className="glass glass-card glass-interactive p-6 flex items-center justify-between group cursor-pointer relative overflow-hidden"
       >
         <div>
@@ -122,11 +131,11 @@ export const KPICards = () => {
 
       {/* Pending Letters */}
       <div 
-        onClick={() => handleCardClick('pending')}
+        onClick={() => setDrillDown({ title: 'نامە هەڵواسراوەکان (بێ وەڵام)', data: baseFilteredData.filter((item) => !item.responseDate), viewType: 'received' })}
         className="glass glass-card glass-interactive p-6 flex items-center justify-between group cursor-pointer relative overflow-hidden"
       >
         <div>
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">نامە هەڵپەسێردراوەکان (بێ وەڵام)</p>
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">نامە هەڵواسراوەکان (بێ وەڵام)</p>
           <h3 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-amber-500 to-orange-500">
             {pendingLetters}
           </h3>
@@ -139,7 +148,7 @@ export const KPICards = () => {
 
       {/* Avg Processing Time */}
       <div 
-        onClick={() => handleCardClick('completed')}
+        onClick={() => setDrillDown({ title: 'تێکڕای کاتی وەڵامدانەوە', data: completedLetters, viewType: 'received' })}
         className="glass glass-card glass-interactive p-6 flex items-center justify-between group cursor-pointer relative overflow-hidden"
       >
         <div>

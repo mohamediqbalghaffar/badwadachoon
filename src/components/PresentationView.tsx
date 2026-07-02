@@ -46,7 +46,7 @@ import { format, parseISO, isValid, startOfMonth, parse } from "date-fns";
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4"];
 
 export const PresentationView = () => {
-  const { baseFilteredData, filteredData, data, filters, sentData, baseFilteredSentData, incomingData, baseFilteredIncomingData } = useData();
+  const { baseFilteredData, filteredData, data, filters, sentData, baseFilteredSentData, incomingData, baseFilteredIncomingData, setDrillDown } = useData();
   const [activeSlide, setActiveSlide] = useState(0);
   const [showInsights, setShowInsights] = useState(false);
 
@@ -491,12 +491,12 @@ export const PresentationView = () => {
       {/* Top Slide Progress and Title */}
       <div className="w-full flex flex-col lg:flex-row justify-between items-center gap-4 mb-6 z-20">
         <div className="flex gap-4 items-center">
-          <span className="text-sm font-semibold text-slate-500 dark:text-slate-400 bg-slate-200/50 dark:bg-slate-800/50 px-3 py-1.5 rounded-full">
+          <span className="text-sm font-semibold text-slate-700 dark:text-slate-300 bg-slate-200/50 dark:bg-slate-800/50 px-3 py-1.5 rounded-full">
             سڵاید {activeSlide + 1} لە {slideCount}
           </span>
           <button 
             onClick={() => setShowInsights(!showInsights)}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold transition-all duration-300 ${showInsights ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.2)]' : 'bg-slate-200/50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 hover:bg-slate-300/50 dark:hover:bg-slate-700/50'}`}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold transition-all duration-300 ${showInsights ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.2)]' : 'bg-slate-200/50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 hover:bg-slate-300/50 dark:hover:bg-slate-700/50'}`}
           >
             {showInsights ? <Lightbulb size={16} className="text-amber-500" /> : <LightbulbOff size={16} />}
             <span className="hidden sm:inline">{showInsights ? 'شیکاری هۆشمەند چالاکە' : 'شیکاری هۆشمەند'}</span>
@@ -507,28 +507,28 @@ export const PresentationView = () => {
         <div className="flex bg-slate-200/50 dark:bg-slate-800/50 p-1.5 rounded-2xl backdrop-blur-md shadow-sm border border-white/20 dark:border-slate-700/50">
           <button 
             onClick={() => { setActiveView('incoming'); setActiveSlide(0); }} 
-            className={`px-4 py-2 text-sm font-bold rounded-xl transition-all duration-300 flex items-center gap-2 ${activeView === 'incoming' ? 'bg-white dark:bg-slate-700 text-purple-600 dark:text-purple-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
+            className={`px-4 py-2 text-sm font-bold rounded-xl transition-all duration-300 flex items-center gap-2 ${activeView === 'incoming' ? 'bg-white dark:bg-slate-700 text-purple-600 dark:text-purple-400 shadow-sm' : 'text-slate-800 dark:text-slate-200 hover:text-slate-800 dark:hover:text-slate-200'}`}
           >
             <ArrowDownToLine size={18} />
             سەرجەم هاتووەکان
           </button>
           <button 
             onClick={() => { setActiveView('received'); setActiveSlide(0); }} 
-            className={`px-4 py-2 text-sm font-bold rounded-xl transition-all duration-300 flex items-center gap-2 ${activeView === 'received' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
+            className={`px-4 py-2 text-sm font-bold rounded-xl transition-all duration-300 flex items-center gap-2 ${activeView === 'received' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-800 dark:text-slate-200 hover:text-slate-800 dark:hover:text-slate-200'}`}
           >
             <Inbox size={16} />
             پێویست بە وەڵام
           </button>
           <button 
             onClick={() => { setActiveView('sent'); setActiveSlide(0); }} 
-            className={`px-4 py-2 text-sm font-bold rounded-xl transition-all duration-300 flex items-center gap-2 ${activeView === 'sent' ? 'bg-white dark:bg-slate-700 text-teal-600 dark:text-teal-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
+            className={`px-4 py-2 text-sm font-bold rounded-xl transition-all duration-300 flex items-center gap-2 ${activeView === 'sent' ? 'bg-white dark:bg-slate-700 text-teal-600 dark:text-teal-400 shadow-sm' : 'text-slate-800 dark:text-slate-200 hover:text-slate-800 dark:hover:text-slate-200'}`}
           >
             <Send size={16} />
             سەرجەم ڕەوانەکراوەکان
           </button>
           <button 
             onClick={() => { setActiveView('comparison'); setActiveSlide(0); }} 
-            className={`px-4 py-2 text-sm font-bold rounded-xl transition-all duration-300 flex items-center gap-2 ${activeView === 'comparison' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
+            className={`px-4 py-2 text-sm font-bold rounded-xl transition-all duration-300 flex items-center gap-2 ${activeView === 'comparison' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-800 dark:text-slate-200 hover:text-slate-800 dark:hover:text-slate-200'}`}
           >
             <GitCompareArrows size={16} />
             بەراوردکردن
@@ -569,7 +569,7 @@ export const PresentationView = () => {
         {activeView === 'received' && activeSlide === 0 && (
           <motion.div key="rec-slide-0" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col items-center">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-blue-500/10 -z-10" />
-            <motion.h2 variants={itemVariants} className="text-3xl sm:text-4xl font-bold text-center mb-10 text-slate-800 dark:text-slate-200">
+            <motion.h2 variants={itemVariants} className="text-3xl sm:text-4xl font-bold text-center mb-10 text-slate-900 dark:text-white">
               کورتەی ئەدای سیستەم و ئامارە بنەڕەتییەکان
             </motion.h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
@@ -578,7 +578,7 @@ export const PresentationView = () => {
                 <div className="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-4">
                   <Layers size={32} />
                 </div>
-                <h3 className="text-lg font-semibold text-slate-500 dark:text-slate-400 mb-2">کۆی گشتی نامەکان</h3>
+                <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2">کۆی گشتی نامەکان</h3>
                 <span className="text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-500">{totalLetters}</span>
               </motion.div>
               {/* Card 2 */}
@@ -586,7 +586,7 @@ export const PresentationView = () => {
                 <div className="w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400 mb-4">
                   <AlertTriangle size={32} />
                 </div>
-                <h3 className="text-lg font-semibold text-slate-500 dark:text-slate-400 mb-2">هەڵپەسێردراو</h3>
+                <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2">هەڵپەسێردراو</h3>
                 <span className="text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-amber-500 to-orange-500">{pendingLetters}</span>
               </motion.div>
               {/* Card 3 */}
@@ -594,14 +594,14 @@ export const PresentationView = () => {
                 <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-4">
                   <Clock size={32} />
                 </div>
-                <h3 className="text-lg font-semibold text-slate-500 dark:text-slate-400 mb-2">تێکڕای کاتی وەڵامدانەوە</h3>
+                <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2">تێکڕای کاتی وەڵامدانەوە</h3>
                 <span className="text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-emerald-500 to-teal-500">{avgProcessingTime.toFixed(1)} <span className="text-lg font-medium text-slate-400">ڕۆژ</span></span>
               </motion.div>
             </div>
             {showInsights && (
               <motion.div variants={itemVariants} className="mt-8 p-5 bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-2xl w-full flex items-center gap-4">
                 <Lightbulb className="text-amber-500 shrink-0" size={28} />
-                <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                <p className="text-slate-800 dark:text-slate-100 font-medium leading-relaxed">
                   <strong className="text-amber-600 dark:text-amber-400">شیکاری هۆشمەند: </strong> 
                   لە کۆی گشتی <strong className="text-blue-500">{totalLetters}</strong> نامە، تەنها <strong className="text-amber-500">{pendingLetters}</strong> نامە هەڵپەسێردراون، کە دەکاتە <strong className="text-emerald-500">{Math.round(((totalLetters - pendingLetters) / Math.max(totalLetters, 1)) * 100)}%</strong> ڕێژەی تەواوبوون بە تێکڕای کاتی <strong className="text-teal-500">{avgProcessingTime.toFixed(1)}</strong> ڕۆژ.
                 </p>
@@ -615,7 +615,7 @@ export const PresentationView = () => {
           <motion.div key="rec-slide-1" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-emerald-500/10 -z-10" />
             <motion.div variants={itemVariants} className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
                 <TrendingUp className="text-emerald-500" size={32} />
                 هەڵکشان و داکشانی نامەکان بەپێی کات
               </h2>
@@ -643,7 +643,7 @@ export const PresentationView = () => {
             {showInsights && timelineData.length >= 2 && (
               <motion.div variants={itemVariants} className="mt-6 p-5 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-2xl w-full flex items-center gap-4">
                 <Lightbulb className="text-emerald-500 shrink-0" size={28} />
-                <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                <p className="text-slate-800 dark:text-slate-100 font-medium leading-relaxed">
                   <strong className="text-emerald-600 dark:text-emerald-400">شیکاری هۆشمەند: </strong> 
                   زۆرترین نامە لە مانگی <strong className="text-emerald-500">{[...timelineData].sort((a,b)=>b.count-a.count)[0].date}</strong> دا تۆمارکراوە بە بڕی <strong className="text-emerald-500">{[...timelineData].sort((a,b)=>b.count-a.count)[0].count}</strong> نامە. ڕەوتی گشتی کارەکان بەپێی کات گۆڕانکاری بەسەردا هاتووە.
                 </p>
@@ -657,7 +657,7 @@ export const PresentationView = () => {
           <motion.div key="rec-slide-2" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-blue-500/10 -z-10" />
             <motion.div variants={itemVariants} className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
                 <Building2 className="text-blue-500" size={32} />
                 {chartTitle}
               </h2>
@@ -692,15 +692,15 @@ export const PresentationView = () => {
               {chartData.map((entry, index) => (
                 <div key={index} className="flex items-center gap-1.5 text-xs">
                   <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }}></span>
-                  <span className="font-bold text-slate-700 dark:text-slate-300">{entry.abbr}</span>
-                  <span className="text-slate-500 dark:text-slate-400">= {entry.name}</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-100">{entry.abbr}</span>
+                  <span className="text-slate-700 dark:text-slate-300">= {entry.name}</span>
                 </div>
               ))}
             </motion.div>
             {showInsights && chartData.length > 0 && (
               <motion.div variants={itemVariants} className="mt-4 p-5 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border border-blue-500/20 rounded-2xl w-full flex items-center gap-4">
                 <Lightbulb className="text-blue-500 shrink-0" size={28} />
-                <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                <p className="text-slate-800 dark:text-slate-100 font-medium leading-relaxed">
                   <strong className="text-blue-600 dark:text-blue-400">شیکاری هۆشمەند: </strong> 
                   زۆرترین پاڵەپەستۆی کار لەسەر <strong className="text-blue-500">{(chartData[0] as any).name || (chartData[0] as any).date}</strong>ە بە ژمارەی <strong className="text-blue-500">{(chartData[0] as any).count}</strong> نامە، کە دەکاتە نزیکەی <strong className="text-emerald-500">{Math.round(((chartData[0] as any).count / Math.max(totalLetters, 1)) * 100)}%</strong>ی کۆی گشتی کارەکان.
                 </p>
@@ -714,7 +714,7 @@ export const PresentationView = () => {
           <motion.div key="rec-slide-3" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-purple-500/10 -z-10" />
             <motion.div variants={itemVariants} className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
                 <PieIcon className="text-purple-500" size={32} />
                 پۆلێنکردنی جۆرەکانی نامە
               </h2>
@@ -749,9 +749,9 @@ export const PresentationView = () => {
                   <div key={index} className="flex items-center justify-between p-3 rounded-xl bg-slate-800/10 dark:bg-slate-850/50 border border-white/5 hover:bg-slate-800/20 transition-colors">
                     <div className="flex items-center gap-3">
                       <span className="w-4 h-4 rounded-full shadow-sm" style={{ backgroundColor: COLORS[index % COLORS.length] }}></span>
-                      <span className="font-semibold text-slate-800 dark:text-slate-200">{entry.name}</span>
+                      <span className="font-semibold text-slate-900 dark:text-white">{entry.name}</span>
                     </div>
-                    <span className="text-lg font-bold text-slate-600 dark:text-slate-400">{entry.value} نامە</span>
+                    <span className="text-lg font-bold text-slate-800 dark:text-slate-200">{entry.value} نامە</span>
                   </div>
                 ))}
               </div>
@@ -759,7 +759,7 @@ export const PresentationView = () => {
             {showInsights && typeData.length > 0 && (
               <motion.div variants={itemVariants} className="mt-6 p-5 bg-gradient-to-r from-blue-500/10 to-blue-400/10 border border-blue-500/20 rounded-2xl w-full flex items-center gap-4">
                 <Lightbulb className="text-blue-500 shrink-0" size={28} />
-                <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                <p className="text-slate-800 dark:text-slate-100 font-medium leading-relaxed">
                   <strong className="text-blue-600 dark:text-blue-400">شیکاری هۆشمەند: </strong> 
                   زۆرترین جۆری نامە پێکهاتووە لە <strong className="text-blue-500">{[...typeData].sort((a,b)=>b.value-a.value)[0].name}</strong> بە ڕێژەی بەرچاو.
                 </p>
@@ -774,7 +774,7 @@ export const PresentationView = () => {
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-amber-500/10 -z-10" />
             <motion.div variants={itemVariants} className="flex justify-between items-start mb-6">
               <div>
-                <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+                <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
                   <BarChart2 className="text-amber-500" size={32} />
                   کاتی تێچوو (SLA)
                 </h2>
@@ -862,21 +862,21 @@ export const PresentationView = () => {
             <motion.div variants={itemVariants} className="mt-6 flex flex-wrap gap-x-8 gap-y-2 justify-center" dir="rtl">
               <div className="flex items-center gap-2 text-sm">
                 <span className="w-4 h-4 rounded-full bg-[#10b981]"></span>
-                <span className="font-bold text-slate-700 dark:text-slate-300">لە کاتی خۆی (کەمتر)</span>
+                <span className="font-bold text-slate-800 dark:text-slate-100">لە کاتی خۆی (کەمتر)</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <span className="w-4 h-4 rounded-full bg-[#ef4444]"></span>
-                <span className="font-bold text-slate-700 dark:text-slate-300">دواکەوتوو (زیاتر)</span>
+                <span className="font-bold text-slate-800 dark:text-slate-100">دواکەوتوو (زیاتر)</span>
               </div>
               <div className="flex items-center gap-2 text-sm ml-4">
                 <span className="w-5 h-1.5 rounded-full bg-[#f59e0b]"></span>
-                <span className="font-bold text-slate-700 dark:text-slate-300">تێکڕای کاتی تێچوو (ڕۆژ)</span>
+                <span className="font-bold text-slate-800 dark:text-slate-100">تێکڕای کاتی تێچوو (ڕۆژ)</span>
               </div>
             </motion.div>
             {showInsights && slaEnhancedData.data.length > 0 && (
               <motion.div variants={itemVariants} className="mt-6 p-5 bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-2xl w-full flex items-center gap-4">
                 <Lightbulb className="text-amber-500 shrink-0" size={28} />
-                <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                <p className="text-slate-800 dark:text-slate-100 font-medium leading-relaxed">
                   <strong className="text-amber-600 dark:text-amber-400">شیکاری هۆشمەند: </strong> 
                   ڕێژەی گشتی پابەندبوون بە کات <strong className="text-emerald-500">{Math.round((slaEnhancedData.totalOnTime / (slaEnhancedData.totalOnTime + slaEnhancedData.totalLate)) * 100)}%</strong>ە. ئەو جۆرە نامانەی زۆرترین ڕێژەی دواکەوتنیان هەیە بریتین لە جۆری <strong className="text-red-500">{[...slaEnhancedData.data].sort((a,b)=>b.late-a.late)[0]?.name || '-'}</strong>. تەرکیز کردن لەسەر خێراکردنی ئەم جۆرە، ڕێژەی پابەندبوونی گشتی بەرز دەکاتەوە.
                 </p>
@@ -889,7 +889,7 @@ export const PresentationView = () => {
         {activeView === 'received' && activeSlide === 5 && (
           <motion.div key="rec-slide-5" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-orange-500/10 -z-10" />
-            <motion.h2 variants={itemVariants} className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 mb-8 flex items-center gap-3">
+            <motion.h2 variants={itemVariants} className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-8 flex items-center gap-3">
               <Activity className="text-orange-500" size={32} />
               شیکاری کارایی لایەن و بەشەکان
             </motion.h2>
@@ -951,7 +951,7 @@ export const PresentationView = () => {
                   {mostPendingDepts.length > 0 ? (
                     mostPendingDepts.map((d, i) => (
                       <div key={i} className="flex justify-between items-center py-2.5 border-b border-white/5 last:border-b-0">
-                        <span className="text-sm text-slate-700 dark:text-slate-300 line-clamp-1 w-2/3">{d.name}</span>
+                        <span className="text-sm text-slate-800 dark:text-slate-100 line-clamp-1 w-2/3">{d.name}</span>
                         <span className="text-sm font-bold text-amber-500 shrink-0">{d.count} نامە</span>
                       </div>
                     ))
@@ -964,7 +964,7 @@ export const PresentationView = () => {
             {showInsights && mostPendingDepts.length > 0 && (
               <motion.div variants={itemVariants} className="mt-6 p-5 bg-gradient-to-r from-emerald-500/10 to-emerald-400/10 border border-emerald-500/20 rounded-2xl w-full flex items-center gap-4">
                 <Lightbulb className="text-emerald-500 shrink-0" size={28} />
-                <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                <p className="text-slate-800 dark:text-slate-100 font-medium leading-relaxed">
                   <strong className="text-emerald-600 dark:text-emerald-400">شیکاری هۆشمەند: </strong> 
                   بەشی <strong className="text-emerald-500">{[...mostPendingDepts].sort((a,b)=>b.count-a.count)[0].name}</strong> زۆرترین نامەی هەڵپەسێردراوی هەیە.
                 </p>
@@ -978,7 +978,7 @@ export const PresentationView = () => {
           <motion.div key="rec-slide-6" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-red-500/10 -z-10" />
             <motion.div variants={itemVariants} className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
                 <AlertOctagon className="text-red-500" size={32} />
                 کۆنترین کار و نامە هەڵپەسێردراوەکان
               </h2>
@@ -996,7 +996,7 @@ export const PresentationView = () => {
                     <th className="p-4 text-left">ماوەی مانەوە</th>
                   </tr>
                 </thead>
-                <tbody className="text-sm text-slate-700 dark:text-slate-300">
+                <tbody className="text-sm text-slate-800 dark:text-slate-100">
                   {oldestPending.length > 0 ? (
                     oldestPending.map((item, index) => (
                       <tr key={index} className="border-b border-white/5 hover:bg-slate-800/10 transition-colors">
@@ -1018,7 +1018,7 @@ export const PresentationView = () => {
             {showInsights && oldestPending.length > 0 && (
               <motion.div variants={itemVariants} className="mt-6 p-5 bg-gradient-to-r from-red-500/10 to-orange-500/10 border border-red-500/20 rounded-2xl w-full flex items-center gap-4">
                 <Lightbulb className="text-red-500 shrink-0" size={28} />
-                <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                <p className="text-slate-800 dark:text-slate-100 font-medium leading-relaxed">
                   <strong className="text-red-600 dark:text-red-400">شیکاری هۆشمەند: </strong> 
                   کۆنترین نامەی هەڵپەسێردراو تەمەنی گەیشتووەتە <strong className="text-red-500">{oldestPending[0].daysPending}</strong> ڕۆژ. پێویستە دەستبەجێ بەدواداچوون بۆ ئەم {oldestPending.length} کارە بکرێت بۆ ئەوەی ڕێژەی پابەندبوون دانەبەزێت.
                 </p>
@@ -1035,7 +1035,7 @@ export const PresentationView = () => {
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-teal-500/10 -z-10" />
             <motion.div variants={itemVariants} className="flex justify-between items-start mb-6">
               <div>
-                <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+                <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
                   <Send className="text-teal-500" size={32} />
                   سەرجەم نووسراوە ڕەوانەکراوەکان
                 </h2>
@@ -1054,7 +1054,7 @@ export const PresentationView = () => {
             {showInsights && true && (
               <motion.div variants={itemVariants} className="mt-6 p-5 bg-gradient-to-r from-teal-500/10 to-teal-400/10 border border-teal-500/20 rounded-2xl w-full flex items-center gap-4">
                 <Lightbulb className="text-teal-500 shrink-0" size={28} />
-                <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                <p className="text-slate-800 dark:text-slate-100 font-medium leading-relaxed">
                   <strong className="text-teal-600 dark:text-teal-400">شیکاری هۆشمەند: </strong> 
                   سەرجەم نامە ڕەوانەکراوەکان گەیشتوونەتە <strong className="text-teal-500">{totalSent}</strong> نامە، کە ئەمەش پیشاندەری ئاستی کارایی و خێرایی بەشەکانە.
                 </p>
@@ -1068,7 +1068,7 @@ export const PresentationView = () => {
           <motion.div key="sent-slide-1" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-teal-500/10 -z-10" />
             <motion.div variants={itemVariants} className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
                 <TrendingUp className="text-teal-500" size={32} />
                 هەڵکشان و داکشانی نامە ڕەوانەکراوەکان
               </h2>
@@ -1095,7 +1095,7 @@ export const PresentationView = () => {
             {showInsights && sentTimelineData.length >= 2 && (
               <motion.div variants={itemVariants} className="mt-6 p-5 bg-gradient-to-r from-teal-500/10 to-teal-400/10 border border-teal-500/20 rounded-2xl w-full flex items-center gap-4">
                 <Lightbulb className="text-teal-500 shrink-0" size={28} />
-                <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                <p className="text-slate-800 dark:text-slate-100 font-medium leading-relaxed">
                   <strong className="text-teal-600 dark:text-teal-400">شیکاری هۆشمەند: </strong> 
                   لووتکەی نامە ڕەوانەکراوەکان لە مانگی <strong className="text-teal-500">{[...sentTimelineData].sort((a,b)=>b.count-a.count)[0].date}</strong> دا بووە بە بڕی <strong className="text-teal-500">{[...sentTimelineData].sort((a,b)=>b.count-a.count)[0].count}</strong> نامە.
                 </p>
@@ -1109,7 +1109,7 @@ export const PresentationView = () => {
           <motion.div key="sent-slide-2" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-teal-500/10 -z-10" />
             <motion.div variants={itemVariants} className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
                 <Building2 className="text-teal-500" size={32} />
                 لایەنە سەرەکییەکان بەپێی نامەی ڕەوانەکراو
               </h2>
@@ -1131,7 +1131,7 @@ export const PresentationView = () => {
             {showInsights && sentDeptData.length > 0 && (
               <motion.div variants={itemVariants} className="mt-6 p-5 bg-gradient-to-r from-cyan-500/10 to-cyan-400/10 border border-cyan-500/20 rounded-2xl w-full flex items-center gap-4">
                 <Lightbulb className="text-cyan-500 shrink-0" size={28} />
-                <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                <p className="text-slate-800 dark:text-slate-100 font-medium leading-relaxed">
                   <strong className="text-cyan-600 dark:text-cyan-400">شیکاری هۆشمەند: </strong> 
                   بەشی <strong className="text-cyan-500">{[...sentDeptData].sort((a,b)=>b.count-a.count)[0].name}</strong> زۆرترین ڕێژەی نامەی ڕەوانەکراوی هەیە بە <strong className="text-cyan-500">{[...sentDeptData].sort((a,b)=>b.count-a.count)[0].count}</strong> نامە.
                 </p>
@@ -1145,7 +1145,7 @@ export const PresentationView = () => {
           <motion.div key="sent-slide-3" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-purple-500/10 -z-10" />
             <motion.div variants={itemVariants} className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
                 <PieIcon className="text-purple-500" size={32} />
                 جۆری نامە ڕەوانەکراوەکان
               </h2>
@@ -1166,9 +1166,9 @@ export const PresentationView = () => {
                   <div key={index} className="flex items-center justify-between p-3 rounded-xl bg-slate-800/10 dark:bg-slate-850/50 border border-white/5 hover:bg-slate-800/20 transition-colors">
                     <div className="flex items-center gap-3">
                       <span className="w-4 h-4 rounded-full shadow-sm" style={{ backgroundColor: COLORS[index % COLORS.length] }}></span>
-                      <span className="font-semibold text-slate-800 dark:text-slate-200">{entry.name}</span>
+                      <span className="font-semibold text-slate-900 dark:text-white">{entry.name}</span>
                     </div>
-                    <span className="text-lg font-bold text-slate-600 dark:text-slate-400">{entry.value} نامە</span>
+                    <span className="text-lg font-bold text-slate-800 dark:text-slate-200">{entry.value} نامە</span>
                   </div>
                 ))}
               </div>
@@ -1176,7 +1176,7 @@ export const PresentationView = () => {
             {showInsights && sentTypeDataPres.length > 0 && (
               <motion.div variants={itemVariants} className="mt-6 p-5 bg-gradient-to-r from-cyan-500/10 to-cyan-400/10 border border-cyan-500/20 rounded-2xl w-full flex items-center gap-4">
                 <Lightbulb className="text-cyan-500 shrink-0" size={28} />
-                <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                <p className="text-slate-800 dark:text-slate-100 font-medium leading-relaxed">
                   <strong className="text-cyan-600 dark:text-cyan-400">شیکاری هۆشمەند: </strong> 
                   جۆری <strong className="text-cyan-500">{[...sentTypeDataPres].sort((a,b)=>b.value-a.value)[0].name}</strong> بەربڵاوترین جۆری نامەی ڕەوانەکراوە بە <strong className="text-cyan-500">{[...sentTypeDataPres].sort((a,b)=>b.value-a.value)[0].value}</strong> نامە.
                 </p>
@@ -1192,7 +1192,7 @@ export const PresentationView = () => {
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-teal-500/10 -z-10" />
             <motion.div variants={itemVariants} className="flex justify-between items-start mb-6">
               <div>
-                <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+                <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
                   <Send className="text-teal-500" size={32} />
                   سەرجەم هاتووەکان
                 </h2>
@@ -1211,7 +1211,7 @@ export const PresentationView = () => {
             {showInsights && true && (
               <motion.div variants={itemVariants} className="mt-6 p-5 bg-gradient-to-r from-purple-500/10 to-purple-400/10 border border-purple-500/20 rounded-2xl w-full flex items-center gap-4">
                 <Lightbulb className="text-purple-500 shrink-0" size={28} />
-                <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                <p className="text-slate-800 dark:text-slate-100 font-medium leading-relaxed">
                   <strong className="text-purple-600 dark:text-purple-400">شیکاری هۆشمەند: </strong> 
                   ژمارەی نامە هاتووەکان گەیشتووەتە <strong className="text-purple-500">{totalIncoming}</strong> نامە، کە پێویستیان بە ڕێکخستن و وەڵامدانەوەیە.
                 </p>
@@ -1225,7 +1225,7 @@ export const PresentationView = () => {
           <motion.div key="incoming-slide-1" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-teal-500/10 -z-10" />
             <motion.div variants={itemVariants} className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
                 <TrendingUp className="text-teal-500" size={32} />
                 هەڵکشان و داکشانی نامە هاتووەکان
               </h2>
@@ -1252,7 +1252,7 @@ export const PresentationView = () => {
             {showInsights && incomingTimelineData.length >= 2 && (
               <motion.div variants={itemVariants} className="mt-6 p-5 bg-gradient-to-r from-fuchsia-500/10 to-fuchsia-400/10 border border-fuchsia-500/20 rounded-2xl w-full flex items-center gap-4">
                 <Lightbulb className="text-fuchsia-500 shrink-0" size={28} />
-                <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                <p className="text-slate-800 dark:text-slate-100 font-medium leading-relaxed">
                   <strong className="text-fuchsia-600 dark:text-fuchsia-400">شیکاری هۆشمەند: </strong> 
                   زۆرترین نامەی هاتوو لە مانگی <strong className="text-fuchsia-500">{[...incomingTimelineData].sort((a,b)=>b.count-a.count)[0].date}</strong> دا تۆمارکراوە بە بڕی <strong className="text-fuchsia-500">{[...incomingTimelineData].sort((a,b)=>b.count-a.count)[0].count}</strong> نامە.
                 </p>
@@ -1266,7 +1266,7 @@ export const PresentationView = () => {
           <motion.div key="incoming-slide-2" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-teal-500/10 -z-10" />
             <motion.div variants={itemVariants} className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
                 <Building2 className="text-teal-500" size={32} />
                 لایەنە سەرەکییەکان بەپێی نامەی هاتوو
               </h2>
@@ -1288,7 +1288,7 @@ export const PresentationView = () => {
             {showInsights && incomingDeptData.length > 0 && (
               <motion.div variants={itemVariants} className="mt-6 p-5 bg-gradient-to-r from-purple-500/10 to-purple-400/10 border border-purple-500/20 rounded-2xl w-full flex items-center gap-4">
                 <Lightbulb className="text-purple-500 shrink-0" size={28} />
-                <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                <p className="text-slate-800 dark:text-slate-100 font-medium leading-relaxed">
                   <strong className="text-purple-600 dark:text-purple-400">شیکاری هۆشمەند: </strong> 
                   بەشی <strong className="text-purple-500">{[...incomingDeptData].sort((a,b)=>b.count-a.count)[0].name}</strong> زۆرترین نامەی ئاراستە کراوە بە <strong className="text-purple-500">{[...incomingDeptData].sort((a,b)=>b.count-a.count)[0].count}</strong> نامە.
                 </p>
@@ -1302,7 +1302,7 @@ export const PresentationView = () => {
           <motion.div key="incoming-slide-3" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-purple-500/10 -z-10" />
             <motion.div variants={itemVariants} className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
                 <PieIcon className="text-purple-500" size={32} />
                 جۆری نامە هاتووەکان
               </h2>
@@ -1323,9 +1323,9 @@ export const PresentationView = () => {
                   <div key={index} className="flex items-center justify-between p-3 rounded-xl bg-slate-800/10 dark:bg-slate-850/50 border border-white/5 hover:bg-slate-800/20 transition-colors">
                     <div className="flex items-center gap-3">
                       <span className="w-4 h-4 rounded-full shadow-sm" style={{ backgroundColor: COLORS[index % COLORS.length] }}></span>
-                      <span className="font-semibold text-slate-800 dark:text-slate-200">{entry.name}</span>
+                      <span className="font-semibold text-slate-900 dark:text-white">{entry.name}</span>
                     </div>
-                    <span className="text-lg font-bold text-slate-600 dark:text-slate-400">{entry.value} نامە</span>
+                    <span className="text-lg font-bold text-slate-800 dark:text-slate-200">{entry.value} نامە</span>
                   </div>
                 ))}
               </div>
@@ -1333,7 +1333,7 @@ export const PresentationView = () => {
             {showInsights && incomingTypeDataPres.length > 0 && (
               <motion.div variants={itemVariants} className="mt-6 p-5 bg-gradient-to-r from-purple-500/10 to-purple-400/10 border border-purple-500/20 rounded-2xl w-full flex items-center gap-4">
                 <Lightbulb className="text-purple-500 shrink-0" size={28} />
-                <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                <p className="text-slate-800 dark:text-slate-100 font-medium leading-relaxed">
                   <strong className="text-purple-600 dark:text-purple-400">شیکاری هۆشمەند: </strong> 
                   سەرەکیترین جۆری نامەی هاتوو بریتییە لە <strong className="text-purple-500">{[...incomingTypeDataPres].sort((a,b)=>b.value-a.value)[0].name}</strong> بە بڕی <strong className="text-purple-500">{[...incomingTypeDataPres].sort((a,b)=>b.value-a.value)[0].value}</strong> نامە.
                 </p>
@@ -1349,7 +1349,7 @@ export const PresentationView = () => {
         {activeView === 'comparison' && (
           <div className="absolute top-8 left-1/2 -translate-x-1/2 z-50 flex gap-4 bg-white/10 dark:bg-slate-900/40 backdrop-blur-md p-2 rounded-2xl border border-slate-200/20 shadow-lg">
             <select 
-              className="bg-transparent text-slate-800 dark:text-slate-200 outline-none font-bold text-sm px-2 cursor-pointer"
+              className="bg-transparent text-slate-900 dark:text-white outline-none font-bold text-sm px-2 cursor-pointer"
               value={compSourceA}
               onChange={(e) => setCompSourceA(e.target.value as DataSourceType)}
             >
@@ -1359,7 +1359,7 @@ export const PresentationView = () => {
             </select>
             <GitCompareArrows className="text-slate-400" size={20} />
             <select 
-              className="bg-transparent text-slate-800 dark:text-slate-200 outline-none font-bold text-sm px-2 cursor-pointer"
+              className="bg-transparent text-slate-900 dark:text-white outline-none font-bold text-sm px-2 cursor-pointer"
               value={compSourceB}
               onChange={(e) => setCompSourceB(e.target.value as DataSourceType)}
             >
@@ -1376,7 +1376,7 @@ export const PresentationView = () => {
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-indigo-500/10 -z-10" />
             <motion.div variants={itemVariants} className="flex justify-between items-start mb-6">
               <div>
-                <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+                <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
                   <GitCompareArrows className="text-indigo-500" size={32} />
                   بەراوردکردنی نامەکان
                 </h2>
@@ -1403,7 +1403,7 @@ export const PresentationView = () => {
             {showInsights && compCountA > 0 || compCountB > 0 && (
               <motion.div variants={itemVariants} className="mt-6 p-5 bg-gradient-to-r from-indigo-500/10 to-indigo-400/10 border border-indigo-500/20 rounded-2xl w-full flex items-center gap-4">
                 <Lightbulb className="text-indigo-500 shrink-0" size={28} />
-                <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                <p className="text-slate-800 dark:text-slate-100 font-medium leading-relaxed">
                   <strong className="text-indigo-600 dark:text-indigo-400">شیکاری هۆشمەند: </strong> 
                   ڕێژەی <strong className="text-indigo-500">{compCountA + compCountB > 0 ? Math.round((compCountA / (compCountA + compCountB)) * 100) : 0}%</strong>ی کارەکان پەیوەستە بە <strong className="text-indigo-500">{compConfigA.name}</strong> بەرامبەر بە <strong className="text-indigo-500">{compCountA + compCountB > 0 ? Math.round((compCountB / (compCountA + compCountB)) * 100) : 0}%</strong> بۆ <strong className="text-indigo-500">{compConfigB.name}</strong>.
                 </p>
@@ -1416,7 +1416,7 @@ export const PresentationView = () => {
         {activeView === 'comparison' && activeSlide === 1 && (
           <motion.div key="comp-slide-1" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col pt-12">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-indigo-500/10 -z-10" />
-            <motion.h2 variants={itemVariants} className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 mb-8 flex items-center gap-3">
+            <motion.h2 variants={itemVariants} className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-8 flex items-center gap-3">
               <GitCompareArrows className="text-indigo-500" size={32} />
               بەراوردی ژمارەی کارەکان بەپێی بەشەکان
             </motion.h2>
@@ -1442,17 +1442,17 @@ export const PresentationView = () => {
             <motion.div variants={itemVariants} className="mt-6 flex flex-wrap gap-x-8 gap-y-2 justify-center" dir="rtl">
               <div className="flex items-center gap-2 text-sm">
                 <span className="w-4 h-4 rounded-sm" style={{ backgroundColor: compConfigA.color }}></span>
-                <span className="font-bold text-slate-700 dark:text-slate-300">{compConfigA.name}</span>
+                <span className="font-bold text-slate-800 dark:text-slate-100">{compConfigA.name}</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <span className="w-4 h-4 rounded-sm" style={{ backgroundColor: compConfigB.color }}></span>
-                <span className="font-bold text-slate-700 dark:text-slate-300">{compConfigB.name}</span>
+                <span className="font-bold text-slate-800 dark:text-slate-100">{compConfigB.name}</span>
               </div>
             </motion.div>
             {showInsights && deptComparisonData.length > 0 && (
               <motion.div variants={itemVariants} className="mt-6 p-5 bg-gradient-to-r from-indigo-500/10 to-indigo-400/10 border border-indigo-500/20 rounded-2xl w-full flex items-center gap-4">
                 <Lightbulb className="text-indigo-500 shrink-0" size={28} />
-                <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                <p className="text-slate-800 dark:text-slate-100 font-medium leading-relaxed">
                   <strong className="text-indigo-600 dark:text-indigo-400">شیکاری هۆشمەند: </strong> 
                   بەشی <strong className="text-indigo-500">{[...deptComparisonData].sort((a,b)=>b.total-a.total)[0].name}</strong> گەورەترین ژمارەی کاری هەیە لەنێوان هەردوو سەرچاوەی بەراوردکراودا.
                 </p>
@@ -1465,7 +1465,7 @@ export const PresentationView = () => {
         {activeView === 'comparison' && activeSlide === 2 && (
           <motion.div key="comp-slide-2" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col pt-12">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-purple-500/10 -z-10" />
-            <motion.h2 variants={itemVariants} className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200 mb-8 flex items-center gap-3">
+            <motion.h2 variants={itemVariants} className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-8 flex items-center gap-3">
               <TrendingUp className="text-purple-500" size={32} />
               بەراوردکردنی هەڵکشان و داکشان بەپێی کات
             </motion.h2>
@@ -1499,17 +1499,17 @@ export const PresentationView = () => {
             <motion.div variants={itemVariants} className="mt-6 flex flex-wrap gap-x-8 gap-y-2 justify-center" dir="rtl">
               <div className="flex items-center gap-2 text-sm">
                 <span className="w-4 h-1 rounded-sm" style={{ backgroundColor: compConfigA.color }}></span>
-                <span className="font-bold text-slate-700 dark:text-slate-300">{compConfigA.name}</span>
+                <span className="font-bold text-slate-800 dark:text-slate-100">{compConfigA.name}</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <span className="w-4 h-1 rounded-sm" style={{ backgroundColor: compConfigB.color }}></span>
-                <span className="font-bold text-slate-700 dark:text-slate-300">{compConfigB.name}</span>
+                <span className="font-bold text-slate-800 dark:text-slate-100">{compConfigB.name}</span>
               </div>
             </motion.div>
             {showInsights && timelineDataComparison.length >= 2 && (
               <motion.div variants={itemVariants} className="mt-6 p-5 bg-gradient-to-r from-indigo-500/10 to-indigo-400/10 border border-indigo-500/20 rounded-2xl w-full flex items-center gap-4">
                 <Lightbulb className="text-indigo-500 shrink-0" size={28} />
-                <p className="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                <p className="text-slate-800 dark:text-slate-100 font-medium leading-relaxed">
                   <strong className="text-indigo-600 dark:text-indigo-400">شیکاری هۆشمەند: </strong> 
                   ئەم بەراوردکارییە دەریدەخات کە چۆن گۆڕانکارییەکان بەپێی کات کاریگەرییان هەبووە لەسەر ژمارەی کار لە هەردوو سەرچاوەکەدا.
                 </p>
@@ -1529,3 +1529,4 @@ export const PresentationView = () => {
     </div>
   );
 };
+

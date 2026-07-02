@@ -21,6 +21,7 @@ import { parseFile } from "../utils/parser";
 import { AdminSettingsModal } from "./AdminSettingsModal";
 import { LiveActivityTracker } from "./LiveActivityTracker";
 import { AdminDataEntry } from "./AdminDataEntry";
+import { DrillDownModal } from "./DrillDownModal";
 
 const VIEW_SEGMENTS: { key: ActiveView; label: string; icon: React.ReactNode }[] = [
   { key: 'incoming', label: 'سەرجەم هاتووەکان', icon: <ArrowDownToLine size={16} /> },
@@ -43,6 +44,7 @@ export const Dashboard = () => {
   const [presentationStyle, setPresentationStyle] = React.useState<'powerpoint' | 'prezi'>('powerpoint');
   const [scrolledPastTop, setScrolledPastTop] = React.useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = React.useState(false);
+  const [isDraggingFilter, setIsDraggingFilter] = React.useState(false);
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -475,12 +477,19 @@ export const Dashboard = () => {
       {(isPresentationMode || scrolledPastTop) && (activeView === 'received' || activeView === 'sent' || activeView === 'incoming') && (
         <motion.button
           drag
+          dragConstraints={false}
           dragMomentum={false}
-          initial={{ y: '-50%' }}
-          style={{ top: '50%', right: '1rem' }}
-          onClick={() => setIsFilterModalOpen(true)}
-          className="fixed z-[60] bg-blue-600 hover:bg-blue-500 text-white p-4 rounded-full shadow-2xl hover:shadow-[0_0_20px_rgba(59,130,246,0.6)] transition-colors group flex items-center justify-center animate-in fade-in cursor-grab active:cursor-grabbing"
-          title="پاڵاوتنی داتا"
+          onDragStart={() => setIsDraggingFilter(true)}
+          onDragEnd={() => {
+            setTimeout(() => setIsDraggingFilter(false), 150);
+          }}
+          initial={{ right: '1rem', top: '50%', y: '-50%' }}
+          style={{ position: 'fixed', zIndex: 60 }}
+          onClick={() => {
+            if (!isDraggingFilter) setIsFilterModalOpen(true);
+          }}
+          className="bg-blue-600 hover:bg-blue-500 text-white p-4 rounded-full shadow-2xl hover:shadow-[0_0_20px_rgba(59,130,246,0.6)] transition-colors group flex items-center justify-center animate-in fade-in cursor-grab active:cursor-grabbing"
+          title="فلتەری کاتی"
         >
           <Filter size={24} className="group-hover:scale-110 transition-transform pointer-events-none" />
         </motion.button>
@@ -516,12 +525,15 @@ export const Dashboard = () => {
                 onClick={() => setIsFilterModalOpen(false)}
                 className="px-6 py-2 mt-4 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-colors shadow-lg shadow-blue-500/30"
               >
-                جێبەجێکردن
+                پێشاندانی داتاکان
               </button>
             </div>
           </div>
         </>
       )}
+
+      {/* Drill Down Modal */}
+      <DrillDownModal />
     </div>
   );
 };

@@ -10,7 +10,7 @@ if (globalForPrisma.prisma) {
   prisma = globalForPrisma.prisma;
 } else {
   const libsql = createClient({
-    url: process.env.TURSO_DATABASE_URL || '',
+    url: process.env.TURSO_DATABASE_URL || 'file:./dev.db',
     authToken: process.env.TURSO_AUTH_TOKEN || '',
   });
 
@@ -25,3 +25,4 @@ if (globalForPrisma.prisma) {
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 
 export { prisma };
+

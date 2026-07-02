@@ -8,6 +8,12 @@ import { DashboardData, SentLetterData, IncomingLetterData } from "../utils/pars
 export type ActiveView = 'incoming' | 'received' | 'sent' | 'comparison' | 'data-entry';
 export type AdminMode = 'live' | 'local';
 
+export interface DrillDownState {
+  title: string;
+  data: any[];
+  viewType: 'received' | 'sent' | 'incoming';
+}
+
 interface FilterState {
   dateRange: { start: string | null; end: string | null };
   departments: string[];
@@ -46,6 +52,8 @@ interface DataContextType {
   mode: AdminMode;
   viewerSelectedUserId: string | null;
   setViewerSelectedUserId: React.Dispatch<React.SetStateAction<string | null>>;
+  drillDown: DrillDownState | null;
+  setDrillDown: React.Dispatch<React.SetStateAction<DrillDownState | null>>;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -66,6 +74,7 @@ export const DataProvider = ({ children, mode }: { children: React.ReactNode, mo
   const [isPresentationMode, setIsPresentationMode] = useState<boolean>(false);
   const [dbLoading, setDbLoading] = useState(true);
   const [viewerSelectedUserId, setViewerSelectedUserId] = useState<string | null>(null);
+  const [drillDown, setDrillDown] = useState<DrillDownState | null>(null);
 
   const { data: session } = useSession();
   const { hasPermission, loading: permsLoading } = usePermissions();
@@ -268,6 +277,8 @@ export const DataProvider = ({ children, mode }: { children: React.ReactNode, mo
         isPresentationMode, setIsPresentationMode,
         dbLoading, mode,
         viewerSelectedUserId, setViewerSelectedUserId,
+        drillDown,
+        setDrillDown
       }}
     >
       {children}
