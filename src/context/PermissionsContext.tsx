@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 
-type PermissionKey = 'data:edit' | 'data:upload' | 'users:manage' | 'roles:manage' | 'db:fetch';
+type PermissionKey = 'data:edit' | 'data:upload' | 'users:manage' | 'roles:manage' | 'db:fetch' | 'view:presentation' | 'view:analytics';
 
 interface PermissionsContextType {
   permissions: string[];
@@ -43,8 +43,8 @@ export const PermissionsProvider = ({ children }: { children: React.ReactNode })
             setPermissions(JSON.parse(roleData.permissions));
           } else {
             // Defaults fallback
-            if (userRole === 'admin') setPermissions(['data:edit', 'data:upload', 'users:manage', 'roles:manage', 'db:fetch']);
-            else if (userRole === 'user') setPermissions(['data:edit', 'db:fetch']);
+            if (userRole === 'admin') setPermissions(['data:edit', 'data:upload', 'users:manage', 'roles:manage', 'db:fetch', 'view:presentation', 'view:analytics']);
+            else if (userRole === 'user') setPermissions(['data:edit', 'db:fetch', 'view:presentation', 'view:analytics']);
             else if (userRole === 'guest') setPermissions(['db:fetch']);
             else setPermissions([]);
           }

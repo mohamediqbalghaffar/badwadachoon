@@ -22,6 +22,8 @@ const PERMISSION_KEYS = [
   { key: 'users:manage', label: 'بەڕێوەبردنی بەکارهێنەران' },
   { key: 'roles:manage', label: 'دەستکاریکردنی دەسەڵاتەکان' },
   { key: 'db:fetch', label: 'بینینی داتای بنکە (Database)' },
+  { key: 'view:presentation', label: 'بینینی شێوازی پێشکەشکردن' },
+  { key: 'view:analytics', label: 'بینینی پەڕەکانی شیکاری داتا' },
 ];
 
 const ROLES = ['admin', 'user', 'viewer', 'guest'];
@@ -57,7 +59,7 @@ const PermissionsManagement = () => {
         ROLES.forEach(r => {
           if (!mapping[r]) {
             if (r === 'admin') mapping[r] = PERMISSION_KEYS.map(p => p.key);
-            else if (r === 'user') mapping[r] = ['data:edit', 'db:fetch'];
+            else if (r === 'user') mapping[r] = ['data:edit', 'db:fetch', 'view:presentation', 'view:analytics'];
             else if (r === 'guest') mapping[r] = ['db:fetch'];
             else mapping[r] = [];
           }
