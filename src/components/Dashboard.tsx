@@ -306,15 +306,59 @@ export const Dashboard = () => {
 
           {/* Content Views */}
           {!hasAnalytics && activeView !== 'data-entry' ? (
-            <div className="flex flex-col items-center justify-center py-20 animate-in fade-in zoom-in">
-              <ShieldCheck size={64} className="text-slate-300 dark:text-slate-700 mb-6" />
-              <h2 className="text-2xl font-bold text-slate-700 dark:text-slate-300 mb-2">دەسەڵاتت نییە</h2>
-              <p className="text-slate-500 dark:text-slate-400 max-w-md text-center">
-                {hasPresentation 
-                  ? "بۆ بینینی پەڕەکانی شیکاری داتا دەسەڵاتت نییە، بەڵام دەتوانیت لە ڕێگەی دوگمەی پێشکەشکردنەوە سەرەوە شێوازەکانی پێشکەشکردن ببینی."
-                  : "تکایە داوای دەسەڵات بکە لە بەڕێوەبەر بۆ بینینی ئەم پەڕەیە."}
-              </p>
-            </div>
+            hasPresentation ? (
+              <div className="flex flex-col items-center justify-center py-20 animate-in fade-in zoom-in">
+                <MonitorPlay size={64} className="text-blue-500 mb-6" />
+                <h2 className="text-3xl font-bold text-slate-800 dark:text-white mb-8 text-center">
+                  شێوازی پێشکەشکردن هەڵبژێرە
+                </h2>
+                <div className="flex flex-col sm:flex-row gap-6 w-full max-w-2xl px-4 justify-center">
+                  <button
+                    onClick={() => {
+                      setPresentationStyle('powerpoint');
+                      setIsPresentationMode(true);
+                    }}
+                    className="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-8 rounded-3xl shadow-xl hover:shadow-2xl hover:-translate-y-2 hover:border-blue-500 dark:hover:border-blue-500 transition-all duration-300 group flex flex-col items-center gap-4"
+                  >
+                    <div className="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-500 group-hover:scale-110 transition-transform text-3xl">
+                      📊
+                    </div>
+                    <div className="text-xl font-bold text-slate-800 dark:text-slate-200">
+                      شێوازی ئاسایی (Classic)
+                    </div>
+                    <p className="text-slate-500 dark:text-slate-400 text-sm text-center">
+                      شێوازی ئاسایی پێشکەشکردن بە بەکارهێنانی چارتی سادە و ڕوون.
+                    </p>
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      setPresentationStyle('prezi');
+                      setIsPresentationMode(true);
+                    }}
+                    className="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-8 rounded-3xl shadow-xl hover:shadow-2xl hover:-translate-y-2 hover:border-teal-500 dark:hover:border-teal-500 transition-all duration-300 group flex flex-col items-center gap-4"
+                  >
+                    <div className="w-16 h-16 rounded-2xl bg-teal-50 dark:bg-teal-900/30 flex items-center justify-center text-teal-500 group-hover:scale-110 transition-transform text-3xl">
+                      🌌
+                    </div>
+                    <div className="text-xl font-bold text-slate-800 dark:text-slate-200">
+                      شێوازی نوێ (Prezi)
+                    </div>
+                    <p className="text-slate-500 dark:text-slate-400 text-sm text-center">
+                      شێوازی پێشکەوتوو بە جوڵە و ئەنیمەیشنی سەرنجڕاکێش.
+                    </p>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-20 animate-in fade-in zoom-in">
+                <ShieldCheck size={64} className="text-slate-300 dark:text-slate-700 mb-6" />
+                <h2 className="text-2xl font-bold text-slate-700 dark:text-slate-300 mb-2">دەسەڵاتت نییە</h2>
+                <p className="text-slate-500 dark:text-slate-400 max-w-md text-center">
+                  تکایە داوای دەسەڵات بکە لە بەڕێوەبەر بۆ بینینی ئەم پەڕەیە.
+                </p>
+              </div>
+            )
           ) : (
             <>
               {/* 3-Segment View Switcher */}
