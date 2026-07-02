@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useData } from "../context/DataContext";
@@ -340,14 +340,14 @@ export const PreziPresentationView = () => {
     const depts = new Set<string>();
     const recCounts: Record<string, number> = {};
     const sentCounts: Record<string, number> = {};
-    baseFilteredData.forEach((d: any) => {
+    baseFilteredData.forEach(d => {
       if (Array.isArray(d.departments)) {
-        d.departments.forEach((dept: any) => { depts.add(dept); recCounts[dept] = (recCounts[dept] || 0) + 1; });
+        d.departments.forEach(dept => { depts.add(dept); recCounts[dept] = (recCounts[dept] || 0) + 1; });
       }
     });
-    baseFilteredSentData.forEach((d: any) => {
+    baseFilteredSentData.forEach(d => {
       if (Array.isArray(d.departments)) {
-        d.departments.forEach((dept: any) => { depts.add(dept); sentCounts[dept] = (sentCounts[dept] || 0) + 1; });
+        d.departments.forEach(dept => { depts.add(dept); sentCounts[dept] = (sentCounts[dept] || 0) + 1; });
       }
     });
     return Array.from(depts).map(dept => ({
@@ -362,10 +362,10 @@ export const PreziPresentationView = () => {
     const dates = new Set<string>();
     const recCounts: Record<string, number> = {};
     const sentCounts: Record<string, number> = {};
-    baseFilteredData.forEach((d: any) => {
+    baseFilteredData.forEach(d => {
       if (d.sentDate) { const date = parseISO(d.sentDate); if (isValid(date)) { const m = format(startOfMonth(date), 'yyyy-MM'); dates.add(m); recCounts[m] = (recCounts[m] || 0) + 1; } }
     });
-    baseFilteredSentData.forEach((d: any) => {
+    baseFilteredSentData.forEach(d => {
       if (d.sentDate) { const date = parseISO(d.sentDate); if (isValid(date)) { const m = format(startOfMonth(date), 'yyyy-MM'); dates.add(m); sentCounts[m] = (sentCounts[m] || 0) + 1; } }
     });
     return Array.from(dates).map(date => ({ date, received: recCounts[date] || 0, sent: sentCounts[date] || 0 })).sort((a, b) => a.date.localeCompare(b.date));
@@ -748,14 +748,6 @@ export const PreziPresentationView = () => {
     </div>
   );
 };
-
-
-
-
-
-
-
-
 
 
 

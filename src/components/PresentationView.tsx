@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useData } from "../context/DataContext";
@@ -96,7 +96,7 @@ export const PresentationView = () => {
   const deptData = useMemo(() => {
     const counts: Record<string, number> = {};
     baseFilteredData.forEach((d) => {
-      d.departments.forEach((dept: any) => {
+      d.departments.forEach((dept) => {
         counts[dept] = (counts[dept] || 0) + 1;
       });
     });
@@ -260,7 +260,7 @@ export const PresentationView = () => {
     const deptPending: Record<string, number> = {};
     baseFilteredData.forEach((item) => {
       if (!item.responseDate) {
-        item.departments.forEach((dept: any) => {
+        item.departments.forEach((dept) => {
           deptPending[dept] = (deptPending[dept] || 0) + 1;
         });
       }
@@ -319,7 +319,7 @@ export const PresentationView = () => {
   const sentDeptData = useMemo(() => {
     const counts: Record<string, number> = {};
     baseFilteredSentData.forEach((d) => {
-      d.departments.forEach((dept: any) => counts[dept] = (counts[dept] || 0) + 1);
+      d.departments.forEach((dept) => counts[dept] = (counts[dept] || 0) + 1);
     });
     return Object.entries(counts).map(([name, count]) => {
          const cleanName = name.replace('بەشی ', '').replace('سێکتەری ', '');
@@ -675,7 +675,7 @@ export const PresentationView = () => {
                     contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff' }}
                     formatter={(value: any, name: any, props: any) => [value, props.payload.name]}
                     labelFormatter={(abbr) => {
-                      const entry = chartData.find((d: any) => d.abbr === abbr);
+                      const entry = chartData.find(d => d.abbr === abbr);
                       return entry ? entry.name : abbr;
                     }}
                   />
@@ -1120,7 +1120,7 @@ export const PresentationView = () => {
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#475569" opacity={0.2} />
                   <XAxis dataKey="abbr" tick={{ fontSize: 13, fill: '#94a3b8', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 13, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                  <Tooltip itemStyle={{ color: '#fff' }} contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff' }} formatter={(value, name, props) => [value, props.payload.name]} labelFormatter={(abbr) => { const entry = sentDeptData.find((d: any) => d.abbr === abbr); return entry ? entry.name : abbr; }} />
+                  <Tooltip itemStyle={{ color: '#fff' }} contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff' }} formatter={(value, name, props) => [value, props.payload.name]} labelFormatter={(abbr) => { const entry = sentDeptData.find(d => d.abbr === abbr); return entry ? entry.name : abbr; }} />
                   <Bar dataKey="count" radius={[8, 8, 0, 0]} maxBarSize={45}>
                     <LabelList dataKey="count" position="top" offset={8} fill="#94a3b8" fontSize={12} fontWeight="bold" />
                     {sentDeptData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
@@ -1277,7 +1277,7 @@ export const PresentationView = () => {
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#475569" opacity={0.2} />
                   <XAxis dataKey="abbr" tick={{ fontSize: 13, fill: '#94a3b8', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 13, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                  <Tooltip itemStyle={{ color: '#fff' }} contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff' }} formatter={(value, name, props) => [value, props.payload.name]} labelFormatter={(abbr) => { const entry = incomingDeptData.find((d: any) => d.abbr === abbr); return entry ? entry.name : abbr; }} />
+                  <Tooltip itemStyle={{ color: '#fff' }} contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff' }} formatter={(value, name, props) => [value, props.payload.name]} labelFormatter={(abbr) => { const entry = incomingDeptData.find(d => d.abbr === abbr); return entry ? entry.name : abbr; }} />
                   <Bar dataKey="count" radius={[8, 8, 0, 0]} maxBarSize={45}>
                     <LabelList dataKey="count" position="top" offset={8} fill="#94a3b8" fontSize={12} fontWeight="bold" />
                     {incomingDeptData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
@@ -1529,12 +1529,6 @@ export const PresentationView = () => {
     </div>
   );
 };
-
-
-
-
-
-
 
 
 

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+﻿import React, { useEffect } from 'react';
 import { useData } from '../context/DataContext';
 import { X } from 'lucide-react';
 import { DataTable } from './DataTable';
@@ -28,7 +28,7 @@ export const DrillDownModal = () => {
         className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
         onClick={() => setDrillDown(null)}
       />
-      <div className="relative w-full max-w-7xl h-[90vh] bg-white dark:bg-slate-900 rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative w-[95vw] h-[95vh] bg-white dark:bg-slate-900 rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-slate-200 dark:border-slate-700 animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
           <h2 className="text-2xl font-black text-slate-800 dark:text-white flex items-center gap-3">
@@ -62,3 +62,4 @@ export const DrillDownModal = () => {
     </div>
   );
 };
+
