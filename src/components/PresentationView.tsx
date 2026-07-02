@@ -1044,9 +1044,9 @@ export const PresentationView = () => {
             </motion.div>
             
             <motion.div variants={itemVariants} className="grid grid-cols-1 gap-6 mt-4">
-              <div className="glass p-12 rounded-3xl flex flex-col items-center justify-center text-center border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] backdrop-blur-3xl relative overflow-hidden group hover:scale-[1.02] transition-transform">
-                <div className="absolute inset-0 bg-teal-500/5 group-hover:bg-teal-500/10 transition-colors" />
-                <Send className="text-teal-500 mb-6 relative z-10" size={56} />
+              <div onClick={() => setDrillDown({ title: '?????? ???????????', data: baseFilteredSentData, viewType: 'sent' })} className="glass p-12 rounded-3xl flex flex-col items-center justify-center text-center border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] backdrop-blur-3xl relative overflow-hidden group hover:scale-[1.02] transition-transform cursor-pointer">
+                  <div className="absolute inset-0 bg-teal-500/5 group-hover:bg-teal-500/10 transition-colors" />
+                  <Send className="text-teal-500 mb-6 relative z-10" size={56} />
                 <span className="text-7xl font-black bg-clip-text text-transparent bg-gradient-to-r from-teal-500 to-cyan-500 mb-4 relative z-10">{totalSent}</span>
                 <span className="text-xl text-slate-500 font-bold relative z-10">سەرجەم ڕەوانەکراوەکان</span>
               </div>
@@ -1201,9 +1201,9 @@ export const PresentationView = () => {
             </motion.div>
             
             <motion.div variants={itemVariants} className="grid grid-cols-1 gap-6 mt-4">
-              <div className="glass p-12 rounded-3xl flex flex-col items-center justify-center text-center border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] backdrop-blur-3xl relative overflow-hidden group hover:scale-[1.02] transition-transform">
-                <div className="absolute inset-0 bg-teal-500/5 group-hover:bg-teal-500/10 transition-colors" />
-                <Send className="text-teal-500 mb-6 relative z-10" size={56} />
+              <div onClick={() => setDrillDown({ title: '?????? ???????????', data: baseFilteredSentData, viewType: 'sent' })} className="glass p-12 rounded-3xl flex flex-col items-center justify-center text-center border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] backdrop-blur-3xl relative overflow-hidden group hover:scale-[1.02] transition-transform cursor-pointer">
+                  <div className="absolute inset-0 bg-teal-500/5 group-hover:bg-teal-500/10 transition-colors" />
+                  <Send className="text-teal-500 mb-6 relative z-10" size={56} />
                 <span className="text-7xl font-black bg-clip-text text-transparent bg-gradient-to-r from-teal-500 to-cyan-500 mb-4 relative z-10">{totalIncoming}</span>
                 <span className="text-xl text-slate-500 font-bold relative z-10">سەرجەم هاتووەکان</span>
               </div>
@@ -1529,4 +1529,6 @@ export const PresentationView = () => {
     </div>
   );
 };
+
+
 
