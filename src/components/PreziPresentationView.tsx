@@ -342,12 +342,12 @@ export const PreziPresentationView = () => {
     const sentCounts: Record<string, number> = {};
     baseFilteredData.forEach((d: any) => {
       if (Array.isArray(d.departments)) {
-        d.departments.forEach((dept: any) => { depts.add(dept); recCounts[dept] = (recCounts[dept] || 0) + 1; });
+        d.departments.forEach(dept: any) => { depts.add(dept); recCounts[dept] = (recCounts[dept] || 0) + 1; });
       }
     });
     baseFilteredSentData.forEach((d: any) => {
       if (Array.isArray(d.departments)) {
-        d.departments.forEach((dept: any) => { depts.add(dept); sentCounts[dept] = (sentCounts[dept] || 0) + 1; });
+        d.departments.forEach(dept: any) => { depts.add(dept); sentCounts[dept] = (sentCounts[dept] || 0) + 1; });
       }
     });
     return Array.from(depts).map(dept => ({
@@ -748,6 +748,7 @@ export const PreziPresentationView = () => {
     </div>
   );
 };
+
 
 
 

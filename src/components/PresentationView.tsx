@@ -96,7 +96,7 @@ export const PresentationView = () => {
   const deptData = useMemo(() => {
     const counts: Record<string, number> = {};
     baseFilteredData.forEach((d) => {
-      d.departments.forEach(((dept: any)) => {
+      d.departments.forEach(dept: any) => {
         counts[dept] = (counts[dept] || 0) + 1;
       });
     });
@@ -260,7 +260,7 @@ export const PresentationView = () => {
     const deptPending: Record<string, number> = {};
     baseFilteredData.forEach((item) => {
       if (!item.responseDate) {
-        item.departments.forEach(((dept: any)) => {
+        item.departments.forEach(dept: any) => {
           deptPending[dept] = (deptPending[dept] || 0) + 1;
         });
       }
@@ -319,7 +319,7 @@ export const PresentationView = () => {
   const sentDeptData = useMemo(() => {
     const counts: Record<string, number> = {};
     baseFilteredSentData.forEach((d) => {
-      d.departments.forEach(((dept: any)) => counts[dept] = (counts[dept] || 0) + 1);
+      d.departments.forEach(dept: any) => counts[dept] = (counts[dept] || 0) + 1);
     });
     return Object.entries(counts).map(([name, count]) => {
          const cleanName = name.replace('بەشی ', '').replace('سێکتەری ', '');
@@ -428,7 +428,7 @@ export const PresentationView = () => {
     compConfigA.data.forEach((d: any) => {
       if (Array.isArray(d.departments) && d.departments.length > 0) {
         d.departments.forEach((dept: string) => {
-          depts.add((dept: any));
+          depts.add(dept: any);
           receivedCounts[dept] = (receivedCounts[dept] || 0) + 1;
         });
       } else if (d.sender) {
@@ -440,7 +440,7 @@ export const PresentationView = () => {
     compConfigB.data.forEach((d: any) => {
       if (Array.isArray(d.departments) && d.departments.length > 0) {
         d.departments.forEach((dept: string) => {
-          depts.add((dept: any));
+          depts.add(dept: any);
           sentCounts[dept] = (sentCounts[dept] || 0) + 1;
         });
       } else if (d.sender) {
@@ -667,7 +667,7 @@ export const PresentationView = () => {
             </motion.div>
             <motion.div variants={itemVariants} className="w-full h-[380px] glass rounded-3xl p-6 border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] backdrop-blur-3xl" dir="ltr">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData} margin={{ top: 25, right: 10, left: -20, bottom: 0 }} onClick={(e: any) => { if (e?.activePayload?.length > 0) { const dept = e.activePayload[0].payload.name; setDrillDown({ title: "نامەکانی " + dept, data: baseFilteredData.filter((d: any) => d.departments?.includes((dept: any)) || d.sender === dept), viewType: "received" }); } }} style={{ cursor: "pointer" }}>
+                <BarChart data={chartData} margin={{ top: 25, right: 10, left: -20, bottom: 0 }} onClick={(e: any) => { if (e?.activePayload?.length > 0) { const dept = e.activePayload[0].payload.name; setDrillDown({ title: "نامەکانی " + dept, data: baseFilteredData.filter((d: any) => d.departments?.includes(dept: any) || d.sender === dept), viewType: "received" }); } }} style={{ cursor: "pointer" }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#475569" opacity={0.2} />
                   <XAxis dataKey="abbr" tick={{ fontSize: 13, fill: '#94a3b8', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 13, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
@@ -1116,7 +1116,7 @@ export const PresentationView = () => {
             </motion.div>
             <motion.div variants={itemVariants} className="w-full h-[380px] glass rounded-3xl p-6 border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] backdrop-blur-3xl" dir="ltr">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={sentDeptData} margin={{ top: 25, right: 10, left: -20, bottom: 0 }} onClick={(e: any) => { if (e?.activePayload?.length > 0) { const dept = e.activePayload[0].payload.name; setDrillDown({ title: "نێردراوەکانی " + dept, data: baseFilteredSentData.filter((d: any) => d.departments?.includes((dept: any)) || d.sender === dept), viewType: "sent" }); } }} style={{ cursor: "pointer" }}>
+                <BarChart data={sentDeptData} margin={{ top: 25, right: 10, left: -20, bottom: 0 }} onClick={(e: any) => { if (e?.activePayload?.length > 0) { const dept = e.activePayload[0].payload.name; setDrillDown({ title: "نێردراوەکانی " + dept, data: baseFilteredSentData.filter((d: any) => d.departments?.includes(dept: any) || d.sender === dept), viewType: "sent" }); } }} style={{ cursor: "pointer" }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#475569" opacity={0.2} />
                   <XAxis dataKey="abbr" tick={{ fontSize: 13, fill: '#94a3b8', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 13, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
@@ -1273,7 +1273,7 @@ export const PresentationView = () => {
             </motion.div>
             <motion.div variants={itemVariants} className="w-full h-[380px] glass rounded-3xl p-6 border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] backdrop-blur-3xl" dir="ltr">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={incomingDeptData} margin={{ top: 25, right: 10, left: -20, bottom: 0 }} onClick={(e: any) => { if (e?.activePayload?.length > 0) { const dept = e.activePayload[0].payload.name; setDrillDown({ title: "هاتووەکانی " + dept, data: baseFilteredIncomingData.filter((d: any) => d.departments?.includes((dept: any)) || d.sender === dept), viewType: "incoming" }); } }} style={{ cursor: "pointer" }}>
+                <BarChart data={incomingDeptData} margin={{ top: 25, right: 10, left: -20, bottom: 0 }} onClick={(e: any) => { if (e?.activePayload?.length > 0) { const dept = e.activePayload[0].payload.name; setDrillDown({ title: "هاتووەکانی " + dept, data: baseFilteredIncomingData.filter((d: any) => d.departments?.includes(dept: any) || d.sender === dept), viewType: "incoming" }); } }} style={{ cursor: "pointer" }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#475569" opacity={0.2} />
                   <XAxis dataKey="abbr" tick={{ fontSize: 13, fill: '#94a3b8', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 13, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
@@ -1529,6 +1529,7 @@ export const PresentationView = () => {
     </div>
   );
 };
+
 
 
 
