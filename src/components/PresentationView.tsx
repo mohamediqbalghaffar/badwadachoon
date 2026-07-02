@@ -567,7 +567,7 @@ export const PresentationView = () => {
         
         {/* SLIDE 1: KPI Dashboard Summary */}
         {activeView === 'received' && activeSlide === 0 && (
-          <motion.div key="rec-slide-0" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col items-center">
+          <motion.div key="rec-slide-0" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-[1400px] flex flex-col items-center">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-blue-500/10 -z-10" />
             <motion.h2 variants={itemVariants} className="text-3xl sm:text-4xl font-bold text-center mb-10 text-slate-900 dark:text-white">
               کورتەی ئەدای سیستەم و ئامارە بنەڕەتییەکان
@@ -612,7 +612,7 @@ export const PresentationView = () => {
 
         {/* SLIDE 2: Timeline Trend */}
         {activeView === 'received' && activeSlide === 1 && (
-          <motion.div key="rec-slide-1" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col">
+          <motion.div key="rec-slide-1" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-[1400px] flex flex-col">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-emerald-500/10 -z-10" />
             <motion.div variants={itemVariants} className="flex justify-between items-center mb-6">
               <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
@@ -654,7 +654,7 @@ export const PresentationView = () => {
 
         {/* SLIDE 3: Department Volumes */}
         {activeView === 'received' && activeSlide === 2 && (
-          <motion.div key="rec-slide-2" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col">
+          <motion.div key="rec-slide-2" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-[1400px] flex flex-col">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-blue-500/10 -z-10" />
             <motion.div variants={itemVariants} className="flex justify-between items-center mb-6">
               <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
@@ -711,7 +711,7 @@ export const PresentationView = () => {
 
         {/* SLIDE 4: Letter Types */}
         {activeView === 'received' && activeSlide === 3 && (
-          <motion.div key="rec-slide-3" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col">
+          <motion.div key="rec-slide-3" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-[1400px] flex flex-col">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-purple-500/10 -z-10" />
             <motion.div variants={itemVariants} className="flex justify-between items-center mb-6">
               <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
@@ -770,7 +770,7 @@ export const PresentationView = () => {
 
         {/* SLIDE 5: SLA Status */}
         {activeView === 'received' && activeSlide === 4 && (
-          <motion.div key="rec-slide-4" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col">
+          <motion.div key="rec-slide-4" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-[1400px] flex flex-col">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-amber-500/10 -z-10" />
             <motion.div variants={itemVariants} className="flex justify-between items-start mb-6">
               <div>
@@ -887,7 +887,7 @@ export const PresentationView = () => {
 
         {/* SLIDE 6: Department Insights */}
         {activeView === 'received' && activeSlide === 5 && (
-          <motion.div key="rec-slide-5" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col">
+          <motion.div key="rec-slide-5" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-[1400px] flex flex-col">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-orange-500/10 -z-10" />
             <motion.h2 variants={itemVariants} className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-8 flex items-center gap-3">
               <Activity className="text-orange-500" size={32} />
@@ -975,7 +975,7 @@ export const PresentationView = () => {
 
         {/* SLIDE 7: Urgent Actions */}
         {activeView === 'received' && activeSlide === 6 && (
-          <motion.div key="rec-slide-6" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col">
+          <motion.div key="rec-slide-6" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-[1400px] flex flex-col">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-red-500/10 -z-10" />
             <motion.div variants={itemVariants} className="flex justify-between items-center mb-6">
               <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
@@ -1031,7 +1031,7 @@ export const PresentationView = () => {
         {/* ===================== SENT SLIDES ===================== */}
         {/* SENT SLIDE 0: Summary */}
         {activeView === 'sent' && activeSlide === 0 && (
-          <motion.div key="sent-slide-0" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col">
+          <motion.div key="sent-slide-0" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-[1400px] flex flex-col">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-teal-500/10 -z-10" />
             <motion.div variants={itemVariants} className="flex justify-between items-start mb-6">
               <div>
@@ -1065,7 +1065,7 @@ export const PresentationView = () => {
 
         {/* SENT SLIDE 1: Timeline Trend */}
         {activeView === 'sent' && activeSlide === 1 && (
-          <motion.div key="sent-slide-1" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col">
+          <motion.div key="sent-slide-1" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-[1400px] flex flex-col">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-teal-500/10 -z-10" />
             <motion.div variants={itemVariants} className="flex justify-between items-center mb-6">
               <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
@@ -1106,7 +1106,7 @@ export const PresentationView = () => {
 
         {/* SENT SLIDE 2: Depts */}
         {activeView === 'sent' && activeSlide === 2 && (
-          <motion.div key="sent-slide-2" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col">
+          <motion.div key="sent-slide-2" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-[1400px] flex flex-col">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-teal-500/10 -z-10" />
             <motion.div variants={itemVariants} className="flex justify-between items-center mb-6">
               <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
@@ -1142,7 +1142,7 @@ export const PresentationView = () => {
 
         {/* SENT SLIDE 3: Types */}
         {activeView === 'sent' && activeSlide === 3 && (
-          <motion.div key="sent-slide-3" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col">
+          <motion.div key="sent-slide-3" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-[1400px] flex flex-col">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-purple-500/10 -z-10" />
             <motion.div variants={itemVariants} className="flex justify-between items-center mb-6">
               <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
@@ -1188,7 +1188,7 @@ export const PresentationView = () => {
         {/* ===================== INCOMING SLIDES ===================== */}
         {/* INCOMING SLIDE 0: Summary */}
         {activeView === 'incoming' && activeSlide === 0 && (
-          <motion.div key="incoming-slide-0" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col">
+          <motion.div key="incoming-slide-0" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-[1400px] flex flex-col">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-teal-500/10 -z-10" />
             <motion.div variants={itemVariants} className="flex justify-between items-start mb-6">
               <div>
@@ -1222,7 +1222,7 @@ export const PresentationView = () => {
 
         {/* INCOMING SLIDE 1: Timeline Trend */}
         {activeView === 'incoming' && activeSlide === 1 && (
-          <motion.div key="incoming-slide-1" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col">
+          <motion.div key="incoming-slide-1" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-[1400px] flex flex-col">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-teal-500/10 -z-10" />
             <motion.div variants={itemVariants} className="flex justify-between items-center mb-6">
               <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
@@ -1263,7 +1263,7 @@ export const PresentationView = () => {
 
         {/* INCOMING SLIDE 2: Depts */}
         {activeView === 'incoming' && activeSlide === 2 && (
-          <motion.div key="incoming-slide-2" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col">
+          <motion.div key="incoming-slide-2" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-[1400px] flex flex-col">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-teal-500/10 -z-10" />
             <motion.div variants={itemVariants} className="flex justify-between items-center mb-6">
               <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
@@ -1299,7 +1299,7 @@ export const PresentationView = () => {
 
         {/* INCOMING SLIDE 3: Types */}
         {activeView === 'incoming' && activeSlide === 3 && (
-          <motion.div key="incoming-slide-3" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col">
+          <motion.div key="incoming-slide-3" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-[1400px] flex flex-col">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-purple-500/10 -z-10" />
             <motion.div variants={itemVariants} className="flex justify-between items-center mb-6">
               <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
@@ -1372,7 +1372,7 @@ export const PresentationView = () => {
 
         {/* COMP SLIDE 0: Summary */}
         {activeView === 'comparison' && activeSlide === 0 && (
-          <motion.div key="comp-slide-0" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col pt-12">
+          <motion.div key="comp-slide-0" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-[1400px] flex flex-col pt-12">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-indigo-500/10 -z-10" />
             <motion.div variants={itemVariants} className="flex justify-between items-start mb-6">
               <div>
@@ -1414,7 +1414,7 @@ export const PresentationView = () => {
 
         {/* COMP SLIDE 1: Comparison Chart */}
         {activeView === 'comparison' && activeSlide === 1 && (
-          <motion.div key="comp-slide-1" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col pt-12">
+          <motion.div key="comp-slide-1" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-[1400px] flex flex-col pt-12">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-indigo-500/10 -z-10" />
             <motion.h2 variants={itemVariants} className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-8 flex items-center gap-3">
               <GitCompareArrows className="text-indigo-500" size={32} />
@@ -1463,7 +1463,7 @@ export const PresentationView = () => {
 
         {/* COMP SLIDE 2: Timeline */}
         {activeView === 'comparison' && activeSlide === 2 && (
-          <motion.div key="comp-slide-2" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-5xl flex flex-col pt-12">
+          <motion.div key="comp-slide-2" variants={containerVariants} initial="hidden" animate="visible" exit="exit" className="w-full max-w-[1400px] flex flex-col pt-12">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[100px] bg-purple-500/10 -z-10" />
             <motion.h2 variants={itemVariants} className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-8 flex items-center gap-3">
               <TrendingUp className="text-purple-500" size={32} />

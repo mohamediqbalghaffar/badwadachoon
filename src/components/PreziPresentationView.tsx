@@ -93,7 +93,7 @@ const NodeWrapper = ({ active, node, onClick, children }: any) => {
   const Icon = node.icon;
   return (
     <div 
-      className="absolute flex flex-col items-center justify-center w-[1000px] z-10"
+      className="absolute flex flex-col items-center justify-center w-[1400px] z-10"
       style={{ transform: `translate(${node.x}px, ${node.y}px)` }}
     >
       <div 
