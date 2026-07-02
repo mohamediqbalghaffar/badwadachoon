@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useData } from "../context/DataContext";
@@ -420,7 +420,7 @@ export const PreziPresentationView = () => {
           {/* KPI INCOMING */}
           {node.type === 'kpi-incoming' && (
             <motion.div className="flex justify-center w-full" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.5, delay: 0.2 }}>
-              <div onClick={() => setDrillDown({ title: '?????? ?????????', data: baseFilteredIncomingData, viewType: 'incoming' })} className="bg-blue-50 dark:bg-blue-900/20 p-8 rounded-[2rem] flex flex-col items-center text-center border border-blue-100 dark:border-blue-800/50 w-2/3 cursor-pointer hover:scale-105 transition-transform">
+              <div onClick={() => setDrillDown({ title: 'سەرجەم هاتووەکان', data: baseFilteredIncomingData, viewType: 'incoming' })} className="bg-blue-50 dark:bg-blue-900/20 p-8 rounded-[2rem] flex flex-col items-center text-center border border-blue-100 dark:border-blue-800/50 w-2/3 cursor-pointer hover:scale-105 transition-transform">
                 <div className="w-24 h-24 rounded-full bg-blue-100 dark:bg-blue-800/50 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-8">
                   <ArrowDownToLine size={48} />
                 </div>
@@ -433,7 +433,7 @@ export const PreziPresentationView = () => {
           {/* KPI SENT */}
           {node.type === 'kpi-sent' && (
             <motion.div className="flex justify-center w-full" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.5, delay: 0.2 }}>
-              <div onClick={() => setDrillDown({ title: '?????? ???????????', data: baseFilteredSentData, viewType: 'sent' })} className="bg-teal-50 dark:bg-teal-900/20 p-8 rounded-[2rem] flex flex-col items-center text-center border border-teal-100 dark:border-teal-800/50 w-2/3 cursor-pointer hover:scale-105 transition-transform">
+              <div onClick={() => setDrillDown({ title: 'سەرجەم نێردراوەکان', data: baseFilteredSentData, viewType: 'sent' })} className="bg-teal-50 dark:bg-teal-900/20 p-8 rounded-[2rem] flex flex-col items-center text-center border border-teal-100 dark:border-teal-800/50 w-2/3 cursor-pointer hover:scale-105 transition-transform">
                 <div className="w-24 h-24 rounded-full bg-teal-100 dark:bg-teal-800/50 flex items-center justify-center text-teal-600 dark:text-teal-400 mb-8">
                   <Send size={48} />
                 </div>
@@ -748,6 +748,7 @@ export const PreziPresentationView = () => {
     </div>
   );
 };
+
 
 
 
