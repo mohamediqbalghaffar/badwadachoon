@@ -3,8 +3,7 @@ import { NextResponse } from 'next/server';
 const ODOO_URL = process.env.ODOO_URL || "https://erp.halabjagroup.com";
 const ODOO_DB = process.env.ODOO_DB || "HalabjaGroup";
 const ODOO_USER = process.env.ODOO_USER || "mohammed.iqbal@halabjagroup.com";
-// Using the API Key in place of the password
-const ODOO_PASS = process.env.ODOO_PASS || "8118d3d4560146aed84264cf83f083bcce3583f3";
+const ODOO_PASS = process.env.ODOO_PASS || "fe05af2c58c138a1471f8cf7a48ee4347bc13162";
 
 export async function GET() {
   try {
