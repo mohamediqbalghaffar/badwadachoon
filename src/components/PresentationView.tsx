@@ -96,7 +96,7 @@ export const PresentationView = () => {
   const deptData = useMemo(() => {
     const counts: Record<string, number> = {};
     baseFilteredData.forEach((d) => {
-      d.departments.forEach(dept: any) => {
+      d.departments.forEach((dept: any) => {
         counts[dept] = (counts[dept] || 0) + 1;
       });
     });
@@ -260,7 +260,7 @@ export const PresentationView = () => {
     const deptPending: Record<string, number> = {};
     baseFilteredData.forEach((item) => {
       if (!item.responseDate) {
-        item.departments.forEach(dept: any) => {
+        item.departments.forEach((dept: any) => {
           deptPending[dept] = (deptPending[dept] || 0) + 1;
         });
       }
@@ -1529,6 +1529,7 @@ export const PresentationView = () => {
     </div>
   );
 };
+
 
 
 
