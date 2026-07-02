@@ -15,7 +15,7 @@ import { LiquidGlassCard } from "@/components/ui/liquid-glass";
 import { SentDashboard } from "./SentDashboard";
 import { ComparisonView } from "./ComparisonView";
 import { IncomingView } from "./IncomingView";
-import { MonitorPlay, X, Inbox, Send, GitCompareArrows, ArrowDownToLine, LogOut, User, ShieldCheck, Settings, Database, UploadCloud, Edit3 } from "lucide-react";
+import { MonitorPlay, X, Inbox, Send, GitCompareArrows, ArrowDownToLine, LogOut, User, ShieldCheck, Settings, Database, UploadCloud, Edit3, Filter } from "lucide-react";
 import { parseFile } from "../utils/parser";
 import { AdminSettingsModal } from "./AdminSettingsModal";
 import { LiveActivityTracker } from "./LiveActivityTracker";
@@ -40,6 +40,18 @@ export const Dashboard = () => {
   const [isUploading, setIsUploading] = React.useState(false);
   const [showPresentationMenu, setShowPresentationMenu] = React.useState(false);
   const [presentationStyle, setPresentationStyle] = React.useState<'powerpoint' | 'prezi'>('powerpoint');
+  const [scrolledPastTop, setScrolledPastTop] = React.useState(false);
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    const handleScroll = () => {
+      setScrolledPastTop(window.scrollY > 300);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const showFloatingFilter = (isPresentationMode || scrolledPastTop) && (activeView === 'received' || activeView === 'sent' || activeView === 'incoming');
 
   const handleDirectUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -447,6 +459,37 @@ export const Dashboard = () => {
 
       {/* Live Activity Tracker */}
       <LiveActivityTracker />
+
+      {/* Floating Filter Button */}
+      {showFloatingFilter && (
+        <div className="fixed right-4 top-1/2 -translate-y-1/2 z-[60] flex items-center">
+          <button 
+            onClick={() => setIsFilterPanelOpen(true)}
+            className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full shadow-xl hover:shadow-2xl transition-all hover:scale-110 flex items-center justify-center border border-white/20"
+            title="پاڵاوتنی داتا"
+          >
+            <Filter size={24} />
+          </button>
+        </div>
+      )}
+
+      {/* Floating Filter Panel */}
+      {isFilterPanelOpen && showFloatingFilter && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center sm:items-center sm:justify-end sm:pr-24 bg-slate-900/40 backdrop-blur-sm animate-in fade-in" onClick={() => setIsFilterPanelOpen(false)}>
+          <div 
+            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-2xl w-[95%] sm:w-[400px] max-h-[90vh] overflow-y-auto animate-in slide-in-from-right-8"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-6 pb-4 border-b border-slate-100 dark:border-slate-800">
+              <h3 className="font-bold text-xl text-slate-800 dark:text-slate-200">پاڵاوتن (فلتەر)</h3>
+              <button onClick={() => setIsFilterPanelOpen(false)} className="p-2 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-full transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            <OmniFilter isPopup={true} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

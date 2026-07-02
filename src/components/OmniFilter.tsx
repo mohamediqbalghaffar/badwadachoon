@@ -98,7 +98,7 @@ const MultiSelect = ({ label, options, selected, onChange, placeholder }: MultiS
   );
 };
 
-export const OmniFilter = () => {
+export const OmniFilter = ({ isPopup = false }: { isPopup?: boolean }) => {
   const { data, sentData, incomingData, filters, setFilters, clearFilters, activeView } = useData();
 
   const formatDateDisplay = (dateStr: string | null) => {
@@ -146,11 +146,11 @@ export const OmniFilter = () => {
     (showSlaFilter && filters.slaStatus.length > 0 ? 1 : 0);
 
   return (
-    <div className="sticky top-4 z-40 mb-8 glass glass-card glass-interactive p-4 transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:hover:shadow-[0_8px_30px_rgba(255,255,255,0.05)]">
-      <div className="flex flex-col md:flex-row gap-4 items-center">
+    <div className={isPopup ? "w-full" : "sticky top-4 z-40 mb-8 glass glass-card glass-interactive p-4 transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:hover:shadow-[0_8px_30px_rgba(255,255,255,0.05)]"}>
+      <div className={`flex flex-col ${isPopup ? 'items-stretch' : 'md:flex-row items-center'} gap-4`}>
         
         {/* Header / Clear */}
-        <div className="flex items-center gap-2 md:pr-4 md:border-l border-slate-200 dark:border-slate-800">
+        <div className={`flex items-center gap-2 ${isPopup ? 'pb-4 border-b' : 'md:pr-4 md:border-l'} border-slate-200 dark:border-slate-800`}>
           <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-full text-blue-600 dark:text-blue-400">
             <Filter size={20} />
           </div>
@@ -166,9 +166,9 @@ export const OmniFilter = () => {
           )}
         </div>
 
-        <div className={`flex-1 grid grid-cols-1 sm:grid-cols-2 ${showSlaFilter || showSenderFilter ? 'md:grid-cols-5' : 'md:grid-cols-4'} gap-4 w-full`}>
+        <div className={`flex-1 grid ${isPopup ? 'grid-cols-1' : `grid-cols-1 sm:grid-cols-2 ${showSlaFilter || showSenderFilter ? 'md:grid-cols-5' : 'md:grid-cols-4'}`} gap-4 w-full`}>
           {/* Date Range */}
-          <div className="flex flex-col space-y-1 col-span-1 sm:col-span-2 md:col-span-2">
+          <div className={`flex flex-col space-y-1 ${isPopup ? 'col-span-1' : 'col-span-1 sm:col-span-2 md:col-span-2'}`}>
             <label className="text-xs text-slate-500 dark:text-slate-400">مەودای بەروار</label>
             <div className="flex gap-2 items-center bg-white/50 dark:bg-black/20 rounded-xl px-3 py-[10px] border border-slate-200/50 dark:border-slate-700/50 w-full relative">
               <div className="flex-1 flex items-center gap-2 relative">
