@@ -623,7 +623,7 @@ export const PresentationView = () => {
             </motion.div>
             <motion.div variants={itemVariants} className="w-full h-[380px] glass rounded-3xl p-6 border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] backdrop-blur-3xl" dir="ltr">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={timelineData} margin={{ top: 20, right: 20, left: -20, bottom: 0 }} onClick={(e: any) => { if (e?.activePayload?.length > 0) { const m = e.activePayload[0].payload.date; setDrillDown({ title: "نامەکانی مانگی " + m, data: baseFilteredData.filter(d => d.sentDate && d.sentDate.startsWith(m)), viewType: "received" }); } }} style={{ cursor: "pointer" }}>
+                <AreaChart data={timelineData} margin={{ top: 20, right: 20, left: -20, bottom: 0 }} onClick={(e: any) => { if (e?.activePayload?.length > 0) { const m = e.activePayload[0].payload.date; setDrillDown({ title: "نامەکانی مانگی " + m, data: baseFilteredData.filter((d: any) => d.sentDate && d.sentDate.startsWith(m)), viewType: "received" }); } }} style={{ cursor: "pointer" }}>
                   <defs>
                     <linearGradient id="colorTimelinePres" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
@@ -667,7 +667,7 @@ export const PresentationView = () => {
             </motion.div>
             <motion.div variants={itemVariants} className="w-full h-[380px] glass rounded-3xl p-6 border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] backdrop-blur-3xl" dir="ltr">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData} margin={{ top: 25, right: 10, left: -20, bottom: 0 }} onClick={(e: any) => { if (e?.activePayload?.length > 0) { const dept = e.activePayload[0].payload.name; setDrillDown({ title: "نامەکانی " + dept, data: baseFilteredData.filter(d => d.departments?.includes(dept) || d.sender === dept), viewType: "received" }); } }} style={{ cursor: "pointer" }}>
+                <BarChart data={chartData} margin={{ top: 25, right: 10, left: -20, bottom: 0 }} onClick={(e: any) => { if (e?.activePayload?.length > 0) { const dept = e.activePayload[0].payload.name; setDrillDown({ title: "نامەکانی " + dept, data: baseFilteredData.filter((d: any) => d.departments?.includes(dept) || d.sender === dept), viewType: "received" }); } }} style={{ cursor: "pointer" }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#475569" opacity={0.2} />
                   <XAxis dataKey="abbr" tick={{ fontSize: 13, fill: '#94a3b8', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 13, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
@@ -675,7 +675,7 @@ export const PresentationView = () => {
                     contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff' }}
                     formatter={(value: any, name: any, props: any) => [value, props.payload.name]}
                     labelFormatter={(abbr) => {
-                      const entry = chartData.find(d => d.abbr === abbr);
+                      const entry = chartData.find((d: any) => d.abbr === abbr);
                       return entry ? entry.name : abbr;
                     }}
                   />
@@ -1075,7 +1075,7 @@ export const PresentationView = () => {
             </motion.div>
             <motion.div variants={itemVariants} className="w-full h-[380px] glass rounded-3xl p-6 border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] backdrop-blur-3xl" dir="ltr">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={sentTimelineData} margin={{ top: 20, right: 20, left: -20, bottom: 0 }} onClick={(e: any) => { if (e?.activePayload?.length > 0) { const m = e.activePayload[0].payload.date; setDrillDown({ title: "نێردراوەکانی مانگی " + m, data: baseFilteredSentData.filter(d => d.sentDate && d.sentDate.startsWith(m)), viewType: "sent" }); } }} style={{ cursor: "pointer" }}>
+                <AreaChart data={sentTimelineData} margin={{ top: 20, right: 20, left: -20, bottom: 0 }} onClick={(e: any) => { if (e?.activePayload?.length > 0) { const m = e.activePayload[0].payload.date; setDrillDown({ title: "نێردراوەکانی مانگی " + m, data: baseFilteredSentData.filter((d: any) => d.sentDate && d.sentDate.startsWith(m)), viewType: "sent" }); } }} style={{ cursor: "pointer" }}>
                   <defs>
                     <linearGradient id="colorTimelineSent" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.4} />
@@ -1116,11 +1116,11 @@ export const PresentationView = () => {
             </motion.div>
             <motion.div variants={itemVariants} className="w-full h-[380px] glass rounded-3xl p-6 border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] backdrop-blur-3xl" dir="ltr">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={sentDeptData} margin={{ top: 25, right: 10, left: -20, bottom: 0 }} onClick={(e: any) => { if (e?.activePayload?.length > 0) { const dept = e.activePayload[0].payload.name; setDrillDown({ title: "نێردراوەکانی " + dept, data: baseFilteredSentData.filter(d => d.departments?.includes(dept) || d.sender === dept), viewType: "sent" }); } }} style={{ cursor: "pointer" }}>
+                <BarChart data={sentDeptData} margin={{ top: 25, right: 10, left: -20, bottom: 0 }} onClick={(e: any) => { if (e?.activePayload?.length > 0) { const dept = e.activePayload[0].payload.name; setDrillDown({ title: "نێردراوەکانی " + dept, data: baseFilteredSentData.filter((d: any) => d.departments?.includes(dept) || d.sender === dept), viewType: "sent" }); } }} style={{ cursor: "pointer" }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#475569" opacity={0.2} />
                   <XAxis dataKey="abbr" tick={{ fontSize: 13, fill: '#94a3b8', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 13, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                  <Tooltip itemStyle={{ color: '#fff' }} contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff' }} formatter={(value, name, props) => [value, props.payload.name]} labelFormatter={(abbr) => { const entry = sentDeptData.find(d => d.abbr === abbr); return entry ? entry.name : abbr; }} />
+                  <Tooltip itemStyle={{ color: '#fff' }} contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff' }} formatter={(value, name, props) => [value, props.payload.name]} labelFormatter={(abbr) => { const entry = sentDeptData.find((d: any) => d.abbr === abbr); return entry ? entry.name : abbr; }} />
                   <Bar dataKey="count" radius={[8, 8, 0, 0]} maxBarSize={45}>
                     <LabelList dataKey="count" position="top" offset={8} fill="#94a3b8" fontSize={12} fontWeight="bold" />
                     {sentDeptData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
@@ -1232,7 +1232,7 @@ export const PresentationView = () => {
             </motion.div>
             <motion.div variants={itemVariants} className="w-full h-[380px] glass rounded-3xl p-6 border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] backdrop-blur-3xl" dir="ltr">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={incomingTimelineData} margin={{ top: 20, right: 20, left: -20, bottom: 0 }} onClick={(e: any) => { if (e?.activePayload?.length > 0) { const m = e.activePayload[0].payload.date; setDrillDown({ title: "هاتووەکانی مانگی " + m, data: baseFilteredIncomingData.filter(d => d.sentDate && d.sentDate.startsWith(m)), viewType: "incoming" }); } }} style={{ cursor: "pointer" }}>
+                <AreaChart data={incomingTimelineData} margin={{ top: 20, right: 20, left: -20, bottom: 0 }} onClick={(e: any) => { if (e?.activePayload?.length > 0) { const m = e.activePayload[0].payload.date; setDrillDown({ title: "هاتووەکانی مانگی " + m, data: baseFilteredIncomingData.filter((d: any) => d.sentDate && d.sentDate.startsWith(m)), viewType: "incoming" }); } }} style={{ cursor: "pointer" }}>
                   <defs>
                     <linearGradient id="colorTimelineSent" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.4} />
@@ -1273,11 +1273,11 @@ export const PresentationView = () => {
             </motion.div>
             <motion.div variants={itemVariants} className="w-full h-[380px] glass rounded-3xl p-6 border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] backdrop-blur-3xl" dir="ltr">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={incomingDeptData} margin={{ top: 25, right: 10, left: -20, bottom: 0 }} onClick={(e: any) => { if (e?.activePayload?.length > 0) { const dept = e.activePayload[0].payload.name; setDrillDown({ title: "هاتووەکانی " + dept, data: baseFilteredIncomingData.filter(d => d.departments?.includes(dept) || d.sender === dept), viewType: "incoming" }); } }} style={{ cursor: "pointer" }}>
+                <BarChart data={incomingDeptData} margin={{ top: 25, right: 10, left: -20, bottom: 0 }} onClick={(e: any) => { if (e?.activePayload?.length > 0) { const dept = e.activePayload[0].payload.name; setDrillDown({ title: "هاتووەکانی " + dept, data: baseFilteredIncomingData.filter((d: any) => d.departments?.includes(dept) || d.sender === dept), viewType: "incoming" }); } }} style={{ cursor: "pointer" }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#475569" opacity={0.2} />
                   <XAxis dataKey="abbr" tick={{ fontSize: 13, fill: '#94a3b8', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 13, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                  <Tooltip itemStyle={{ color: '#fff' }} contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff' }} formatter={(value, name, props) => [value, props.payload.name]} labelFormatter={(abbr) => { const entry = incomingDeptData.find(d => d.abbr === abbr); return entry ? entry.name : abbr; }} />
+                  <Tooltip itemStyle={{ color: '#fff' }} contentStyle={{ borderRadius: '1rem', border: 'none', background: 'rgba(15, 23, 42, 0.9)', color: '#fff' }} formatter={(value, name, props) => [value, props.payload.name]} labelFormatter={(abbr) => { const entry = incomingDeptData.find((d: any) => d.abbr === abbr); return entry ? entry.name : abbr; }} />
                   <Bar dataKey="count" radius={[8, 8, 0, 0]} maxBarSize={45}>
                     <LabelList dataKey="count" position="top" offset={8} fill="#94a3b8" fontSize={12} fontWeight="bold" />
                     {incomingDeptData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
@@ -1529,6 +1529,8 @@ export const PresentationView = () => {
     </div>
   );
 };
+
+
 
 
 

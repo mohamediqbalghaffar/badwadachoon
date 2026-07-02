@@ -340,12 +340,12 @@ export const PreziPresentationView = () => {
     const depts = new Set<string>();
     const recCounts: Record<string, number> = {};
     const sentCounts: Record<string, number> = {};
-    baseFilteredData.forEach(d => {
+    baseFilteredData.forEach((d: any) => {
       if (Array.isArray(d.departments)) {
         d.departments.forEach(dept => { depts.add(dept); recCounts[dept] = (recCounts[dept] || 0) + 1; });
       }
     });
-    baseFilteredSentData.forEach(d => {
+    baseFilteredSentData.forEach((d: any) => {
       if (Array.isArray(d.departments)) {
         d.departments.forEach(dept => { depts.add(dept); sentCounts[dept] = (sentCounts[dept] || 0) + 1; });
       }
@@ -362,10 +362,10 @@ export const PreziPresentationView = () => {
     const dates = new Set<string>();
     const recCounts: Record<string, number> = {};
     const sentCounts: Record<string, number> = {};
-    baseFilteredData.forEach(d => {
+    baseFilteredData.forEach((d: any) => {
       if (d.sentDate) { const date = parseISO(d.sentDate); if (isValid(date)) { const m = format(startOfMonth(date), 'yyyy-MM'); dates.add(m); recCounts[m] = (recCounts[m] || 0) + 1; } }
     });
-    baseFilteredSentData.forEach(d => {
+    baseFilteredSentData.forEach((d: any) => {
       if (d.sentDate) { const date = parseISO(d.sentDate); if (isValid(date)) { const m = format(startOfMonth(date), 'yyyy-MM'); dates.add(m); sentCounts[m] = (sentCounts[m] || 0) + 1; } }
     });
     return Array.from(dates).map(date => ({ date, received: recCounts[date] || 0, sent: sentCounts[date] || 0 })).sort((a, b) => a.date.localeCompare(b.date));
@@ -456,7 +456,7 @@ export const PreziPresentationView = () => {
           {node.type === 'bar' && (
             <motion.div className="w-full h-[380px]" dir="ltr" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6, delay: 0.3 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={barData} margin={{ top: 25, right: 10, left: -20, bottom: 0 }} onClick={(e: any) => { if (e?.activePayload?.length > 0) { const dept = e.activePayload[0].payload.name; setDrillDown({ title: "داتاکانی " + dept, data: (activeView === "sent" ? baseFilteredSentData : activeView === "incoming" ? baseFilteredIncomingData : baseFilteredData).filter(d => d.departments?.includes(dept) || d.sender === dept), viewType: activeView }); } }} style={{ cursor: "pointer" }}>
+                <BarChart data={barData} margin={{ top: 25, right: 10, left: -20, bottom: 0 }} onClick={(e: any) => { if (e?.activePayload?.length > 0) { const dept = e.activePayload[0].payload.name; setDrillDown({ title: "داتاکانی " + dept, data: (activeView === "sent" ? baseFilteredSentData : activeView === "incoming" ? baseFilteredIncomingData : baseFilteredData).filter((d: any) => d.departments?.includes(dept) || d.sender === dept), viewType: activeView }); } }} style={{ cursor: "pointer" }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#94a3b8" opacity={0.2} />
                   <XAxis dataKey="abbr" tick={{ fontSize: 18, fill: '#cbd5e1', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 18, fill: '#cbd5e1' }} axisLine={false} tickLine={false} />
@@ -518,7 +518,7 @@ export const PreziPresentationView = () => {
           {node.type === 'timeline' && (
             <motion.div className="w-full h-[380px]" dir="ltr" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6, delay: 0.3 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={timelineData} margin={{ top: 30, right: 20, left: -20, bottom: 0 }} onClick={(e: any) => { if (e?.activePayload?.length > 0) { const m = e.activePayload[0].payload.date; setDrillDown({ title: "مانگی " + m, data: (activeView === "sent" ? baseFilteredSentData : activeView === "incoming" ? baseFilteredIncomingData : baseFilteredData).filter(d => d.sentDate && d.sentDate.startsWith(m)), viewType: activeView }); } }} style={{ cursor: "pointer" }}>
+                <AreaChart data={timelineData} margin={{ top: 30, right: 20, left: -20, bottom: 0 }} onClick={(e: any) => { if (e?.activePayload?.length > 0) { const m = e.activePayload[0].payload.date; setDrillDown({ title: "مانگی " + m, data: (activeView === "sent" ? baseFilteredSentData : activeView === "incoming" ? baseFilteredIncomingData : baseFilteredData).filter((d: any) => d.sentDate && d.sentDate.startsWith(m)), viewType: activeView }); } }} style={{ cursor: "pointer" }}>
                   <defs>
                     <linearGradient id={`colorTimeline-${node.color}`} x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor={node.color === 'orange' ? '#f59e0b' : '#3b82f6'} stopOpacity={0.5} />
@@ -748,6 +748,8 @@ export const PreziPresentationView = () => {
     </div>
   );
 };
+
+
 
 
 
