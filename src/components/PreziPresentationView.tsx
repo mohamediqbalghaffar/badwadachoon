@@ -541,7 +541,7 @@ export const PreziPresentationView = () => {
           {node.type === 'comp-timeline' && (
             <motion.div className="w-full h-[380px]" dir="ltr" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6, delay: 0.3 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={comparisonTimelineData} margin={{ top: 30, right: 20, left: -20, bottom: 0 }}>
+                <LineChart data={comparisonTimelineData} margin={{ top: 30, right: 20, left: -20, bottom: 0 }} onClick={(e: any) => { if (e?.activePayload?.length > 0) { const m = e.activePayload[0].payload.date; setDrillDown({ title: "بەراوردکردنی مانگی " + m, data: baseFilteredData.filter((d: any) => d.sentDate && d.sentDate.startsWith(m)), viewType: "received" }); } }} style={{ cursor: "pointer" }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#94a3b8" opacity={0.2} />
                   <XAxis dataKey="date" tick={{ fontSize: 18, fill: '#cbd5e1' }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 18, fill: '#cbd5e1' }} axisLine={false} tickLine={false} />

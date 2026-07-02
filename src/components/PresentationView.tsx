@@ -1433,8 +1433,8 @@ export const PresentationView = () => {
                     labelFormatter={(label, payload) => payload?.[0]?.payload?.name || label}
                     formatter={(value, name) => [value, name === 'received' ? compConfigA.name : compConfigB.name]}
                   />
-                  <Bar dataKey="received" name="received" fill={compConfigA.color} radius={[4, 4, 0, 0]} maxBarSize={40} />
-                  <Bar dataKey="sent" name="sent" fill={compConfigB.color} radius={[4, 4, 0, 0]} maxBarSize={40} />
+                  <Bar dataKey="received" name="received" fill={compConfigA.color} radius={[4, 4, 0, 0]} maxBarSize={40} onClick={(data: any) => { if(data?.name) { setDrillDown({ title: "داتاکانی " + data.name, data: compConfigA.data.filter((d: any) => d.departments?.includes(data.name) || d.sender === data.name), viewType: compSourceA as "incoming" | "received" | "sent" }); } }} style={{ cursor: "pointer" }} />
+                  <Bar dataKey="sent" name="sent" fill={compConfigB.color} radius={[4, 4, 0, 0]} maxBarSize={40} onClick={(data: any) => { if(data?.name) { setDrillDown({ title: "داتاکانی " + data.name, data: compConfigB.data.filter((d: any) => d.departments?.includes(data.name) || d.sender === data.name), viewType: compSourceB as "incoming" | "received" | "sent" }); } }} style={{ cursor: "pointer" }} />
                 </BarChart>
               </ResponsiveContainer>
             </motion.div>
@@ -1472,7 +1472,7 @@ export const PresentationView = () => {
             
             <motion.div variants={itemVariants} className="w-full h-[350px] glass rounded-3xl p-6 border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] backdrop-blur-3xl" dir="ltr">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={timelineDataComparison} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
+                <AreaChart data={timelineDataComparison} margin={{ top: 20, right: 10, left: -20, bottom: 0 }} onClick={(e: any) => { if (e?.activePayload?.length > 0) { const m = e.activePayload[0].payload.date; setDrillDown({ title: "بەراوردکردنی مانگی " + m, data: compConfigA.data.filter((d: any) => d.sentDate && d.sentDate.startsWith(m)), viewType: compSourceA as "incoming" | "received" | "sent" }); } }} style={{ cursor: "pointer" }}>
                   <defs>
                     <linearGradient id="colorRec" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor={compConfigA.color} stopOpacity={0.4} />
