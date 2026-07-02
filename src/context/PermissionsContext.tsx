@@ -39,12 +39,13 @@ export const PermissionsProvider = ({ children }: { children: React.ReactNode })
         if (res.ok) {
           const data = await res.json();
           const roleData = data.roles.find((r: any) => r.role === userRole);
-          if (roleData) {
+          if (userRole === 'admin') {
+            setPermissions(['data:edit', 'data:upload', 'users:manage', 'roles:manage', 'db:fetch', 'view:presentation', 'view:analytics']);
+          } else if (roleData) {
             setPermissions(JSON.parse(roleData.permissions));
           } else {
             // Defaults fallback
-            if (userRole === 'admin') setPermissions(['data:edit', 'data:upload', 'users:manage', 'roles:manage', 'db:fetch', 'view:presentation', 'view:analytics']);
-            else if (userRole === 'user') setPermissions(['data:edit', 'db:fetch', 'view:presentation', 'view:analytics']);
+            if (userRole === 'user') setPermissions(['data:edit', 'db:fetch', 'view:presentation', 'view:analytics']);
             else if (userRole === 'guest') setPermissions(['db:fetch']);
             else setPermissions([]);
           }

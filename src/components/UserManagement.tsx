@@ -57,9 +57,10 @@ const PermissionsManagement = () => {
         
         // Ensure defaults exist in state if missing from DB initially
         ROLES.forEach(r => {
-          if (!mapping[r]) {
-            if (r === 'admin') mapping[r] = PERMISSION_KEYS.map(p => p.key);
-            else if (r === 'user') mapping[r] = ['data:edit', 'db:fetch', 'view:presentation', 'view:analytics'];
+          if (r === 'admin') {
+            mapping[r] = PERMISSION_KEYS.map(p => p.key);
+          } else if (!mapping[r]) {
+            if (r === 'user') mapping[r] = ['data:edit', 'db:fetch', 'view:presentation', 'view:analytics'];
             else if (r === 'guest') mapping[r] = ['db:fetch'];
             else mapping[r] = [];
           }
