@@ -15,6 +15,7 @@ import { LiquidGlassCard } from "@/components/ui/liquid-glass";
 import { SentDashboard } from "./SentDashboard";
 import { ComparisonView } from "./ComparisonView";
 import { IncomingView } from "./IncomingView";
+import { motion } from "framer-motion";
 import { MonitorPlay, X, Inbox, Send, GitCompareArrows, ArrowDownToLine, LogOut, User, ShieldCheck, Settings, Database, UploadCloud, Edit3, Filter } from "lucide-react";
 import { parseFile } from "../utils/parser";
 import { AdminSettingsModal } from "./AdminSettingsModal";
@@ -50,6 +51,18 @@ export const Dashboard = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  React.useEffect(() => {
+    if (isPresentationMode) {
+      if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen().catch(err => console.log(err));
+      }
+    } else {
+      if (document.fullscreenElement && document.exitFullscreen) {
+        document.exitFullscreen().catch(err => console.log(err));
+      }
+    }
+  }, [isPresentationMode]);
 
   const handleDirectUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -460,13 +473,17 @@ export const Dashboard = () => {
 
       {/* Floating Filter Button */}
       {(isPresentationMode || scrolledPastTop) && (activeView === 'received' || activeView === 'sent' || activeView === 'incoming') && (
-        <button
+        <motion.button
+          drag
+          dragMomentum={false}
+          initial={{ y: '-50%' }}
+          style={{ top: '50%', right: '1rem' }}
           onClick={() => setIsFilterModalOpen(true)}
-          className="fixed top-1/2 right-4 -translate-y-1/2 z-[60] bg-blue-600 hover:bg-blue-500 text-white p-4 rounded-full shadow-2xl hover:shadow-[0_0_20px_rgba(59,130,246,0.6)] transition-all group flex items-center justify-center animate-in fade-in slide-in-from-right-4"
+          className="fixed z-[60] bg-blue-600 hover:bg-blue-500 text-white p-4 rounded-full shadow-2xl hover:shadow-[0_0_20px_rgba(59,130,246,0.6)] transition-colors group flex items-center justify-center animate-in fade-in cursor-grab active:cursor-grabbing"
           title="پاڵاوتنی داتا"
         >
-          <Filter size={24} className="group-hover:scale-110 transition-transform" />
-        </button>
+          <Filter size={24} className="group-hover:scale-110 transition-transform pointer-events-none" />
+        </motion.button>
       )}
 
       {/* Floating Filter Modal */}
