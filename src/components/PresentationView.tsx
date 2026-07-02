@@ -319,7 +319,7 @@ export const PresentationView = () => {
   const sentDeptData = useMemo(() => {
     const counts: Record<string, number> = {};
     baseFilteredSentData.forEach((d) => {
-      d.departments.forEach(dept: any) => counts[dept] = (counts[dept] || 0) + 1);
+      d.departments.forEach((dept: any) => counts[dept] = (counts[dept] || 0) + 1);
     });
     return Object.entries(counts).map(([name, count]) => {
          const cleanName = name.replace('بەشی ', '').replace('سێکتەری ', '');
