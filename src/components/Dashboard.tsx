@@ -40,12 +40,12 @@ export const Dashboard = () => {
   const [isUploading, setIsUploading] = React.useState(false);
   const [showPresentationMenu, setShowPresentationMenu] = React.useState(false);
   const [presentationStyle, setPresentationStyle] = React.useState<'powerpoint' | 'prezi'>('powerpoint');
-  const [isScrolled, setIsScrolled] = React.useState(false);
-  const [isFloatingFilterOpen, setIsFloatingFilterOpen] = React.useState(false);
+  const [scrolledPastTop, setScrolledPastTop] = React.useState(false);
+  const [isFilterModalOpen, setIsFilterModalOpen] = React.useState(false);
 
   React.useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 150);
+      setScrolledPastTop(window.scrollY > 150);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -455,44 +455,56 @@ export const Dashboard = () => {
       {/* Admin Settings Modal */}
       {isAdminSettingsOpen && <AdminSettingsModal onClose={() => setIsAdminSettingsOpen(false)} initialTab={adminModalTab} />}
 
-      {/* Floating Filter Button & Popup */}
-      {(isPresentationMode || isScrolled) && (activeView === 'received' || activeView === 'sent' || activeView === 'incoming') && (
-        <>
-          {/* Floating Button in Center Bottom */}
-          <button
-            onClick={() => setIsFloatingFilterOpen(true)}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-2xl hover:shadow-blue-500/50 hover:-translate-y-1 hover:-translate-x-1/2 transition-all group flex items-center gap-3 animate-fade-up"
-            title="پاڵاوتن (Filters)"
-          >
-            <Filter size={24} className="group-hover:scale-110 transition-transform" />
-            <span className="font-bold hidden sm:inline">پاڵاوتن</span>
-          </button>
-
-          {/* Floating Popup Modal */}
-          {isFloatingFilterOpen && (
-            <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
-              <div 
-                className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in"
-                onClick={() => setIsFloatingFilterOpen(false)}
-              />
-              <div className="relative bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl w-full max-w-5xl p-6 animate-in fade-in zoom-in-95">
-                <button
-                  onClick={() => setIsFloatingFilterOpen(false)}
-                  className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
-                >
-                  <X size={24} />
-                </button>
-                <div className="mt-8">
-                  <OmniFilter isFloating />
-                </div>
-              </div>
-            </div>
-          )}
-        </>
-      )}
-
       {/* Live Activity Tracker */}
       <LiveActivityTracker />
+
+      {/* Floating Filter Button */}
+      {(isPresentationMode || scrolledPastTop) && (activeView === 'received' || activeView === 'sent' || activeView === 'incoming') && (
+        <button
+          onClick={() => setIsFilterModalOpen(true)}
+          className="fixed top-1/2 right-4 -translate-y-1/2 z-[60] bg-blue-600 hover:bg-blue-500 text-white p-4 rounded-full shadow-2xl hover:shadow-[0_0_20px_rgba(59,130,246,0.6)] transition-all group flex items-center justify-center animate-in fade-in slide-in-from-right-4"
+          title="پاڵاوتنی داتا"
+        >
+          <Filter size={24} className="group-hover:scale-110 transition-transform" />
+        </button>
+      )}
+
+      {/* Floating Filter Modal */}
+      {isFilterModalOpen && (
+        <>
+          <div 
+            className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-sm animate-in fade-in"
+            onClick={() => setIsFilterModalOpen(false)}
+          ></div>
+          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[101] w-[95%] max-w-4xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl p-6 border border-slate-200 dark:border-slate-800 animate-in zoom-in-95 duration-200 flex flex-col gap-4">
+            <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4">
+              <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                <Filter size={20} className="text-blue-500" />
+                پاڵاوتنی داتا
+              </h3>
+              <button 
+                onClick={() => setIsFilterModalOpen(false)}
+                className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="py-2">
+              <OmniFilter inModal />
+            </div>
+            
+            <div className="flex justify-end pt-2 border-t border-slate-100 dark:border-slate-800 mt-2">
+              <button
+                onClick={() => setIsFilterModalOpen(false)}
+                className="px-6 py-2 mt-4 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-colors shadow-lg shadow-blue-500/30"
+              >
+                جێبەجێکردن
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };
