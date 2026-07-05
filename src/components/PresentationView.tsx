@@ -582,11 +582,11 @@ export const PresentationView = () => {
                 <span className="text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-cyan-500">{totalLetters}</span>
               </motion.div>
               {/* Card 2 */}
-              <motion.div onClick={() => setDrillDown({ title: "هەڵپەسێردراو", data: baseFilteredData.filter((d: any) => !d.responseDate), viewType: "received" })} variants={itemVariants} className="cursor-pointer glass p-8 rounded-3xl flex flex-col items-center text-center border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] relative overflow-hidden group hover:scale-[1.03] transition-transform backdrop-blur-3xl">
+              <motion.div onClick={() => setDrillDown({ title: "بێ وەڵام", data: baseFilteredData.filter((d: any) => !d.responseDate), viewType: "received" })} variants={itemVariants} className="cursor-pointer glass p-8 rounded-3xl flex flex-col items-center text-center border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] relative overflow-hidden group hover:scale-[1.03] transition-transform backdrop-blur-3xl">
                 <div className="w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400 mb-4">
                   <AlertTriangle size={32} />
                 </div>
-                <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2">هەڵپەسێردراو</h3>
+                <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2">بێ وەڵام</h3>
                 <span className="text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-amber-500 to-orange-500">{pendingLetters}</span>
               </motion.div>
               {/* Card 3 */}
@@ -603,7 +603,7 @@ export const PresentationView = () => {
                 <Lightbulb className="text-amber-500 shrink-0" size={28} />
                 <p className="text-slate-800 dark:text-slate-100 font-medium leading-relaxed">
                   <strong className="text-amber-600 dark:text-amber-400">شیکاری هۆشمەند: </strong> 
-                  لە کۆی گشتی <strong className="text-blue-500">{totalLetters}</strong> نامە، تەنها <strong className="text-amber-500">{pendingLetters}</strong> نامە هەڵپەسێردراون، کە دەکاتە <strong className="text-emerald-500">{Math.round(((totalLetters - pendingLetters) / Math.max(totalLetters, 1)) * 100)}%</strong> ڕێژەی تەواوبوون بە تێکڕای کاتی <strong className="text-teal-500">{avgProcessingTime.toFixed(1)}</strong> ڕۆژ.
+                  لە کۆی گشتی <strong className="text-blue-500">{totalLetters}</strong> نامە، تەنها <strong className="text-amber-500">{pendingLetters}</strong> نامە بێ وەڵامن، کە دەکاتە <strong className="text-emerald-500">{Math.round(((totalLetters - pendingLetters) / Math.max(totalLetters, 1)) * 100)}%</strong> ڕێژەی تەواوبوون بە تێکڕای کاتی <strong className="text-teal-500">{avgProcessingTime.toFixed(1)}</strong> ڕۆژ.
                 </p>
               </motion.div>
             )}
@@ -966,7 +966,7 @@ export const PresentationView = () => {
                 <Lightbulb className="text-emerald-500 shrink-0" size={28} />
                 <p className="text-slate-800 dark:text-slate-100 font-medium leading-relaxed">
                   <strong className="text-emerald-600 dark:text-emerald-400">شیکاری هۆشمەند: </strong> 
-                  بەشی <strong className="text-emerald-500">{[...mostPendingDepts].sort((a,b)=>b.count-a.count)[0].name}</strong> زۆرترین نامەی هەڵپەسێردراوی هەیە.
+                  بەشی <strong className="text-emerald-500">{[...mostPendingDepts].sort((a,b)=>b.count-a.count)[0].name}</strong> زۆرترین نامەی بێ وەڵامی هەیە.
                 </p>
               </motion.div>
             )}
@@ -980,7 +980,7 @@ export const PresentationView = () => {
             <motion.div variants={itemVariants} className="flex justify-between items-center mb-6">
               <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
                 <AlertOctagon className="text-red-500" size={32} />
-                کۆنترین کار و نامە هەڵپەسێردراوەکان
+                کۆنترین کار و نامە بێ وەڵامەکان
               </h2>
               <span className="text-sm text-red-400 font-semibold bg-red-500/10 px-3 py-1 rounded-full">پێویستی بە وەڵامدانەوەی خێرایە</span>
             </motion.div>
@@ -1009,7 +1009,7 @@ export const PresentationView = () => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={5} className="p-8 text-center text-slate-400">هیچ نامەیەکی هەڵپەسێردراو بوونی نییە!</td>
+                      <td colSpan={5} className="p-8 text-center text-slate-400">هیچ نامەیەکی بێ وەڵام بوونی نییە!</td>
                     </tr>
                   )}
                 </tbody>
@@ -1020,7 +1020,7 @@ export const PresentationView = () => {
                 <Lightbulb className="text-red-500 shrink-0" size={28} />
                 <p className="text-slate-800 dark:text-slate-100 font-medium leading-relaxed">
                   <strong className="text-red-600 dark:text-red-400">شیکاری هۆشمەند: </strong> 
-                  کۆنترین نامەی هەڵپەسێردراو تەمەنی گەیشتووەتە <strong className="text-red-500">{oldestPending[0].daysPending}</strong> ڕۆژ. پێویستە دەستبەجێ بەدواداچوون بۆ ئەم {oldestPending.length} کارە بکرێت بۆ ئەوەی ڕێژەی پابەندبوون دانەبەزێت.
+                  کۆنترین نامەی بێ وەڵام تەمەنی گەیشتووەتە <strong className="text-red-500">{oldestPending[0].daysPending}</strong> ڕۆژ. پێویستە دەستبەجێ بەدواداچوون بۆ ئەم {oldestPending.length} کارە بکرێت بۆ ئەوەی ڕێژەی پابەندبوون دانەبەزێت.
                 </p>
               </motion.div>
             )}

@@ -131,11 +131,11 @@ export const KPICards = () => {
 
       {/* Pending Letters */}
       <div 
-        onClick={() => setDrillDown({ title: 'نامە هەڵواسراوەکان (بێ وەڵام)', data: baseFilteredData.filter((item) => !item.responseDate), viewType: 'received' })}
+        onClick={() => setDrillDown({ title: 'نامە بێ وەڵامەکان (بێ وەڵام)', data: baseFilteredData.filter((item) => !item.responseDate), viewType: 'received' })}
         className="glass glass-card glass-interactive p-6 flex items-center justify-between group cursor-pointer relative overflow-hidden"
       >
         <div>
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">نامە هەڵواسراوەکان (بێ وەڵام)</p>
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">نامە بێ وەڵامەکان (بێ وەڵام)</p>
           <h3 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-amber-500 to-orange-500">
             {pendingLetters}
           </h3>

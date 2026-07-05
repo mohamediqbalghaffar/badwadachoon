@@ -1,0 +1,24 @@
+﻿const fs = require('fs');
+
+let pv = fs.readFileSync('src/components/PresentationView.tsx', 'utf8');
+
+// Replace Total Letters KPI block
+pv = pv.replace(
+  '<motion.div variants={itemVariants} className=\"glass p-8 rounded-3xl flex flex-col items-center text-center border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] relative overflow-hidden group hover:scale-[1.03] transition-transform backdrop-blur-3xl\">\n                  <div className=\"w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-4\">\n                    <Layers size={32} />\n                  </div>\n                  <h3 className=\"text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2\">??? ???? ???????</h3>',
+  '<motion.div onClick={() => setDrillDown({ title: \"کۆی گشتی نامەکان\", data: baseFilteredData, viewType: \"received\" })} variants={itemVariants} className=\"cursor-pointer glass p-8 rounded-3xl flex flex-col items-center text-center border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] relative overflow-hidden group hover:scale-[1.03] transition-transform backdrop-blur-3xl\">\n                  <div className=\"w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-4\">\n                    <Layers size={32} />\n                  </div>\n                  <h3 className=\"text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2\">کۆی گشتی نامەکان</h3>'
+);
+
+// Replace Pending Letters KPI block
+pv = pv.replace(
+  '<motion.div variants={itemVariants} className=\"glass p-8 rounded-3xl flex flex-col items-center text-center border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] relative overflow-hidden group hover:scale-[1.03] transition-transform backdrop-blur-3xl\">\n                  <div className=\"w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400 mb-4\">\n                    <AlertTriangle size={32} />\n                  </div>\n                  <h3 className=\"text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2\">????????????</h3>',
+  '<motion.div onClick={() => setDrillDown({ title: \"هەڵپەسێردراو\", data: baseFilteredData.filter((d: any) => !d.responseDate), viewType: \"received\" })} variants={itemVariants} className=\"cursor-pointer glass p-8 rounded-3xl flex flex-col items-center text-center border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] relative overflow-hidden group hover:scale-[1.03] transition-transform backdrop-blur-3xl\">\n                  <div className=\"w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400 mb-4\">\n                    <AlertTriangle size={32} />\n                  </div>\n                  <h3 className=\"text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2\">هەڵپەسێردراو</h3>'
+);
+
+// Replace Avg Processing Time KPI block
+pv = pv.replace(
+  '<motion.div variants={itemVariants} className=\"glass p-8 rounded-3xl flex flex-col items-center text-center border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] relative overflow-hidden group hover:scale-[1.03] transition-transform backdrop-blur-3xl\">\n                  <div className=\"w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-4\">\n                    <Clock size={32} />\n                  </div>\n                  <h3 className=\"text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2\">?????? ???? ?????</h3>',
+  '<motion.div onClick={() => setDrillDown({ title: \"تێکڕای کاتی وەڵامدانەوە\", data: baseFilteredData.filter((d: any) => d.processingTime !== null && d.processingTime !== undefined), viewType: \"received\" })} variants={itemVariants} className=\"cursor-pointer glass p-8 rounded-3xl flex flex-col items-center text-center border-t border-t-white/30 border-l border-l-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] relative overflow-hidden group hover:scale-[1.03] transition-transform backdrop-blur-3xl\">\n                  <div className=\"w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-4\">\n                    <Clock size={32} />\n                  </div>\n                  <h3 className=\"text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2\">تێکڕای کاتی وەڵامدانەوە</h3>'
+);
+
+fs.writeFileSync('src/components/PresentationView.tsx', pv);
+console.log('Fixed Classic KPI Cards');

@@ -1,0 +1,15 @@
+const fs = require('fs');
+
+let pv = fs.readFileSync('src/components/PresentationView.tsx', 'utf8');
+pv = pv.replace(/title: "\?\?\? \?\?\?\? \?\?\?\?\?\?\?"/g, 'title: "کۆی گشتی نامەکان"');
+pv = pv.replace(/title: "\?\?\?\?\?\?\?\?\?\?\?\?"/g, 'title: "هەڵپەسێردراو"');
+pv = pv.replace(/title: "\?\?\?\?\?\? \?\?\?\? \?\?\?\?\?\?\?\?\?\?\?"/g, 'title: "تێکڕای کاتی وەڵامدانەوە"');
+fs.writeFileSync('src/components/PresentationView.tsx', pv);
+
+let pz = fs.readFileSync('src/components/PreziPresentationView.tsx', 'utf8');
+pz = pz.replace(/title: "\?\?\? \?\?\?\? \?\?\?\?\?\?\?"/g, 'title: "کۆی گشتی نامەکان"');
+pz = pz.replace(/title: "\?\?\?\?\?\?\?\?\?\?\?\?"/g, 'title: "هەڵپەسێردراو"');
+pz = pz.replace(/title: "\?\?\?\?\?\? \?\?\?\? \?\?\?\?\?\?\?\?\?\?\?"/g, 'title: "تێکڕای کاتی وەڵامدانەوە"');
+fs.writeFileSync('src/components/PreziPresentationView.tsx', pz);
+
+console.log('Fixed titles perfectly');
