@@ -15,7 +15,7 @@ import { LiquidGlassCard } from "@/components/ui/liquid-glass";
 import { SentDashboard } from "./SentDashboard";
 import { ComparisonView } from "./ComparisonView";
 import { IncomingView } from "./IncomingView";
-import { motion } from "framer-motion";
+import { motion, useAnimation } from "framer-motion";
 import { MonitorPlay, X, Inbox, Send, GitCompareArrows, ArrowDownToLine, LogOut, User, ShieldCheck, Settings, Database, UploadCloud, Edit3, Filter, Sun, Moon } from "lucide-react";
 import { parseFile } from "../utils/parser";
 import { useTheme } from "next-themes";
@@ -32,6 +32,7 @@ const VIEW_SEGMENTS: { key: ActiveView; label: string; icon: React.ReactNode }[]
 ];
 
 export const Dashboard = () => {
+  const filterControls = useAnimation();
   const { theme, setTheme } = useTheme();
   const { data, setData, sentData, setSentData, incomingData, setIncomingData, mode, isPresentationMode, setIsPresentationMode, activeView, setActiveView, clearFilters } = useData();
   const { user, logout } = useAuth();
@@ -490,11 +491,21 @@ export const Dashboard = () => {
       {(isPresentationMode || scrolledPastTop) && (activeView === 'received' || activeView === 'sent' || activeView === 'incoming') && (
         <motion.button
           drag
-          dragConstraints={false}
+          dragElastic={0}
           dragMomentum={false}
+          animate={filterControls}
           onDragStart={() => setIsDraggingFilter(true)}
-          onDragEnd={() => {
+          onDragEnd={(e, info) => {
             setTimeout(() => setIsDraggingFilter(false), 150);
+            const windowWidth = window.innerWidth;
+            const buttonRect = (e.target as HTMLElement).closest('button')?.getBoundingClientRect();
+            const btnWidth = buttonRect?.width || 64;
+            
+            if (info.point.x < windowWidth / 2) {
+              filterControls.start({ x: -(windowWidth - btnWidth - 32) });
+            } else {
+              filterControls.start({ x: 0 });
+            }
           }}
           initial={{ right: '1rem', top: '50%', y: '-50%' }}
           style={{ position: 'fixed', zIndex: 60 }}
