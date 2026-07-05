@@ -32,6 +32,7 @@ const VIEW_SEGMENTS: { key: ActiveView; label: string; icon: React.ReactNode }[]
 ];
 
 export const Dashboard = () => {
+  const { theme, setTheme } = useTheme();
   const { data, setData, sentData, setSentData, incomingData, setIncomingData, mode, isPresentationMode, setIsPresentationMode, activeView, setActiveView, clearFilters } = useData();
   const { user, logout } = useAuth();
   const { hasPermission } = usePermissions();
@@ -206,14 +207,25 @@ export const Dashboard = () => {
     <div className="w-full max-w-[98%] 2xl:max-w-[98%] mx-auto p-2 sm:p-4 lg:p-6 relative">
       {/* Presentation Mode Toggle (Only visible in presentation mode) */}
       {isPresentationMode && (
-        <button
-          onClick={() => setIsPresentationMode(false)}
+        <>
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 sm:top-8 z-50">
+            <button
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              className="p-3 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-amber-500 hover:text-white dark:hover:bg-blue-600 dark:hover:text-white transition-all shadow-lg hover:scale-110 flex items-center gap-2 group border border-slate-300 dark:border-slate-700"
+              title="دۆخی ڕووناکی / تاریک"
+            >
+              {theme === 'dark' ? <Sun size={24} /> : <Moon size={24} />}
+            </button>
+          </div>
+          <button
+            onClick={() => setIsPresentationMode(false)}
           className="absolute top-4 left-4 sm:top-8 sm:left-8 z-50 p-3 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-blue-500 hover:text-white dark:hover:bg-blue-600 dark:hover:text-white transition-all shadow-lg hover:scale-110 flex items-center gap-2 group"
           title="داخستنی پێشکەشکردن"
         >
           <span className="hidden group-hover:block text-sm font-medium">داخستن</span>
           <X size={24} />
         </button>
+        </>
       )}
 
       {!isPresentationMode ? (
