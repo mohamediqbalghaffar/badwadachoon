@@ -497,7 +497,7 @@ export const Dashboard = () => {
           onDragStart={() => setIsDraggingFilter(true)}
           onDragEnd={(e, info) => {
             setTimeout(() => setIsDraggingFilter(false), 150);
-            const windowWidth = window.innerWidth;
+            const windowWidth = document.documentElement.clientWidth;
             const buttonRect = (e.target as HTMLElement).closest('button')?.getBoundingClientRect();
             const btnWidth = buttonRect?.width || 64;
             

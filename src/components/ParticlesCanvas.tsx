@@ -26,14 +26,14 @@ export const ParticlesCanvas = () => {
 
     let particles: Particle[] = [];
     let animationFrameId: number;
-    let width = window.innerWidth;
-    let height = window.innerHeight;
+    let width = document.documentElement.clientWidth;
+    let height = document.documentElement.clientHeight;
 
     let mousePosition = { x: -1000, y: -1000 };
 
     const updateSize = () => {
-      width = window.innerWidth;
-      height = window.innerHeight;
+      width = document.documentElement.clientWidth;
+      height = document.documentElement.clientHeight;
       canvas.width = width;
       canvas.height = height;
     };
