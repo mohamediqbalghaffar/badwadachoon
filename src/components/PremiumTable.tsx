@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from 'react';
 import {
@@ -63,7 +63,7 @@ export function PremiumTable<TData>({ data, columns, renderExpandedRow, exportFi
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-500">
+    <div className="flex flex-col w-full bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-500">
       
       {/* Top Toolbar */}
       <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20 flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -215,3 +215,4 @@ export function PremiumTable<TData>({ data, columns, renderExpandedRow, exportFi
     </div>
   );
 }
+

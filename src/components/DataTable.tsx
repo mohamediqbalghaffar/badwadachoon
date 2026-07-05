@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useMemo, useState } from "react";
 import { useData } from "../context/DataContext";
@@ -199,7 +199,7 @@ export const DataTable = ({ customData, hideHeader }: { customData?: DashboardDa
   };
 
   return (
-    <div id="data-table-section" className="flex flex-col h-[950px] mb-8 relative">
+    <div id="data-table-section" className="flex flex-col mb-8 relative">
       {/* Table Header Controls (Title + Filter Clear) */}
       {!hideHeader && (
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
@@ -239,3 +239,4 @@ export const DataTable = ({ customData, hideHeader }: { customData?: DashboardDa
     </div>
   );
 };
+
