@@ -497,12 +497,12 @@ export const Dashboard = () => {
           onDragStart={() => setIsDraggingFilter(true)}
           onDragEnd={(e, info) => {
             setTimeout(() => setIsDraggingFilter(false), 150);
-            const windowWidth = document.documentElement.clientWidth;
+            const windowWidth = window.innerWidth;
             const buttonRect = (e.target as HTMLElement).closest('button')?.getBoundingClientRect();
             const btnWidth = buttonRect?.width || 64;
             
             if (info.point.x < windowWidth / 2) {
-              filterControls.start({ x: -(windowWidth - btnWidth - 32) });
+              filterControls.start({ x: `calc(-100vw + ${btnWidth + 32}px)` });
             } else {
               filterControls.start({ x: 0 });
             }

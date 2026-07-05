@@ -32,8 +32,9 @@ export const ParticlesCanvas = () => {
     let mousePosition = { x: -1000, y: -1000 };
 
     const updateSize = () => {
-      width = document.documentElement.clientWidth;
-      height = document.documentElement.clientHeight;
+      const rect = canvas.getBoundingClientRect();
+      width = rect.width;
+      height = rect.height;
       canvas.width = width;
       canvas.height = height;
     };
@@ -217,7 +218,7 @@ export const ParticlesCanvas = () => {
   return (
     <canvas 
       ref={canvasRef} 
-      className="fixed inset-0 z-0 pointer-events-none"
+      className="fixed inset-0 w-full h-full z-0 pointer-events-none"
     />
   );
 };
