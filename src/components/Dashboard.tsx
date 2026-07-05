@@ -208,7 +208,7 @@ export const Dashboard = () => {
       {/* Presentation Mode Toggle (Only visible in presentation mode) */}
       {isPresentationMode && (
         <>
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 sm:top-8 z-50">
+          <div className="absolute top-1 left-1/2 -translate-x-1/2 sm:top-2 z-50">
             <button
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
               className="p-3 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-amber-500 hover:text-white dark:hover:bg-blue-600 dark:hover:text-white transition-all shadow-lg hover:scale-110 flex items-center gap-2 group border border-slate-300 dark:border-slate-700"
