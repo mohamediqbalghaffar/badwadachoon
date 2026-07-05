@@ -63,7 +63,7 @@ const MultiSelect = ({ label, options, selected, onChange, placeholder }: MultiS
       </button>
 
       {isOpen && (
-        <div className="absolute top-[105%] right-0 left-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/80 dark:border-slate-800/80 rounded-xl shadow-2xl max-h-60 overflow-y-auto p-1.5 animate-fade-in">
+        <div className="absolute top-[105%] right-0 min-w-full w-max z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/80 dark:border-slate-800/80 rounded-xl shadow-2xl max-h-60 overflow-y-auto p-1.5 animate-fade-in">
           {options.length > 0 && (
             <button
               type="button"
@@ -87,7 +87,7 @@ const MultiSelect = ({ label, options, selected, onChange, placeholder }: MultiS
                     : "hover:bg-slate-100 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-300"
                 }`}
               >
-                <span className="truncate pl-2 select-none">{opt}</span>
+                <span className="pl-2 select-none whitespace-nowrap">{opt}</span>
                 {isSel && <Check size={14} className="shrink-0" />}
               </button>
             );
