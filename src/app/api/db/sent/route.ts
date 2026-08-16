@@ -8,7 +8,16 @@ export async function GET() {
     const letters = await prisma.sentLetter.findMany({
       orderBy: { id: 'asc' }
     });
-    return NextResponse.json(letters.map(l => ({ ...l, departments: JSON.parse(l.departments) })));
+    const mapped = letters.map(l => {
+      let depts: string[] = [];
+      try {
+        depts = typeof l.departments === 'string' ? JSON.parse(l.departments) : (l.departments || []);
+      } catch (e) {
+        depts = l.department ? [l.department] : [];
+      }
+      return { ...l, departments: depts };
+    });
+    return NextResponse.json(mapped);
   } catch (error: any) {
     console.error('Failed to fetch sent letters:', error);
     return NextResponse.json({ error: 'Failed to fetch letters' }, { status: 500 });
