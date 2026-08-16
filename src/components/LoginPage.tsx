@@ -4,10 +4,11 @@ import React, { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useAuth } from "../context/AuthContext";
 import { HTSLogo } from "./HTSLogoBackground";
-import { KeyRound, ArrowRight, ShieldCheck, User, Mail, Lock } from "lucide-react";
+import { KeyRound, ArrowRight, ShieldCheck, User, Mail, Lock, Monitor } from "lucide-react";
 
 export const LoginPage = () => {
-  const [activeTab, setActiveTab] = useState<"staff" | "email" | "viewer">("staff");
+  const [activeTab, setActiveTab] = useState<"local" | "staff" | "email" | "viewer">("local");
+  const [localPassword, setLocalPassword] = useState("");
   const [staffUsername, setStaffUsername] = useState("");
   const [staffPassword, setStaffPassword] = useState("");
   const [viewerCode, setViewerCode] = useState("");
@@ -16,6 +17,31 @@ export const LoginPage = () => {
   const [shake, setShake] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { updateSession } = useAuth();
+
+  const handleLocalAdminSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setIsSubmitting(true);
+
+    try {
+      const res = await signIn("local-admin", {
+        password: localPassword,
+        redirect: false,
+      });
+
+      if (res?.error) {
+        setError("وشەی نهێنی هەڵەیە (تێپەڕوشەی باو: admin2026)");
+        setShake(true);
+        setTimeout(() => setShake(false), 500);
+      } else if (res?.ok) {
+        await updateSession();
+      }
+    } catch (err) {
+      setError("هەڵەیەک ڕوویدا لە کاتی چوونەژوورەوە.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleStaffSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,6 +146,17 @@ export const LoginPage = () => {
         {/* Tabs */}
         <div className="flex p-1 mb-8 bg-black/5 dark:bg-white/5 rounded-2xl backdrop-blur-md overflow-x-auto">
           <button
+            onClick={() => { setActiveTab("local"); setError(null); }}
+            className={`flex-1 py-2.5 px-2 text-sm font-semibold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 whitespace-nowrap ${
+              activeTab === "local"
+                ? "bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 shadow-sm"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+            }`}
+          >
+            <Monitor size={16} />
+            لۆکاڵ
+          </button>
+          <button
             onClick={() => { setActiveTab("staff"); setError(null); }}
             className={`flex-1 py-2.5 px-2 text-sm font-semibold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 whitespace-nowrap ${
               activeTab === "staff"
@@ -154,7 +191,51 @@ export const LoginPage = () => {
           </button>
         </div>
 
-        {activeTab === "staff" ? (
+        {activeTab === "local" ? (
+          <div className="space-y-5">
+            <div className="text-center mb-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50">
+                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">سێرڤەری لۆکاڵ (ئەدمین)</span>
+              </div>
+            </div>
+            <form onSubmit={handleLocalAdminSubmit} className="space-y-5">
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-slate-600 dark:text-slate-300 ml-1">وشەی نهێنی ئەدمین</label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-400 group-focus-within:text-emerald-500 transition-colors">
+                    <KeyRound size={18} />
+                  </div>
+                  <input
+                    type="password"
+                    dir="ltr"
+                    value={localPassword}
+                    onChange={(e) => setLocalPassword(e.target.value)}
+                    className="w-full bg-white/50 dark:bg-black/20 border border-slate-200 dark:border-slate-700/50 rounded-2xl py-3 pl-4 pr-12 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all backdrop-blur-sm tracking-widest text-center font-mono text-lg"
+                    placeholder="••••••••"
+                    required
+                  />
+                </div>
+              </div>
+
+              {error && (
+                <div className="text-rose-500 dark:text-rose-400 text-sm font-medium text-center bg-rose-50 dark:bg-rose-950/30 py-2 rounded-lg border border-rose-100 dark:border-rose-900/50">
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={isSubmitting || !localPassword}
+                className="w-full mt-6 flex items-center justify-center gap-2 py-3.5 rounded-2xl text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 shadow-emerald-500/25 disabled:opacity-50"
+              >
+                <Monitor size={18} />
+                <span>چوونەژوورەوە (ئەدمین)</span>
+                <ArrowRight size={18} className="rotate-180" />
+              </button>
+            </form>
+          </div>
+        ) : activeTab === "staff" ? (
           <div className="space-y-5">
             <form onSubmit={handleStaffSubmit} className="space-y-4">
               <div className="space-y-1">
