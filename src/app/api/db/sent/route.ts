@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { syncTableToExcel } from '@/lib/excel-db';
+import fallbackSent from '@/data/SentLetter.json';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,6 +10,33 @@ export async function GET() {
     const letters = await prisma.sentLetter.findMany({
       orderBy: { id: 'asc' }
     });
+
+    if (letters.length === 0) {
+      // Auto-seed in background for Vercel serverless instances
+      (async () => {
+        try {
+          await prisma.sentLetter.createMany({
+            data: fallbackSent.map((item: any) => ({
+              id: item.id,
+              subject: item.subject || 'نەزانراو',
+              department: item.department || 'نەزانراو',
+              departments: JSON.stringify(Array.isArray(item.departments) ? item.departments : [item.department]),
+              dept1: item.dept1 || null,
+              dept2: item.dept2 || null,
+              dept3: item.dept3 || null,
+              refCode: item.refCode || '-',
+              letterType: item.letterType || 'نامەی گشتی',
+              sentDate: item.sentDate ? new Date(item.sentDate) : null,
+            })),
+          });
+        } catch (e) {
+          // ignore background seed conflict
+        }
+      })();
+
+      return NextResponse.json(fallbackSent);
+    }
+
     const mapped = letters.map(l => {
       let depts: string[] = [];
       try {
@@ -20,8 +48,8 @@ export async function GET() {
     });
     return NextResponse.json(mapped);
   } catch (error: any) {
-    console.error('Failed to fetch sent letters:', error);
-    return NextResponse.json({ error: 'Failed to fetch letters' }, { status: 500 });
+    console.error('Failed to fetch sent letters, returning fallback data:', error);
+    return NextResponse.json(fallbackSent);
   }
 }
 
