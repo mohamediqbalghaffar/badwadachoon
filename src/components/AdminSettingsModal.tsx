@@ -45,6 +45,82 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose,
   const [hasOdooApiKey, setHasOdooApiKey] = useState(false);
   const [isSavingOdoo, setIsSavingOdoo] = useState(false);
 
+  // Excel Server State
+  const [excelStatus, setExcelStatus] = useState<any>(null);
+  const [isExcelSyncing, setIsExcelSyncing] = useState(false);
+  const [excelMessage, setExcelMessage] = useState<string | null>(null);
+
+  const fetchExcelStatus = () => {
+    fetch('/api/db/excel-sync')
+      .then(res => res.json())
+      .then(data => {
+        if (!data.error) setExcelStatus(data);
+      })
+      .catch(console.error);
+  };
+
+  React.useEffect(() => {
+    if (activeTab === 'database') {
+      fetchExcelStatus();
+    }
+  }, [activeTab]);
+
+  const handleSyncToExcel = async () => {
+    setIsExcelSyncing(true);
+    setExcelMessage(null);
+    try {
+      const res = await fetch('/api/db/excel-sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ direction: 'to-excel' })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setExcelMessage('سەرجەم داتاکان بە سەرکەوتوویی هەناردەی فایلەکانی ئێکسڵ کران لەسەر دیسکتۆپ');
+        fetchExcelStatus();
+      } else {
+        setExcelMessage('هەڵەیەک ڕوویدا لە کاتی هەناردەکردن');
+      }
+    } catch (err) {
+      setExcelMessage('هەڵەیەک ڕوویدا لە پەیوەندی بە سێرڤەر');
+    } finally {
+      setIsExcelSyncing(false);
+    }
+  };
+
+  const handleSyncFromExcel = async () => {
+    if (!confirm('ئایا دڵنیایت دەتەوێت داتابەیسەکە لە فایلەکانی ئێکسڵی سەر دیسکتۆپەوە دووبارە باربکەیتەوە؟')) return;
+    setIsExcelSyncing(true);
+    setExcelMessage(null);
+    try {
+      const res = await fetch('/api/db/excel-sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ direction: 'from-excel' })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setExcelMessage('سەرجەم داتاکان لە فایلەکانی ئێکسڵەوە هاوردەکران و داتابەیس نوێکرایەوە');
+        // Refresh views
+        const [rRes, sRes, iRes] = await Promise.all([
+          fetch('/api/db/received'),
+          fetch('/api/db/sent'),
+          fetch('/api/db/incoming')
+        ]);
+        if (rRes.ok) setData(await rRes.json());
+        if (sRes.ok) setSentData(await sRes.json());
+        if (iRes.ok) setIncomingData(await iRes.json());
+        fetchExcelStatus();
+      } else {
+        setExcelMessage('هەڵەیەک ڕوویدا لە کاتی هاوردەکردن');
+      }
+    } catch (err) {
+      setExcelMessage('هەڵەیەک ڕوویدا لە پەیوەندی بە سێرڤەر');
+    } finally {
+      setIsExcelSyncing(false);
+    }
+  };
+
   React.useEffect(() => {
     if (activeTab === 'profile') {
       fetch('/api/user/odoo-settings')
@@ -394,6 +470,68 @@ export const AdminSettingsModal: React.FC<AdminSettingsModalProps> = ({ onClose,
                     لۆکاڵی کاتی (Local)
                   </button>
                 </div>
+              </div>
+
+              {/* Desktop Excel Database Server Status Card */}
+              <div className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/20 border border-emerald-200 dark:border-emerald-800/50 rounded-2xl p-5 space-y-4 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-xl bg-emerald-500 text-white shadow-sm">
+                      <FileSpreadsheet size={22} />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-bold text-slate-800 dark:text-white text-base">سێرڤەری فایلەکانی ئێکسڵ</h3>
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 animate-pulse"></span>
+                          سەرهێڵ (Online Server)
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5 dir-ltr text-left select-all">
+                        C:\Users\PC\Desktop\badwadachoon db files\db excel files
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {excelStatus && (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+                    {excelStatus.files?.map((f: any) => (
+                      <div key={f.name} className="p-2 rounded-lg bg-white/70 dark:bg-slate-800/70 border border-emerald-100 dark:border-emerald-900/30 flex justify-between items-center">
+                        <span className="font-medium text-slate-700 dark:text-slate-200 truncate">{f.name.replace('.xlsx', '')}</span>
+                        <span className="font-bold text-emerald-600 dark:text-emerald-400 font-mono">{f.rowCount} دێڕ</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="flex flex-wrap gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={handleSyncToExcel}
+                    disabled={isExcelSyncing}
+                    className="flex-1 min-w-[160px] py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-semibold text-xs transition-all shadow-sm flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    <Download size={15} />
+                    <span>نوێکردنەوەی فایلەکانی ئێکسڵ (Sync to Excel)</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleSyncFromExcel}
+                    disabled={isExcelSyncing}
+                    className="flex-1 min-w-[160px] py-2.5 px-4 rounded-xl bg-white dark:bg-slate-800 border border-emerald-300 dark:border-emerald-700 hover:bg-emerald-50 dark:hover:bg-slate-700 text-emerald-800 dark:text-emerald-200 font-semibold text-xs transition-all shadow-sm flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    <UploadCloud size={15} />
+                    <span>بارکردنەوە لە فایلەکانی ئێکسڵ (Reload from Excel)</span>
+                  </button>
+                </div>
+
+                {excelMessage && (
+                  <div className="text-xs text-center font-medium py-1.5 px-3 rounded-lg bg-white/80 dark:bg-slate-800/80 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40">
+                    {excelMessage}
+                  </div>
+                )}
               </div>
 
               <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-4">

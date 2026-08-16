@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { syncTableToExcel } from '@/lib/excel-db';
 
 export const dynamic = 'force-dynamic';
 
@@ -53,6 +54,9 @@ export async function POST(request: Request) {
       }
     });
 
+    // Sync to Desktop Excel
+    syncTableToExcel('UserAccount').catch(console.error);
+
     return NextResponse.json({ success: true, user: newUser });
   } catch (error) {
     console.error(error);
@@ -84,6 +88,9 @@ export async function PUT(request: Request) {
       }
     });
 
+    // Sync to Desktop Excel
+    syncTableToExcel('UserAccount').catch(console.error);
+
     return NextResponse.json({ success: true, user: updatedUser });
   } catch (error) {
     console.error(error);
@@ -110,9 +117,13 @@ export async function DELETE(request: Request) {
       where: { id }
     });
 
+    // Sync to Desktop Excel
+    syncTableToExcel('UserAccount').catch(console.error);
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
+

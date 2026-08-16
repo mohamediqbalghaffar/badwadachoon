@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { syncAllToExcel } from '@/lib/excel-db';
 
 export async function POST(request: Request) {
   try {
@@ -11,6 +12,7 @@ export async function POST(request: Request) {
       await prisma.receivedLetter.deleteMany({});
       await prisma.sentLetter.deleteMany({});
       await prisma.incomingLetter.deleteMany({});
+      syncAllToExcel().catch(console.error);
       return NextResponse.json({ success: true, message: 'Database cleared' });
     }
 
@@ -83,6 +85,9 @@ export async function POST(request: Request) {
       maxWait: 10000,
       timeout: 20000,
     });
+
+    // Background sync to Excel
+    syncAllToExcel().catch(console.error);
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

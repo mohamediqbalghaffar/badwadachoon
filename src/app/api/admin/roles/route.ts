@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { syncTableToExcel } from '@/lib/excel-db';
 
 export async function GET() {
   try {
@@ -40,9 +41,13 @@ export async function PUT(request: Request) {
       create: { role, permissions: finalPermissions },
     });
 
+    // Sync to Desktop Excel
+    syncTableToExcel('RolePermission').catch(console.error);
+
     return NextResponse.json({ success: true, role: updated });
   } catch (error: any) {
     console.error('Failed to update role:', error);
     return NextResponse.json({ error: 'Failed to update role' }, { status: 500 });
   }
 }
+

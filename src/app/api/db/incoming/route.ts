@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { syncTableToExcel } from '@/lib/excel-db';
 
 export const dynamic = 'force-dynamic';
 
@@ -54,6 +55,9 @@ export async function POST(request: Request) {
       }
     });
 
+    // Sync to Desktop Excel
+    syncTableToExcel('IncomingLetter').catch(console.error);
+
     return NextResponse.json(letter);
   } catch (error: any) {
     console.error('Failed to create incoming letter:', error);
@@ -81,6 +85,9 @@ export async function PUT(request: Request) {
       }
     });
 
+    // Sync to Desktop Excel
+    syncTableToExcel('IncomingLetter').catch(console.error);
+
     return NextResponse.json(letter);
   } catch (error: any) {
     console.error('Failed to update incoming letter:', error);
@@ -101,9 +108,13 @@ export async function DELETE(request: Request) {
       where: { id: parseInt(id) }
     });
 
+    // Sync to Desktop Excel
+    syncTableToExcel('IncomingLetter').catch(console.error);
+
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error('Failed to delete incoming letter:', error);
     return NextResponse.json({ error: 'Failed to delete letter' }, { status: 500 });
   }
 }
+

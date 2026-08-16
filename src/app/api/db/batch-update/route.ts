@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { syncTableToExcel } from '@/lib/excel-db';
 
 export const dynamic = 'force-dynamic';
 
@@ -77,6 +78,13 @@ export async function POST(request: Request) {
         });
       }
     });
+
+    // Background sync to Excel spreadsheets
+    Promise.all([
+      syncTableToExcel('ReceivedLetter'),
+      syncTableToExcel('SentLetter'),
+      syncTableToExcel('IncomingLetter'),
+    ]).catch(console.error);
 
     return NextResponse.json({ success: true, message: 'Batch update successful' });
   } catch (error: any) {
